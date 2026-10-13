@@ -272,7 +272,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
   return (
     <>
       {/* 1. Fixed Floating Annotation Toolbar at Top Center */}
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white/95 border border-slate-200 rounded-2xl px-4 py-2 shadow-xl flex items-center gap-3 select-none animate-fade-in text-slate-800 text-xs backdrop-blur-none">
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white/95 border border-slate-200 rounded-2xl px-4 py-2 shadow-xl flex items-center gap-3 select-none animate-fade-in text-slate-800 text-xs">
         {/* Tool Mode: Pen / Eraser */}
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
           <button

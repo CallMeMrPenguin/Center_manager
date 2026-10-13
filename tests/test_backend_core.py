@@ -99,3 +99,37 @@ def test_api_endpoints_and_rbac():
         if (u.get("username") or "").lower() == "admin":
             assert u.get("plain_password") is None
 
+def test_modular_compiler_import_and_helpers():
+    """Verify that the modularized compiler package exports classes and functions seamlessly."""
+    from services.compiler import (
+        WordDocumentCompiler,
+        get_instruction_map,
+        normalize_input_exercises,
+        clean_option_text,
+        cm_to_pt
+    )
+    assert WordDocumentCompiler is not None
+    instructions = get_instruction_map()
+    assert isinstance(instructions, dict)
+    assert "pr" in instructions
+    assert cm_to_pt(2.54) > 0
+    assert clean_option_text("A. Hello world") == "Hello world"
+    normalized = normalize_input_exercises([{"t": "mcq", "q": "1", "o": ["A", "B"]}])
+    assert isinstance(normalized, list)
+    assert len(normalized) == 1
+
+def test_system_and_compiler_routes():
+    """Verify that system.py and system_compiler.py routes are reachable via FastAPI client."""
+    from fastapi.testclient import TestClient
+    from main import app
+
+    client = TestClient(app)
+    # Check version endpoint
+    res = client.get("/api/system/version")
+    assert res.status_code == 200
+    assert "boot_time" in res.json()
+
+    # Check profiles endpoint
+    res_prof = client.get("/api/profiles")
+    assert res_prof.status_code == 200
+    assert isinstance(res_prof.json(), dict)

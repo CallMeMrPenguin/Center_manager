@@ -1,5 +1,6 @@
 import React from 'react';
 import { AssignmentType } from '../types';
+import { CustomSelect } from '../../../components/CustomSelect';
 
 interface AssignmentTypeConfigSelectorProps {
   assignmentType: AssignmentType;
@@ -69,35 +70,37 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b]">
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Thời Gian Làm Bài</label>
-            <select
+            <CustomSelect
               value={timeLimit || 0}
-              onChange={(e) => {
-                const v = Number(e.target.value);
+              onChange={(val) => {
+                const v = Number(val);
                 onChangeTimeLimit(v > 0 ? v : null);
               }}
-              className="w-full bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-xs font-bold shadow-xs"
-            >
-              <option value="0">Không giới hạn</option>
-              <option value="15">15 phút</option>
-              <option value="30">30 phút</option>
-              <option value="45">45 phút</option>
-              <option value="60">60 phút</option>
-              <option value="90">90 phút</option>
-            </select>
+              options={[
+                { value: 0, label: 'Không giới hạn' },
+                { value: 15, label: '15 phút' },
+                { value: 30, label: '30 phút' },
+                { value: 45, label: '45 phút' },
+                { value: 60, label: '60 phút' },
+                { value: 90, label: '90 phút' },
+              ]}
+              className="w-full text-xs"
+            />
           </div>
 
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Số Lần Nộp Tối Đa</label>
-            <select
+            <CustomSelect
               value={maxAttempts}
-              onChange={(e) => onChangeMaxAttempts(Number(e.target.value))}
-              className="w-full bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-xs font-bold shadow-xs"
-            >
-              <option value="1">1 lần (Khóa sau khi nộp)</option>
-              <option value="2">2 lần</option>
-              <option value="3">3 lần</option>
-              <option value="0">Không giới hạn</option>
-            </select>
+              onChange={(val) => onChangeMaxAttempts(Number(val))}
+              options={[
+                { value: 1, label: '1 lần (Khóa sau khi nộp)' },
+                { value: 2, label: '2 lần' },
+                { value: 3, label: '3 lần' },
+                { value: 0, label: 'Không giới hạn' },
+              ]}
+              className="w-full text-xs"
+            />
           </div>
 
           <div className="space-y-1 flex flex-col justify-end">

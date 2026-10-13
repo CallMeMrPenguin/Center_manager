@@ -1,397 +1,112 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../api';
-import { LayoutSettings, AppFile } from '../../types';
-import PromptManager, { PromptItem } from '../../components/PromptManager';
+import { LayoutSettings } from '../../types';
+import PromptManager from '../../components/PromptManager';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { 
-  FileText, Download, Eye, Play, Save, Trash2, Settings, 
-  ChevronRight, RefreshCw, Upload, AlertCircle, FileCode, CheckCircle,
-  FolderOpen, ZoomIn, ZoomOut, Sparkles, X, Layout, ExternalLink
+  FileText, Download, Settings, 
+  ChevronRight, Upload, AlertCircle, FileCode, CheckCircle
 } from 'lucide-react';
 import { showToast } from '../../components/Toast';
-import { SegmentedControl } from '../../components/SegmentedControl';
 import { cleanOptionPrefix } from '../../utils';
+import { 
+  DEFAULT_TEST_FORMATTER_PROMPTS, 
+  DEFAULT_LAYOUT 
+} from './constants';
+import { ConfigDrawer } from './components/ConfigDrawer';
+import { ExportModal } from './components/ExportModal';
+import { FastJsonEditor } from './components/FastJsonEditor';
+import { CompiledFilesBanner } from './components/CompiledFilesBanner';
+import { PdfPreviewPanel } from './components/PdfPreviewPanel';
 
-
-import { ULN_OCR_SYSTEM_PROMPT } from '../assignments/constants/ulnPromptTemplate';
-
-const DEFAULT_TEST_FORMATTER_PROMPTS: PromptItem[] = [
-  {
-    id: "tf_universal_v2",
-    title: "Universal Test & Exercise Serialization Agent Prompt (18 Exercise Types)",
-    content: `You are an expert Document, Test, and Exercise Serialization Agent for Microsoft Word DOCX compilation.
-Your job is to parse tests/exercises from source text/images into strict JSON matching the universal compiler schema.
-
-==================================================
-OUTPUT FORMAT MANDATE
-==================================================
-• Provide your response inside a single \`\`\`json code block containing valid JSON.
-• Absolutely NO text, intro, explanations, or conversational filler outside the JSON code block.
-
-==================================================
-CORE CONTENT SCHEMA
-==================================================
-
-Top-level object MUST contain a "data" array:
-{
-  "data": [ ... ]
-}
-
-Each object in "data" represents a section or exercise and uses these fields:
-
-1. "t": (String) Exercise type code. MUST be one of:
-   - "pr" : Pronunciation / Underlined sound (MCQ or classification)
-   - "st" : Stress pattern distinction (MCQ)
-   - "sy" : Synonym / Closest in meaning (MCQ with bracketed target word)
-   - "an" : Antonym / Opposite in meaning (MCQ with bracketed target word)
-   - "er" : Error Identification & Correction ([text](A) ... or [TAB2] sentence | <blank>)
-   - "fb" : Fill in the Blank (Word form in brackets, Verb tense, Prepositions, Standalone sentence)
-   - "rw" : Rewrite Sentence / Sentence Transformation (e.g. "→ Starting phrase <blank>")
-   - "wq" : Write Question (Write question A: for given answer B:)
-   - "wb" : Word Box Passage (Fill blanks with words from a given word bank box)
-   - "cz" : Cloze Passage (Passage with numbered blanks and MCQ A/B/C/D choices per blank)
-   - "rd" : Reading Comprehension Passage with comprehension questions
-   - "ro" : Sentence / Dialogue Reordering (Scrambled phrases or dialogue lines)
-   - "mt" : Matching (Connect Left items "o" to Right items "p")
-   - "tf" : True / False statements
-   - "sg" : Sign Meaning (MCQ)
-   - "nt" : Notice Meaning (MCQ)
-   - "pc" : Picture Vocabulary (Identify words from pictures / diagrams)
-   - "cl" : Column Classification / Word Sorting (Sort words into columns e.g. PLAY / GO / DO)
-
-2. "q": (String) Question number. e.g., "1", "15".
-3. "x": (String) Question sentence / prompt text / instruction.
-4. "o": (Array) Answer choices array ["option A", "option B", "option C", "option D"] or LEFT matching items.
-5. "a": (String | Array) Correct answer string ("A", "B", "C", "D" or open-ended answer text).
-6. "b": (String) Passage body text or dialogue text. Used by "wb", "cz", "rd", "nt".
-7. "k": (Array of Objects) Sub-questions grouped under a shared instruction heading.
-8. "w": (Array of Strings) Word bank list for "wb" or "cl". Rendered in a rounded box above the exercise.
-9. "p": (Array of Strings) RIGHT-column pool for "mt" (matching).
-
-==================================================
-INLINE TEXT FORMATTING RULES
-==================================================
-- Target Underline:        [word]{u}     → e.g., "[po]{u}ttery", "fl[ow]{u}er"
-- Target Underline + Bold: [word]{u,b}   → e.g., "[th]{u,b}ink"
-- Bold Text:               **word**      → e.g., "**SECTION A: PHONETICS**"
-- Italic Text:             *word*        → e.g., "*Note:*"
-- Student Answer Blank:    <blank>       → e.g., "She usually goes <blank> with her friends."
-- Error ID Fragment:       [text](LTR)   → e.g., "She [go](A) to [school](B) yesterday."`
-  },
-  {
-    id: "tf_uln_dsl_v1",
-    title: "Universal Layout Notation (ULN) DSL Extraction & Compilation Agent Prompt",
-    content: ULN_OCR_SYSTEM_PROMPT,
-  }
-];
-
-const DEFAULT_LAYOUT: LayoutSettings = {
-  margin_top: 2.0,
-  margin_bottom: 2.0,
-  margin_left: 3.0,
-  margin_right: 1.5,
-  font_name: "Times New Roman",
-  font_size: 12.0,
-  line_spacing: 1.15,
-  space_after: 6.0,
-  header_space_before: 14.0,
-  header_space_after: 8.0,
-  question_space_before: 6.0,
-  question_space_after: 4.0,
-  options_left_indent: 0.5,
-  options_space_before: 0.0,
-  options_space_after: 3.0,
-  passage_space_before: 4.0,
-  passage_space_after: 6.0,
-  passage_indent_first: 0.75,
-  reorder_space_before: 0.0,
-  reorder_space_after: 2.0,
-  reorder_left_indent: 1.0,
-  notice_space_before: 4.0,
-  notice_space_after: 6.0,
-  notice_left_indent: 1.0
-};
-
-const MOCK_PAYLOAD = [
-  {
-    "t": "pr",
-    "q": 1,
-    "o": ["pass[ed]", "plann[ed]", "hopp[ed]", "play[ed]"],
-    "a": "D"
-  },
-  {
-    "t": "st",
-    "q": 2,
-    "o": ["teacher", "student", "decide", "member"],
-    "a": "C"
-  },
-  {
-    "t": "mq",
-    "q": 3,
-    "x": "We have English lessons _______ Tuesday and Friday.",
-    "o": ["on", "up", "at", "in"],
-    "a": "A"
-  },
-  {
-    "t": "er",
-    "q": 4,
-    "x": "Because of [his](A) illness, he [could not](B) go to school, [so](C) he was [sadly](D).",
-    "o": ["his", "could not", "so", "sadly"],
-    "a": "D"
-  }
-];
-
-interface TestFormatterProps {
-  preloadedQuestions?: any[] | null;
-  preloadedVersions?: number | null;
-  preloadedGrade?: string | null;
-  preloadedUnit?: string | null;
-  clearPreloadedQuestions?: () => void;
-}
-
-// Fast Isolated Code Editor Component to eliminate parent re-render lag
-const FastJsonEditor = React.memo(({ 
-  initialValue, 
-  onParsedDataChange 
-}: { 
-  initialValue: string; 
-  onParsedDataChange: (data: any[], error: string | null, text: string) => void;
-}) => {
-  const [localText, setLocalText] = useState(initialValue);
-
-  useEffect(() => {
-    setLocalText(initialValue);
-  }, [initialValue]);
-
-  // Debounced parsing without triggering parent renders on every keystroke
-  useEffect(() => {
-    if (!localText.trim()) {
-      onParsedDataChange([], null, localText);
-      return;
-    }
-    const timer = setTimeout(() => {
-      try {
-        const parsed = JSON.parse(localText);
-        const dataBlock = parsed.exercises || parsed.questions || parsed.data || parsed;
-        if (Array.isArray(dataBlock)) {
-          onParsedDataChange(dataBlock, null, localText);
-        } else if (typeof dataBlock === 'object') {
-          onParsedDataChange([dataBlock], null, localText);
-        } else {
-          onParsedDataChange([], "JSON phải là một danh sách các câu hỏi.", localText);
-        }
-      } catch (e: any) {
-        onParsedDataChange([], `Lỗi cú pháp: ${e.message}`, localText);
-      }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [localText]);
-
-  return (
-    <textarea
-      value={localText}
-      onChange={(e) => setLocalText(e.target.value)}
-      spellCheck={false}
-      placeholder="Nhập mảng câu hỏi JSON tại đây..."
-      className="code-editor-textarea flex-1 w-full h-full p-5 font-mono text-xs text-slate-900 dark:text-slate-100 resize-none border-0 outline-none leading-relaxed select-text bg-transparent"
-    />
-  );
-});
-
-export default function TestFormatter({ 
-  preloadedQuestions, 
-  preloadedVersions, 
-  preloadedGrade, 
-  preloadedUnit, 
-  clearPreloadedQuestions 
-}: TestFormatterProps) {
+export default function TestFormatter() {
   const confirm = useConfirm();
-  const [jsonText, setJsonText] = useState(() => JSON.stringify(MOCK_PAYLOAD, null, 2));
+  const [jsonText, setJsonText] = useState<string>('{\n  "data": []\n}');
+  const [exercisesData, setExercisesData] = useState<any[]>([]);
   const [jsonError, setJsonError] = useState<string | null>(null);
-  const [exercisesData, setExercisesData] = useState<any[]>(MOCK_PAYLOAD);
-  const [grade, setGrade] = useState<string>("");
-  const [unit, setUnit] = useState<string>("");
-  
-  // Settings & Profiles
+
   const [layout, setLayout] = useState<LayoutSettings>(DEFAULT_LAYOUT);
   const [profiles, setProfiles] = useState<Record<string, LayoutSettings>>({});
-  const [activeProfile, setActiveProfile] = useState<string>("Mặc định");
-  const [newProfileName, setNewProfileName] = useState<string>("");
-  const [showConfig, setShowConfig] = useState(false);
-  const [mixOptions, setMixOptions] = useState(true);
-  
-  // Previews & Workspace
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const [compiling, setCompiling] = useState(false);
-  const [pdfZoom, setPdfZoom] = useState(100);
-  
-  // Test Versions & Compiled Files State
-  const [numVersions, setNumVersions] = useState<number>(1);
+  const [activeProfile, setActiveProfile] = useState<string>('Mặc định');
+  const [showConfig, setShowConfig] = useState<boolean>(false);
+
+  const [numVersions] = useState<number>(1);
+  const [mixOptions, setMixOptions] = useState<boolean>(true);
+  const [grade] = useState<string>('');
+  const [unit] = useState<string>('');
+  const [saveToDocs] = useState<boolean>(false);
+  const [saveFolderId] = useState<string>('');
+
+  const [compiling, setCompiling] = useState<boolean>(false);
+  const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [lastCompiledFiles, setLastCompiledFiles] = useState<any[]>([]);
-  
-  // Workspace files for loader selector
-  const [jsonFiles, setJsonFiles] = useState<AppFile[]>([]);
-  const [selectedFileToLoad, setSelectedFileToLoad] = useState<string>("");
 
-  // Spreadsheet Export States
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [exportConfig, setExportConfig] = useState<{ format: 'xlsx' | 'csv'; defaultTime: number }>({
-    format: 'xlsx',
-    defaultTime: 30
+  const [pdfLoading, setPdfLoading] = useState<boolean>(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfZoom, setPdfZoom] = useState<number>(100);
+
+  const [exportConfig, setExportConfig] = useState<{
+    platform: 'kahoot' | 'quizizz' | 'excel_full';
+    defaultTime: number;
+    defaultPoints: number;
+    testTitle: string;
+  }>({
+    platform: 'kahoot',
+    defaultTime: 30,
+    defaultPoints: 1,
+    testTitle: 'English Test',
   });
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  const [saveToDocs, setSaveToDocs] = useState(false);
-  const [folders, setFolders] = useState<any[]>([]);
-  const [saveFolderId, setSaveFolderId] = useState<string>('');
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+
   const exportMenuRef = useRef<HTMLDivElement>(null);
-
-  const handleParsedDataChange = useCallback((data: any[], error: string | null, text: string) => {
-    setExercisesData(data);
-    setJsonError(error);
-    setJsonText(text);
-  }, []);
-
-  useEffect(() => {
-    if (saveToDocs && folders.length === 0) {
-      api.getDocumentFolders().then(res => {
-        if (res.success) setFolders(res.folders);
-      }).catch(err => console.error("Error loading folders:", err));
-    }
-  }, [saveToDocs, folders.length]);
-
-  const folderOptions = useMemo(() => {
-    const map: Record<number, any> = {};
-    const roots: any[] = [];
-    folders.forEach(f => {
-      map[f.id] = { ...f, children: [] };
-    });
-    folders.forEach(f => {
-      const node = map[f.id];
-      if (node.parent_id !== null && map[node.parent_id]) {
-        map[node.parent_id].children.push(node);
-      } else {
-        roots.push(node);
-      }
-    });
-
-    const flat: Array<{ id: number; name: string; depth: number }> = [];
-    const traverse = (nodes: any[], depth = 0) => {
-      nodes.forEach(n => {
-        flat.push({ id: n.id, name: n.name, depth });
-        traverse(n.children, depth + 1);
-      });
-    };
-    traverse(roots);
-    return flat;
-  }, [folders]);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as HTMLElement)) {
-        setShowExportMenu(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     loadProfiles();
-    loadWorkspaceJsonFiles();
   }, []);
-
-  useEffect(() => {
-    if (preloadedQuestions && preloadedQuestions.length > 0) {
-      const mapped = preloadedQuestions.map((q, idx) => ({
-        t: q.t || 'mq',
-        q: idx + 1,
-        x: q.x || '',
-        o: q.o || [],
-        a: q.a || '',
-        unit: q.unit || '',
-        grade: q.grade || ''
-      }));
-      const str = JSON.stringify(mapped, null, 2);
-      setJsonText(str);
-      setExercisesData(mapped);
-      setJsonError(null);
-      if (preloadedVersions) setNumVersions(preloadedVersions);
-      if (preloadedGrade) setGrade(preloadedGrade);
-      if (preloadedUnit) setUnit(preloadedUnit);
-      if (clearPreloadedQuestions) clearPreloadedQuestions();
-      showToast(`Đã tự động điền ${mapped.length} câu hỏi đã chọn từ Ngân hàng`, "success");
-    }
-  }, [preloadedQuestions, preloadedVersions, preloadedGrade, preloadedUnit]);
 
   const loadProfiles = async () => {
     try {
-      const data = await api.getProfiles();
-      setProfiles(data);
-    } catch (e) {
-      console.error(e);
-      showToast("Không thể tải danh sách cấu hình", "error");
+      const res = await api.getProfiles();
+      if (res) setProfiles(res);
+    } catch {
+      // ignore
     }
   };
 
-  const loadWorkspaceJsonFiles = async () => {
-    try {
-      const files = await api.getFiles();
-      setJsonFiles(files.filter(f => f.type === 'json'));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleProfileChange = (profileName: string) => {
-    setActiveProfile(profileName);
-    if (profileName === "Mặc định") {
+  const handleProfileChange = (name: string) => {
+    setActiveProfile(name);
+    if (name === 'Mặc định') {
       setLayout(DEFAULT_LAYOUT);
-    } else if (profiles[profileName]) {
-      setLayout(profiles[profileName]);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    const name = newProfileName.trim();
-    if (!name) {
-      showToast("Vui lòng nhập tên cấu hình cần lưu", "warning");
-      return;
-    }
-    if (name === "Mặc định") {
-      showToast("Không thể ghi đè lên cấu hình Mặc định", "error");
-      return;
-    }
-    try {
-      await api.saveProfile(name, layout);
-      showToast(`Đã lưu cấu hình '${name}'`, "success");
-      setNewProfileName("");
-      loadProfiles();
-      setActiveProfile(name);
-    } catch (e) {
-      showToast("Lỗi lưu cấu hình: " + e, "error");
+    } else if (profiles[name]) {
+      setLayout(profiles[name]);
     }
   };
 
   const handleDeleteProfile = async () => {
-    if (activeProfile === "Mặc định") return;
+    if (activeProfile === 'Mặc định') return;
     const isConfirmed = await confirm({
-      title: "Xóa cấu hình",
+      title: 'Xóa cấu hình?',
       message: `Bạn có muốn xóa cấu hình '${activeProfile}'?`,
-      confirmText: "Xóa",
-      cancelText: "Hủy bỏ",
-      type: "danger"
+      confirmText: 'Xóa',
+      cancelText: 'Hủy bỏ',
+      type: 'danger',
     });
     if (!isConfirmed) return;
     try {
       await api.deleteProfile(activeProfile);
-      showToast(`Đã xóa cấu hình '${activeProfile}'`, "success");
-      setActiveProfile("Mặc định");
+      showToast(`Đã xóa cấu hình '${activeProfile}'`, 'success');
+      setActiveProfile('Mặc định');
       setLayout(DEFAULT_LAYOUT);
       loadProfiles();
-    } catch (e) {
-      showToast("Lỗi xóa cấu hình: " + e, "error");
+    } catch (e: any) {
+      showToast('Lỗi xóa cấu hình: ' + e, 'error');
     }
+  };
+
+  const handleParsedDataChange = (data: any[], error: string | null) => {
+    setExercisesData(data);
+    setJsonError(error);
   };
 
   const handleDirectFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -401,7 +116,7 @@ export default function TestFormatter({
     reader.onload = (event) => {
       const text = event.target?.result as string;
       setJsonText(text);
-      showToast(`Đã nạp tệp: ${file.name}`, "success");
+      showToast(`Đã nạp tệp: ${file.name}`, 'success');
     };
     reader.readAsText(file);
   };
@@ -410,31 +125,31 @@ export default function TestFormatter({
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      showToast(`Đang tải lên và chuyển đổi tệp: ${file.name}...`, "warning");
+      showToast(`Đang tải lên và chuyển đổi tệp: ${file.name}...`, 'warning');
       const uploadRes = await api.uploadFile(file);
       if (uploadRes.success && uploadRes.filename) {
         const convertRes = await api.convertDocx(uploadRes.filename);
         if (convertRes.success && convertRes.exercises) {
-          const cleanedExercises = Array.isArray(convertRes.exercises) ? convertRes.exercises.map((ex: any) => ({
-            ...ex,
-            o: Array.isArray(ex.o) ? ex.o.map((o: any) => cleanOptionPrefix(String(o))) : ex.o,
-            options: Array.isArray(ex.options) ? ex.options.map((o: any) => cleanOptionPrefix(String(o))) : ex.options,
-            k: Array.isArray(ex.k) ? ex.k.map((sub: any) => ({
-              ...sub,
-              o: Array.isArray(sub.o) ? sub.o.map((o: any) => cleanOptionPrefix(String(o))) : sub.o,
-              options: Array.isArray(sub.options) ? sub.options.map((o: any) => cleanOptionPrefix(String(o))) : sub.options
-            })) : ex.k
-          })) : convertRes.exercises;
-          setJsonText(JSON.stringify(cleanedExercises, null, 2));
-          showToast(`Đã chuyển đổi thành công tệp ${file.name} sang JSON!`, "success");
+          const cleaned = Array.isArray(convertRes.exercises)
+            ? convertRes.exercises.map((ex: any) => ({
+                ...ex,
+                o: Array.isArray(ex.o) ? ex.o.map((o: any) => cleanOptionPrefix(String(o))) : ex.o,
+                k: Array.isArray(ex.k)
+                  ? ex.k.map((sub: any) => ({
+                      ...sub,
+                      o: Array.isArray(sub.o) ? sub.o.map((o: any) => cleanOptionPrefix(String(o))) : sub.o,
+                    }))
+                  : ex.k,
+              }))
+            : convertRes.exercises;
+          setJsonText(JSON.stringify(cleaned, null, 2));
+          showToast(`Đã chuyển đổi thành công tệp ${file.name} sang JSON!`, 'success');
         } else {
-          showToast("Chuyển đổi thất bại hoặc dữ liệu không hợp lệ.", "error");
+          showToast('Chuyển đổi thất bại.', 'error');
         }
-      } else {
-        showToast("Tải tệp lên thất bại.", "error");
       }
     } catch (err: any) {
-      showToast("Lỗi chuyển đổi DOCX: " + (err.message || err), "error");
+      showToast('Lỗi chuyển đổi DOCX: ' + (err.message || err), 'error');
     }
   };
 
@@ -449,320 +164,193 @@ export default function TestFormatter({
 
   const handleCompileAndDownload = async () => {
     if (jsonError || exercisesData.length === 0) {
-      showToast("Vui lòng sửa lỗi JSON trước khi biên dịch", "error");
+      showToast('Vui lòng sửa lỗi JSON trước khi biên dịch', 'error');
       return;
     }
     try {
       setCompiling(true);
-      showToast("Đang tạo file Word...", "warning");
-      const res = await api.compileTest(exercisesData, layout, numVersions, mixOptions, grade, unit, saveToDocs, saveFolderId || null);
+      showToast('Đang tạo file Word...', 'warning');
+      const res = await api.compileTest(
+        exercisesData,
+        layout,
+        numVersions,
+        mixOptions,
+        grade,
+        unit,
+        saveToDocs,
+        saveFolderId || null
+      );
       if (res.success) {
         const filesList = res.files && res.files.length > 0 ? res.files : [{ filename: res.filename, filepath: res.filepath }];
         setLastCompiledFiles(filesList);
-
         filesList.forEach((fileItem: any, i: number) => {
-          const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || res.filename);
+          const fname = typeof fileItem === 'string' ? fileItem : fileItem.filename || res.filename;
           if (fname) {
             setTimeout(() => {
               triggerDownload(api.downloadFileUrl(fname), fname);
             }, i * 300);
           }
         });
-
-        showToast(`Đã tạo và tải xuống thành công ${filesList.length} phiên bản đề thi!`, "success");
+        showToast(`Đã tạo và tải xuống thành công ${filesList.length} đề thi!`, 'success');
       }
-    } catch (e) {
-      showToast("Lỗi biên dịch đề thi: " + e, "error");
+    } catch (e: any) {
+      showToast('Lỗi biên dịch đề thi: ' + e, 'error');
     } finally {
       setCompiling(false);
     }
   };
 
-  const handleExportTestSpreadsheet = async () => {
+  const handleExportPlatform = async () => {
     if (jsonError || exercisesData.length === 0) {
-      showToast("Vui lòng nhập danh sách câu hỏi hợp lệ trước", "error");
+      showToast('Vui lòng nhập danh sách câu hỏi hợp lệ trước', 'error');
       return;
     }
     try {
-      setCompiling(true);
-      showToast("Đang xuất bảng tính...", "warning");
+      setIsExporting(true);
+      showToast('Đang xuất bảng tính...', 'warning');
       const res = await api.exportTestExcelCsv(
-        exercisesData, exportConfig.format, exportConfig.defaultTime,
-        numVersions, mixOptions, grade, unit, saveToDocs, saveFolderId || null
+        exercisesData,
+        exportConfig.platform === 'excel_full' ? 'xlsx' : exportConfig.platform,
+        exportConfig.defaultTime,
+        numVersions,
+        mixOptions,
+        grade,
+        unit,
+        saveToDocs,
+        saveFolderId || null
       );
       if (res.success) {
         const filesList = res.files && res.files.length > 0 ? res.files : [{ filename: res.filename, filepath: res.filepath }];
         setLastCompiledFiles(filesList);
-
         filesList.forEach((fileItem: any, i: number) => {
-          const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || res.filename);
+          const fname = typeof fileItem === 'string' ? fileItem : fileItem.filename || res.filename;
           if (fname) {
             setTimeout(() => {
               triggerDownload(api.downloadFileUrl(fname), fname);
             }, i * 300);
           }
         });
-
-        showToast(`Đã xuất và tải xuống thành công ${filesList.length} phiên bản bảng tính!`, "success");
+        showToast(`Đã xuất và tải xuống thành công ${filesList.length} bảng tính!`, 'success');
         setShowExportModal(false);
       }
     } catch (e: any) {
-      showToast("Xuất bảng tính thất bại: " + (e.message || e), "error");
+      showToast('Xuất bảng tính thất bại: ' + (e.message || e), 'error');
     } finally {
-      setCompiling(false);
+      setIsExporting(false);
     }
   };
 
   const handleGeneratePdfPreview = async () => {
     if (jsonError || exercisesData.length === 0) {
-      showToast("Vui lòng nhập danh sách câu hỏi hợp lệ trước", "error");
+      showToast('Vui lòng nhập danh sách câu hỏi hợp lệ trước', 'error');
       return;
     }
     try {
       setPdfLoading(true);
       setPdfUrl(null);
-      showToast("Đang tạo bản xem trước PDF...", "warning");
+      showToast('Đang tạo bản xem trước PDF...', 'warning');
       const res = await api.previewPdf(exercisesData, layout, numVersions, mixOptions, grade, unit);
       setPdfUrl(`${res.url}?t=${Date.now()}`);
-      showToast("Tạo PDF xem trước thành công!", "success");
+      showToast('Tạo PDF xem trước thành công!', 'success');
     } catch (e: any) {
-      console.error(e);
-      showToast(`Không thể tạo PDF: ${e.message || e}`, "error");
+      showToast(`Không thể tạo PDF: ${e.message || e}`, 'error');
     } finally {
       setPdfLoading(false);
     }
   };
 
-  const renderSettingInput = (label: string, key: keyof LayoutSettings, min = 0, max = 24, step = 0.5) => {
-    return (
-      <div className="flex flex-col gap-1 mt-2">
-        <div className="flex justify-between text-[0.66rem] font-bold text-slate-300">
-          <span>{label}</span>
-          <span className="text-indigo-600 font-mono">{layout[key]}</span>
-        </div>
-        <input 
-          type="range" 
-          min={min} 
-          max={max} 
-          step={step} 
-          value={layout[key] as number}
-          onChange={(e) => setLayout(prev => ({ ...prev, [key]: parseFloat(e.target.value) }))}
-          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] flex relative overflow-hidden select-none">
-      
-      {/* 1. SLIDING CONFIGS PANEL (SLIDEBAR) */}
-      <aside className={`w-80 bg-white dark:bg-[#141417] border-r border-slate-200 dark:border-[#27272a] p-5 flex flex-col justify-between overflow-y-auto shrink-0 transition-all duration-300 absolute lg:relative z-20 h-full ${
-        showConfig ? 'left-0 opacity-100' : '-left-80 lg:-ml-80 opacity-0 pointer-events-none'
-      }`}>
-        <div>
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-[#27272a]">
-            <h2 className="text-[0.73rem] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Settings size={12} /> CẤU HÌNH LỀ & CHỮ
-            </h2>
-            <button 
-              onClick={() => setShowConfig(false)}
-              className="p-1 rounded-xl bg-slate-100 dark:bg-[#1a2038] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#252e4e] cursor-pointer"
-            >
-              <X size={12} />
-            </button>
-          </div>
-          
-          {/* Active Profile Select */}
-          <div className="flex flex-col gap-1 mb-4">
-            <label className="text-[0.6rem] font-bold text-slate-500 dark:text-slate-400 uppercase">Hồ sơ thiết lập</label>
-            <select
-              value={activeProfile}
-              onChange={(e) => handleProfileChange(e.target.value)}
-              className="bg-slate-50 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white font-bold cursor-pointer"
-            >
-              <option value="Mặc định">Mặc định</option>
-              {Object.keys(profiles).map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
-            {activeProfile !== "Mặc định" && (
-              <button 
-                onClick={handleDeleteProfile}
-                className="mt-1 flex items-center gap-1 text-[0.66rem] text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 font-bold justify-end cursor-pointer"
-              >
-                <Trash2 size={10} /> Xóa hồ sơ này
-              </button>
-            )}
-          </div>
+      <ConfigDrawer
+        showConfig={showConfig}
+        setShowConfig={setShowConfig}
+        activeProfile={activeProfile}
+        handleProfileChange={handleProfileChange}
+        handleDeleteProfile={handleDeleteProfile}
+        profiles={profiles}
+        layout={layout}
+        setLayout={setLayout}
+        mixOptions={mixOptions}
+        setMixOptions={setMixOptions}
+      />
 
-          {/* Margins */}
-          <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 mt-2">Căn lề trang (cm)</h3>
-          <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border-0 shadow-2xs">
-            {renderSettingInput("Lề trên", "margin_top", 0.5, 5, 0.1)}
-            {renderSettingInput("Lề dưới", "margin_bottom", 0.5, 5, 0.1)}
-            {renderSettingInput("Lề trái", "margin_left", 0.5, 5, 0.1)}
-            {renderSettingInput("Lề phải", "margin_right", 0.5, 5, 0.1)}
-          </div>
+      <ExportModal
+        showExportModal={showExportModal}
+        setShowExportModal={setShowExportModal}
+        exportConfig={exportConfig}
+        setExportConfig={setExportConfig}
+        isExporting={isExporting}
+        handleExportPlatform={handleExportPlatform}
+      />
 
-          {/* Typography */}
-          <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-4 mb-1">Typography & Font</h3>
-          <div className="flex flex-col gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border-0 shadow-2xs">
-            <div className="flex flex-col gap-1">
-              <label className="text-[0.6rem] text-slate-500 dark:text-slate-400 font-bold">Phông chữ</label>
-              <select
-                value={layout.font_name}
-                onChange={(e) => setLayout(prev => ({ ...prev, font_name: e.target.value }))}
-                className="bg-white dark:bg-[#121629] border border-slate-200 dark:border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white"
-              >
-                {["Times New Roman", "Arial", "Calibri", "Segoe UI", "Georgia"].map(font => (
-                  <option key={font} value={font}>{font}</option>
-                ))}
-              </select>
-            </div>
-            {renderSettingInput("Cỡ chữ (pt)", "font_size", 8, 20, 0.5)}
-            {renderSettingInput("Giãn dòng", "line_spacing", 1.0, 3.0, 0.05)}
-            {renderSettingInput("Khoảng cách đoạn (pt)", "space_after", 0, 24, 1)}
-          </div>
-
-          {/* Mix Options Option */}
-          <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-4 mb-1">Cấu hình Đề thi</h3>
-          <div className="flex flex-col gap-2.5 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border-0 shadow-2xs mt-1">
-            <div className="flex items-center gap-2.5">
-              <input 
-                type="checkbox" 
-                id="mix-options-checkbox"
-                checked={mixOptions}
-                onChange={(e) => setMixOptions(e.target.checked)}
-                className="rounded border-slate-300 dark:border-[#283354] text-indigo-500 bg-white dark:bg-[#121629] focus:ring-indigo-500 h-4 w-4 cursor-pointer"
-              />
-              <label htmlFor="mix-options-checkbox" className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
-                Trộn thứ tự đáp án (Mix Options)
-              </label>
-            </div>
-            
-            <div className="flex flex-col gap-1 mt-1 border-t border-slate-200 dark:border-[#252e4e] pt-2">
-              <label htmlFor="num-versions-input" className="text-[0.66rem] font-bold text-slate-700 dark:text-slate-300">
-                Số lượng mã đề (Versions):
-              </label>
-              <input 
-                type="number" 
-                id="num-versions-input"
-                min={1}
-                max={50}
-                value={numVersions}
-                onChange={(e) => setNumVersions(parseInt(e.target.value) || 1)}
-                className="bg-white dark:bg-[#121629] border border-slate-200 dark:border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white font-bold w-full focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Save Box */}
-        <div className="mt-4 border-t border-slate-200 dark:border-[#202842] pt-3 flex flex-col gap-1.5">
-          <label className="text-[0.6rem] font-bold text-slate-500 dark:text-slate-400 uppercase">Lưu cấu hình hiện tại</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="e.g. Đề thi THPT"
-              value={newProfileName}
-              onChange={(e) => setNewProfileName(e.target.value)}
-              className="bg-slate-50 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 flex-1 focus:outline-none"
-            />
-            <button
-              onClick={handleSaveProfile}
-              className="px-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold text-xs flex items-center justify-center transition cursor-pointer"
-              title="Lưu hồ sơ"
-            >
-              <Save size={13} />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. MAIN HORIZONTAL GRID (SIDE-BY-SIDE EDITOR & PDF VIEW) */}
       <div className="flex-1 flex flex-row overflow-hidden relative">
-        
-        {/* LEFT COMPONENT: EDITOR */}
         <section className="flex-1 flex flex-col border-r border-slate-200 dark:border-[#202842] overflow-hidden bg-slate-50 dark:bg-[#0f1322]">
-          
-          {/* Editor Topbar */}
           <div className="h-14 border-b border-slate-200 dark:border-[#202842] bg-white dark:bg-[#121629] flex items-center justify-between px-6 shrink-0 gap-3 relative z-30">
-            <div className="flex items-center gap-3 group/left-toolbar">
-              <button 
+            <div className="flex items-center gap-3">
+              <button
                 onClick={() => setShowConfig(!showConfig)}
                 className={`p-2.5 rounded-xl border-0 transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
-                  showConfig 
-                    ? 'bg-blue-600 text-white px-3 shadow-sm' 
+                  showConfig
+                    ? 'bg-blue-600 text-white px-3 shadow-sm'
                     : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-2xs'
                 }`}
-                title={showConfig ? "Ẩn cấu hình lề và cỡ chữ" : "Hiện cấu hình lề và cỡ chữ"}
+                title="Căn Lề & Chữ"
               >
                 <Settings size={14} className="shrink-0" />
-                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                  showConfig ? 'max-w-xs opacity-100 ml-1.5' : 'max-w-0 opacity-0 group-hover/left-toolbar:max-w-xs group-hover/left-toolbar:opacity-100 group-hover/left-toolbar:ml-1.5'
-                }`}>Căn Lề & Chữ</span>
+                <span className="ml-1.5">Căn Lề & Chữ</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap md:flex-nowrap justify-end">
-              <PromptManager 
-                storageKey="prompts_test_formatter" 
-                tabTitle="Trình Tạo Đề Thi" 
-                defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS} 
+            <div className="flex items-center gap-2.5 flex-wrap justify-end">
+              <PromptManager
+                storageKey="prompts_test_formatter"
+                tabTitle="Trình Tạo Đề Thi"
+                defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS}
               />
 
-              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs" title="Nạp dữ liệu từ file JSON">
-                <Upload size={14} className="shrink-0" />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nạp JSON</span>
+              <label className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs">
+                <Upload size={14} className="shrink-0 mr-1.5" />
+                <span>Nạp JSON</span>
                 <input type="file" accept=".json" onChange={handleDirectFileUpload} className="hidden" />
               </label>
 
-              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs" title="Chuyển đổi file Word (.docx) sang JSON">
-                <Upload size={14} className="text-amber-500 dark:text-amber-400 shrink-0" />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nhập từ DOCX</span>
+              <label className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs">
+                <Upload size={14} className="text-amber-500 shrink-0 mr-1.5" />
+                <span>Nhập DOCX</span>
                 <input type="file" accept=".docx" onChange={handleDocxFileUpload} className="hidden" />
               </label>
 
-              <label className="group flex items-center px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition shadow-2xs" title="Lưu vào quản lý Tài liệu">
-                <input 
-                  type="checkbox" 
-                  checked={saveToDocs} 
-                  onChange={(e) => setSaveToDocs(e.target.checked)} 
-                  className="rounded border-slate-300 dark:border-[#283354] bg-white dark:bg-[#121629] text-indigo-500 cursor-pointer shrink-0"
-                />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Lưu vào Tài liệu</span>
-              </label>
-
-              {/* Compile/Export Dropdown */}
               <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={compiling}
-                  className="group px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-sm border-0"
-                  title="Xuất đề thi ra Word / Excel"
+                  className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-sm border-0"
                 >
-                  <Download size={14} className={`shrink-0 ${compiling ? "animate-spin" : ""}`} />
-                  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                    showExportMenu ? 'max-w-xs opacity-100 ml-1.5 mr-1' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 group-hover:mr-1'
-                  }`}>Xuất Đề Thi</span>
-                  <ChevronRight size={12} className={`shrink-0 transform transition-transform ${showExportMenu ? 'rotate-90' : ''}`} />
+                  <Download size={14} className={`shrink-0 mr-1.5 ${compiling ? 'animate-spin' : ''}`} />
+                  <span>Xuất Đề Thi</span>
+                  <ChevronRight size={12} className={`ml-1 transform transition-transform ${showExportMenu ? 'rotate-90' : ''}`} />
                 </button>
 
                 {showExportMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#161b2e] border border-slate-300 dark:border-white/10 rounded-xl z-30 py-2 px-2 flex flex-col gap-1 shadow-2xl animate-mac-dropdown text-[0.66rem]">
                     <button
-                      onClick={() => { setShowExportMenu(false); handleCompileAndDownload(); }}
-                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition w-full text-left cursor-pointer"
+                      onClick={() => {
+                        setShowExportMenu(false);
+                        handleCompileAndDownload();
+                      }}
+                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition w-full text-left cursor-pointer"
                     >
-                      <FileText size={13} className="text-indigo-600 dark:text-indigo-400" />
+                      <FileText size={13} className="text-indigo-600" />
                       <span>Tập tin Word (.docx)</span>
                     </button>
                     <button
-                      onClick={() => { setShowExportMenu(false); setShowExportModal(true); }}
-                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition w-full text-left cursor-pointer"
+                      onClick={() => {
+                        setShowExportMenu(false);
+                        setShowExportModal(true);
+                      }}
+                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition w-full text-left cursor-pointer"
                     >
-                      <FileCode size={13} className="text-emerald-600 dark:text-emerald-400" />
+                      <FileCode size={13} className="text-emerald-600" />
                       <span>Bảng tính Excel / CSV</span>
                     </button>
                   </div>
@@ -771,231 +359,42 @@ export default function TestFormatter({
             </div>
           </div>
 
-          {/* Text Area Content - Clean Edge-to-Edge Editor */}
           <div className="flex-1 relative flex flex-col min-h-0 bg-white dark:bg-[#0f1322] overflow-hidden">
-            <FastJsonEditor
-              initialValue={jsonText}
-              onParsedDataChange={handleParsedDataChange}
-            />
+            <FastJsonEditor initialValue={jsonText} onParsedDataChange={handleParsedDataChange} />
 
-            {/* Validation Info Overlay */}
             <div className="absolute bottom-6 right-6 flex items-center gap-2 select-none z-10">
               {jsonError ? (
-                <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-300 font-bold text-[0.66rem] bg-rose-50 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/40 px-3 py-1.5 rounded-xl shadow-lg">
-                  <AlertCircle size={12} />
-                  <span className="truncate max-w-xs">{jsonError}</span>
+                <div className="flex items-center gap-1.5 text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl shadow-lg font-bold text-xs">
+                  <AlertCircle size={12} /><span className="truncate max-w-xs">{jsonError}</span>
                 </div>
               ) : exercisesData.length > 0 ? (
-                <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-300 font-bold text-[0.66rem] bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
-                  <CheckCircle size={12} />
-                  <span>Hợp lệ ({exercisesData.length} câu)</span>
+                <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl shadow-lg font-bold text-xs">
+                  <CheckCircle size={12} /><span>Hợp lệ ({exercisesData.length} câu)</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-bold text-[0.66rem] bg-white dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] px-3 py-1.5 rounded-xl">
-                  <AlertCircle size={12} />
-                  <span>Trống</span>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* BANNER TO OPEN COMPILED FILES */}
-          {lastCompiledFiles && lastCompiledFiles.length > 0 && (
-            <div className="bg-white dark:bg-[#12182b] border-t border-slate-200 dark:border-indigo-500/30 px-6 py-3 flex flex-wrap items-center justify-between shrink-0 shadow-lg gap-3">
-              <div className="flex items-center gap-2">
-                <FileText size={15} className="text-indigo-600 dark:text-indigo-400" />
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Đã xuất bản đề thi thành công ({lastCompiledFiles.length} mã đề)!</h4>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {lastCompiledFiles.map((fileItem: any, i: number) => {
-                  const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || '');
-                  if (!fname) return null;
-                  return (
-                    <div key={i} className="flex items-center gap-1 bg-slate-100 dark:bg-[#1a2238] border border-slate-200 dark:border-indigo-500/30 px-2 py-1 rounded-xl text-xs">
-                      <button
-                        onClick={() => triggerDownload(api.downloadFileUrl(fname), fname)}
-                        className="text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 dark:hover:text-white font-bold flex items-center gap-1 cursor-pointer text-[0.66rem]"
-                        title="Tải về file"
-                      >
-                        <Download size={11} />
-                        <span>{fname}</span>
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const fileToOpen = typeof fileItem === 'string' ? fileItem : (fileItem.filepath || fileItem.filename || fname);
-                          try { await api.openLocalFile(fileToOpen); showToast(`Đang mở tệp: ${fname}`, "success"); }
-                          catch (e: any) { showToast("Lỗi mở file: " + (e.message || e), "error"); }
-                        }}
-                        className="text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 p-1 cursor-pointer"
-                        title="Mở file bằng Word"
-                      >
-                        <Eye size={11} />
-                      </button>
-                    </div>
-                  );
-                })}
-                <button
-                  onClick={async () => {
-                    try { await api.openWorkspaceFolder(); showToast("Đang mở thư mục chứa đề thi...", "success"); }
-                    catch (e) { showToast("Lỗi mở thư mục: " + e, "error"); }
-                  }}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-sm ml-1"
-                >
-                  <FolderOpen size={11} />
-                  <span>MỞ THƯ MỤC CHỨA ĐỀ</span>
-                </button>
-                <button onClick={() => setLastCompiledFiles([])} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer ml-1">
-                  <X size={13} />
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
-        
-        {/* RIGHT COMPONENT: PREVIEW PANEL */}
-        <section className="flex-1 flex flex-col overflow-hidden bg-slate-100 dark:bg-[#0d101d]">
-          
-          {/* Preview Panel Topbar */}
-          <div className="h-14 border-b border-slate-200 dark:border-[#202842] bg-white dark:bg-[#121629] flex items-center justify-between px-6 shrink-0">
-            <div className="flex items-center gap-2">
-              <Eye size={14} className="text-indigo-600 dark:text-indigo-400" />
-              <span className="text-xs font-black text-slate-900 dark:text-white">XEM TRƯỚC BẢN IN PDF</span>
-            </div>
-
-            {/* Zoom controls and generate controls */}
-            <div className="flex items-center gap-2.5 group/preview-toolbar">
-              <button 
-                onClick={handleGeneratePdfPreview}
-                disabled={pdfLoading}
-                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[0.66rem] flex items-center transition shadow-sm cursor-pointer disabled:opacity-50 border border-white/20"
-                title="Tạo lại bản xem trước PDF từ nội dung JSON"
-              >
-                <RefreshCw size={12} className={`shrink-0 ${pdfLoading ? "animate-spin" : ""}`} />
-                <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
-              </button>
-              {pdfUrl && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center bg-slate-100 dark:bg-[#181f36] rounded-xl border border-slate-200 dark:border-[#283354] p-1 shadow-inner gap-0.5">
-                    <button 
-                      onClick={() => setPdfZoom(prev => Math.max(prev - 10, 50))}
-                      className="p-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/10 transition cursor-pointer"
-                      title="Thu nhỏ"
-                    >
-                      <ZoomOut size={13} />
-                    </button>
-                    <span className="px-2 text-[0.66rem] font-extrabold text-slate-700 dark:text-slate-300 font-mono w-12 text-center select-none">
-                      {pdfZoom}%
-                    </span>
-                    <button 
-                      onClick={() => setPdfZoom(prev => Math.min(prev + 10, 200))}
-                      className="p-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/10 transition cursor-pointer"
-                      title="Phóng to"
-                    >
-                      <ZoomIn size={13} />
-                    </button>
-                  </div>
-                  <button 
-                    onClick={() => window.open(pdfUrl, '_blank')}
-                    className="p-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
-                    title="Xem trong trình duyệt"
-                  >
-                    <ExternalLink size={13} className="shrink-0" />
-                    <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Xem Trình Duyệt</span>
-                  </button>
+                <div className="flex items-center gap-1.5 text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold">
+                  <AlertCircle size={12} /><span>Trống</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* PDF Frame Container */}
-          <div className="flex-1 bg-slate-200/50 dark:bg-[#101424] p-6 relative overflow-hidden flex justify-center items-center">
-            {pdfLoading ? (
-              <div className="absolute inset-0 flex flex-col justify-center items-center text-slate-700 dark:text-slate-300 z-10 bg-white/90 dark:bg-[#101424]/90">
-                <RefreshCw className="animate-spin h-8 w-8 text-indigo-500 dark:text-indigo-400 mb-3" />
-                <p className="font-bold text-xs">Đang xuất file Word và chuyển sang PDF...</p>
-              </div>
-            ) : pdfUrl ? (
-              <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-200 dark:border-[#283354] shadow-2xl relative bg-white dark:bg-[#181f36]">
-                <iframe 
-                  src={`${pdfUrl}#zoom=${pdfZoom}`} 
-                  className="w-full h-full border-none" 
-                  title="PDF Preview"
-                />
-              </div>
-            ) : (
-              <div className="max-w-sm flex flex-col justify-center items-center text-center text-slate-500 dark:text-slate-400 px-6">
-                <div className="p-4 bg-white dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] rounded-2xl mb-4 text-indigo-500 dark:text-indigo-400 shadow-md">
-                  <FileText size={32} />
-                </div>
-                <h4 className="text-xs font-black text-slate-900 dark:text-white">Xem Trước Đề Thi</h4>
-                <p className="text-[0.66rem] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed font-semibold">
-                  Nhấn nút <strong className="text-indigo-600 dark:text-indigo-300">"Cập Nhật Xem Trước PDF"</strong> ở góc trên bên phải để xuất bản in PDF trực tiếp từ Microsoft Word.
-                </p>
-              </div>
-            )}
-          </div>
+          <CompiledFilesBanner
+            lastCompiledFiles={lastCompiledFiles}
+            setLastCompiledFiles={setLastCompiledFiles}
+            triggerDownload={triggerDownload}
+          />
         </section>
 
+        <PdfPreviewPanel
+          pdfUrl={pdfUrl}
+          pdfLoading={pdfLoading}
+          pdfZoom={pdfZoom}
+          setPdfZoom={setPdfZoom}
+          handleGeneratePdfPreview={handleGeneratePdfPreview}
+          hasExercises={exercisesData.length > 0}
+        />
       </div>
-      
-      {/* Spreadsheet Export Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-mac-dropdown p-4">
-          <div className="w-full max-w-md bg-white dark:bg-[#121629] border border-slate-300 dark:border-white/10 rounded-2xl p-6 flex flex-col gap-4 text-slate-900 dark:text-slate-200 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
-              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <FileCode size={16} className="text-indigo-600 dark:text-indigo-400" />
-                Cấu hình xuất bảng tính
-              </h3>
-              <button onClick={() => setShowExportModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">Chọn Định dạng file:</label>
-                <SegmentedControl<'xlsx' | 'csv'>
-                  value={exportConfig.format}
-                  onChange={(val) => setExportConfig((prev) => ({ ...prev, format: val as 'xlsx' | 'csv' }))}
-                  options={[
-                    { value: 'xlsx', label: 'Microsoft Excel (.xlsx)' },
-                    { value: 'csv', label: 'CSV File (.csv)' },
-                  ]}
-                  fit="fluid"
-                  size="sm"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-600 uppercase">Thời gian trả lời mặc định (Kahoot/Quizizz):</label>
-                <select
-                  value={exportConfig.defaultTime}
-                  onChange={(e) => setExportConfig(prev => ({ ...prev, defaultTime: parseInt(e.target.value) || 30 }))}
-                  className="bg-slate-50 border border-slate-200 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 cursor-pointer w-full focus:outline-none focus:border-indigo-500"
-                >
-                  {[5, 10, 20, 30, 45, 60, 120, 180, 300, 600, 900, 1800].map(sec => (
-                    <option key={sec} value={sec}>
-                      {sec >= 60 ? `${sec / 60} phút` : `${sec} giây`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-[10px] text-indigo-700 font-semibold flex gap-2">
-                <Sparkles size={14} className="shrink-0 mt-0.5 text-indigo-600" />
-                <span>Dữ liệu câu hỏi sẽ được biên dịch và ghi trực tiếp vào tệp Excel/CSV tương thích Kahoot, Quizizz.</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
-              <button onClick={() => setShowExportModal(false)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition cursor-pointer">Hủy</button>
-              <button onClick={handleExportTestSpreadsheet} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold rounded-xl shadow-sm cursor-pointer">Xuất file</button>
-            </div>
-          </div>
-        </div>
-      )}
-      
     </div>
   );
 }

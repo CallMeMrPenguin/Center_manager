@@ -71,7 +71,7 @@ export const FpsOverlay: React.FC = () => {
 
   return (
     <div className="fixed top-3 right-16 z-[999999] pointer-events-none select-none font-mono">
-      <div className={`flex items-center gap-2 px-3 py-1 rounded-xl border text-xs font-black backdrop-blur-none transition-colors duration-200 ${colorClasses}`}>
+      <div className={`flex items-center gap-2 px-3 py-1 rounded-xl border text-xs font-black transition-colors duration-200 ${colorClasses}`}>
         <Activity size={13} className="animate-pulse" />
         <span>{fps} FPS</span>
         <span className="text-[10px] opacity-75 font-sans font-bold">({statusText})</span>
