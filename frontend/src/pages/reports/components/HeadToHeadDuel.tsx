@@ -59,7 +59,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
                   value={compareClassAId}
                   onChange={(val) => setCompareClassAId(String(val))}
                   options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
-                  triggerClassName="bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-lg font-black px-3.5 py-2 rounded-xl border border-blue-500/20"
+                  triggerClassName="bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-lg font-black px-3.5 py-2 rounded-xl border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
                 />
               </div>
               <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-xl shrink-0">
@@ -159,7 +159,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
                   value={compareClassBId}
                   onChange={(val) => setCompareClassBId(String(val))}
                   options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
-                  triggerClassName="bg-cyan-50/80 hover:bg-cyan-100 dark:bg-cyan-950/40 dark:hover:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 text-lg font-black px-3.5 py-2 rounded-xl border border-cyan-500/20"
+                  triggerClassName="bg-cyan-50/80 hover:bg-cyan-100 dark:bg-cyan-950/40 dark:hover:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 text-lg font-black px-3.5 py-2 rounded-xl border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
                 />
               </div>
               <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 px-3 py-1.5 rounded-xl shrink-0">

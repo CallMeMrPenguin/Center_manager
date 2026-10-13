@@ -96,7 +96,7 @@ export const QuizSidebar: React.FC<QuizSidebarProps> = ({
       <div className="pt-3 border-t border-slate-200 dark:border-white/10 shrink-0">
         <button
           onClick={onFinishTest}
-          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(16,185,129,0.4)] border border-white/20 active:scale-95"
+          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition cursor-pointer shadow-[0_2px_6px_rgba(5,150,105,0.28)] hover:shadow-[0_4px_12px_rgba(5,150,105,0.4)] border-0 active:scale-95"
         >
           Nộp Bài Sớm
         </button>

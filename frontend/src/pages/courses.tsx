@@ -8,6 +8,7 @@ import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { DataTable } from '../components/DataTable';
 import { CustomSelect } from '../components/CustomSelect';
+import { Button } from '../components/button';
 
 interface Course {
   id: number;
@@ -204,13 +205,16 @@ export default function CoursesPage() {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <button
+          <Button
+            variant="primary"
+            size="md"
+            type="button"
             onClick={handleOpenAdd}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(37,99,235,0.4)] border-0 transition cursor-pointer"
+            leftIcon={<Plus size={15} />}
+            title="Tạo Khóa Học Mới"
           >
-            <Plus size={15} />
-            <span>Tạo Khóa Học Mới</span>
-          </button>
+            Tạo Khóa Học Mới
+          </Button>
         </div>
       </div>
 

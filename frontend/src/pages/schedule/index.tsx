@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, List, Calendar } from 'lucide-react';
+import { Plus, List, Calendar, ZoomIn, ZoomOut } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
@@ -82,6 +82,10 @@ export default function SchedulePage() {
     }, {} as Record<string, DayCfg>);
 
   const [dayCfgs, setDayCfgs] = useState<Record<string, DayCfg>>(defaultDayCfgs());
+  const [hourHeight, setHourHeight] = useState(70);
+  const handleZoomIn = () => setHourHeight((prev) => Math.min(140, prev + 10));
+  const handleZoomOut = () => setHourHeight((prev) => Math.max(45, prev - 10));
+  const handleResetZoom = () => setHourHeight(70);
 
   const loadData = async (silent?: boolean | any) => {
     const isSilent = silent === true;
@@ -142,53 +146,23 @@ export default function SchedulePage() {
     return () => window.removeEventListener('data-changed', h);
   }, [selectedMonth, classFilter, scheduleScope, selectedWeekStarts.join(','), customRange?.startStr, customRange?.endStr]);
 
-  const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
-    try {
-      const slots = await api.getClassWeeklySchedule(cid);
-      const newCfgs: Record<string, DayCfg> = DAYS.reduce((acc, d) => {
-        acc[d] = { checked: false, time: '18:00', duration: 90 };
-        return acc;
-      }, {} as Record<string, DayCfg>);
-
-      let matchedTime = '18:00';
-      let matchedDur = 90;
-
-      if (slots && slots.length > 0) {
-        slots.forEach((s: any) => {
-          if (newCfgs[s.day_of_week]) {
-            newCfgs[s.day_of_week] = {
-              checked: true,
-              time: s.start_time || '18:00',
-              duration: s.duration || 90,
-            };
-          }
-        });
-
-        if (targetDateStr) {
-          const dt = new Date(targetDateStr);
-          const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay());
-          const found = slots.find((s: any) => s.day_of_week === dayName);
-          matchedTime = (found || slots[0]).start_time;
-          matchedDur = (found || slots[0]).duration;
-        } else {
-          matchedTime = slots[0].start_time;
-          matchedDur = slots[0].duration;
-        }
-      } else {
-        newCfgs['Thứ 2'] = { checked: true, time: '18:00', duration: 90 };
-        newCfgs['Thứ 4'] = { checked: true, time: '18:00', duration: 90 };
-      }
-
-      setDayCfgs(newCfgs);
-      setForm((prev) => ({
-        ...prev,
-        start_time: matchedTime,
-        duration: matchedDur,
-      }));
-    } catch {
-      // Ignore errors fetching class schedule
-    }
-  };
+  const { save, del, applyClassSchedule } = useScheduleActions({
+    classesList,
+    sessions,
+    selectedMonth,
+    daysInMonth,
+    yr,
+    mo,
+    loadData,
+    form,
+    color,
+    editing,
+    mode,
+    dayCfgs,
+    setModalOpen,
+    setDayCfgs,
+    setForm,
+  });
 
   const openAdd = async (dateStr?: string) => {
     setEditing(null);
@@ -220,22 +194,6 @@ export default function SchedulePage() {
     setModalOpen(true);
   };
 
-  const { save, del } = useScheduleActions({
-    classesList,
-    sessions,
-    selectedMonth,
-    daysInMonth,
-    yr,
-    mo,
-    loadData,
-    form,
-    color,
-    editing,
-    mode,
-    dayCfgs,
-    setModalOpen,
-  });
-
   const total = sessions.length;
   const done = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Đã học').length;
   const upcoming = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Sắp diễn ra').length;
@@ -253,15 +211,16 @@ export default function SchedulePage() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="primary"
+            size="md"
             type="button"
             onClick={() => openAdd()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer border-0 shadow-xs hover:shadow-sm"
+            leftIcon={<Plus size={14} />}
             title="Thêm Lịch Học"
           >
-            <Plus size={14} />
-            <span>Thêm Lịch Học</span>
-          </button>
+            Thêm Lịch Học
+          </Button>
         </div>
       </div>
 
@@ -301,6 +260,52 @@ export default function SchedulePage() {
               className="w-36 sm:w-44"
             />
           </div>
+
+          {/* Right: Zoom controls & View Mode toggle on same line as datepicker */}
+          <div className="flex items-center gap-2">
+            {viewMode === 'week' && (
+              <div className="flex items-center bg-white dark:bg-[#181a20] rounded-xl p-0.5 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)]">
+                <button
+                  type="button"
+                  onClick={handleZoomOut}
+                  disabled={hourHeight <= 45}
+                  className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
+                  title="Thu nhỏ tỉ lệ giờ (Phím -)"
+                >
+                  <ZoomOut size={13} />
+                </button>
+
+                <span
+                  onClick={handleResetZoom}
+                  className="px-2 text-[10.5px] font-mono font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:text-blue-600 transition"
+                  title="Đặt lại mức chuẩn 70px"
+                >
+                  {Math.round((hourHeight / 70) * 100)}%
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleZoomIn}
+                  disabled={hourHeight >= 140}
+                  className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
+                  title="Phóng to tỉ lệ giờ (Phím +)"
+                >
+                  <ZoomIn size={13} />
+                </button>
+              </div>
+            )}
+
+            <Button
+              variant="white"
+              size="xs"
+              type="button"
+              onClick={() => handleChangeViewMode(viewMode === 'week' ? 'list' : 'week')}
+              title={viewMode === 'week' ? 'Chuyển sang chế độ danh sách' : 'Chuyển sang chế độ lịch tuần'}
+              leftIcon={viewMode === 'week' ? <List size={13} /> : <Calendar size={13} />}
+            >
+              {viewMode === 'week' ? 'Danh sách' : 'Lịch tuần'}
+            </Button>
+          </div>
         </div>
 
         {/* WEEK / MONTH TIMELINE VIEW */}
@@ -329,36 +334,15 @@ export default function SchedulePage() {
             }}
             openAdd={openAdd}
             openEdit={openEdit}
-            viewModeToggle={
-              <Button
-                variant="white"
-                size="xs"
-                type="button"
-                onClick={() => handleChangeViewMode('list')}
-                title="Chuyển sang chế độ danh sách"
-                leftIcon={<List size={13} />}
-              >
-                Danh sách
-              </Button>
-            }
+            hourHeight={hourHeight}
+            setHourHeight={setHourHeight}
+            hideToolbar={true}
           />
         )}
 
         {/* LIST VIEW */}
         {viewMode === 'list' && (
           <div className="flex flex-col flex-1 min-h-0">
-            <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
-              <Button
-                variant="white"
-                size="xs"
-                type="button"
-                onClick={() => handleChangeViewMode('week')}
-                title="Chuyển sang chế độ thời gian"
-                leftIcon={<Calendar size={13} />}
-              >
-                Lịch tuần
-              </Button>
-            </div>
             <div className="p-4 flex-1 min-h-0 overflow-auto flex flex-col">
               <DataTable
                 tableId="schedule-table"

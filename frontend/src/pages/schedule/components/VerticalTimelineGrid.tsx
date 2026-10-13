@@ -22,6 +22,9 @@ interface VerticalTimelineGridProps {
   openEdit: (sess: ClassSession) => void;
   setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
   viewModeToggle?: React.ReactNode;
+  hourHeight?: number;
+  setHourHeight?: React.Dispatch<React.SetStateAction<number>>;
+  hideToolbar?: boolean;
 }
 
 export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
@@ -31,11 +34,16 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
   openAdd,
   openEdit,
   viewModeToggle,
+  hourHeight: externalHourHeight,
+  setHourHeight: externalSetHourHeight,
+  hideToolbar = false,
 }) => {
   const { isDark } = useTheme();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   // Default hour row height: 55px on mobile, 70px on desktop
-  const [hourHeight, setHourHeight] = useState<number>(() => (isMobile ? 55 : 70));
+  const [internalHourHeight, setInternalHourHeight] = useState<number>(() => (isMobile ? 55 : 70));
+  const hourHeight = externalHourHeight ?? internalHourHeight;
+  const setHourHeight = externalSetHourHeight ?? setInternalHourHeight;
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Mouse Free-Pan Drag State
@@ -128,43 +136,45 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col select-none bg-slate-100 dark:bg-[#0c101d]">
-      {/* ── TOOLBAR: Zoom Controls & View Mode ──────── */}
-      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
-        {/* Zoom Controls (+ and -) */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-xl p-0.5 shadow-2xs">
-            <button
-              type="button"
-              onClick={handleZoomOut}
-              disabled={hourHeight <= 45}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
-              title="Thu nhỏ tỉ lệ giờ (Phím -)"
-            >
-              <ZoomOut size={13} />
-            </button>
+      {/* ── TOOLBAR: Zoom Controls & View Mode (Hidden when lifted to main header) ──────── */}
+      {!hideToolbar && (
+        <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
+          {/* Zoom Controls (+ and -) */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-white dark:bg-[#111728] border-0 rounded-xl p-0.5 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]">
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={hourHeight <= 45}
+                className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
+                title="Thu nhỏ tỉ lệ giờ (Phím -)"
+              >
+                <ZoomOut size={13} />
+              </button>
 
-            <span
-              onClick={handleResetZoom}
-              className="px-2 text-[10.5px] font-mono font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:text-blue-600 transition"
-              title="Đặt lại mức chuẩn 70px"
-            >
-              {Math.round((hourHeight / 70) * 100)}%
-            </span>
+              <span
+                onClick={handleResetZoom}
+                className="px-2 text-[10.5px] font-mono font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:text-blue-600 transition"
+                title="Đặt lại mức chuẩn 70px"
+              >
+                {Math.round((hourHeight / 70) * 100)}%
+              </span>
 
-            <button
-              type="button"
-              onClick={handleZoomIn}
-              disabled={hourHeight >= 140}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
-              title="Phóng to tỉ lệ giờ (Phím +)"
-            >
-              <ZoomIn size={13} />
-            </button>
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={hourHeight >= 140}
+                className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
+                title="Phóng to tỉ lệ giờ (Phím +)"
+              >
+                <ZoomIn size={13} />
+              </button>
+            </div>
+
+            {viewModeToggle}
           </div>
-
-          {viewModeToggle}
         </div>
-      </div>
+      )}
 
       {/* ── VERTICAL CANVAS (X=Days as Columns, Y=Hours as Rows) ──────────── */}
       <div

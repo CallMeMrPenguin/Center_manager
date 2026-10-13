@@ -47,14 +47,14 @@ export const QuizQuestionContent: React.FC<QuizQuestionContentProps> = ({
         <div className="flex items-center gap-2 pt-1 pb-1">
           <button
             onClick={onEliminateOne}
-            className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 text-xs font-black transition cursor-pointer active:scale-95 shadow-xs"
+            className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 border-0 shadow-[0_1px_3px_rgba(245,158,11,0.2)] text-xs font-black transition cursor-pointer active:scale-95"
             title="Bỏ 1 phương án sai (25/75)"
           >
             25/75
           </button>
           <button
             onClick={onFiftyFifty}
-            className="px-3.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30 text-xs font-black transition cursor-pointer active:scale-95 shadow-xs"
+            className="px-3.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-300 border-0 shadow-[0_1px_3px_rgba(37,99,235,0.2)] text-xs font-black transition cursor-pointer active:scale-95"
             title="Loại 50% phương án sai"
           >
             50/50
@@ -62,7 +62,7 @@ export const QuizQuestionContent: React.FC<QuizQuestionContentProps> = ({
           {eliminatedOptions.length > 0 && (
             <button
               onClick={onResetLifelines}
-              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-bold transition cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] text-xs font-bold transition cursor-pointer"
               title="Khôi phục lại các lựa chọn đã loại"
             >
               Khôi phục

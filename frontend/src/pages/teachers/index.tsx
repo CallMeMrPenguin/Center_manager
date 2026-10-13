@@ -8,6 +8,7 @@ import { showToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { TeacherCM } from '../../types';
 import { DataTable } from '../../components/DataTable';
+import { Button } from '../../components/button';
 import { notifyDataChanged } from '../../utils';
 import { TeacherDetailCard } from './components/TeacherDetailCard';
 import { TeacherModal } from './components/TeacherModal';
@@ -280,14 +281,16 @@ export function TeachersPage() {
           </div>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
           type="button"
           onClick={handleOpenAdd}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black border-0 shadow-md transition cursor-pointer"
+          leftIcon={<UserPlus size={15} />}
+          title="Thêm Giáo Viên Mới"
         >
-          <UserPlus size={15} />
-          <span>Thêm Giáo Viên Mới</span>
-        </button>
+          Thêm Giáo Viên Mới
+        </Button>
       </div>
 
       {/* Main Table */}

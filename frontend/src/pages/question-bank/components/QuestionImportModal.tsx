@@ -45,7 +45,7 @@ export const QuestionImportModal: React.FC<QuestionImportModalProps> = ({
           <div className="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
             <label className="text-[10px] font-bold text-slate-500 uppercase">Cách 1: Chọn tệp CSV từ máy tính</label>
             <div className="flex items-center gap-3 mt-1">
-              <label className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-2 shadow-xs">
+              <label className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-2 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)]">
                 <Upload size={14} />
                 <span>Chọn tệp CSV</span>
                 <input

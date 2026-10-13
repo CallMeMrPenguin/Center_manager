@@ -81,7 +81,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={onRetake}
-            className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(37,99,235,0.4)] border border-white/20 active:scale-95"
+            className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black transition cursor-pointer shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] border-0 active:scale-95"
           >
             Làm lại
           </button>
@@ -97,8 +97,8 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAnswerToggle(!showAnswerToggle)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-              showAnswerToggle ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-white/5 text-slate-300 border-white/10'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] ${
+              showAnswerToggle ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'
             }`}
           >
             {showAnswerToggle ? <Eye size={13} /> : <EyeOff size={13} />}
@@ -128,7 +128,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
             <button
               disabled={reviewPage === 1}
               onClick={() => setReviewPage(p => Math.max(1, p - 1))}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 disabled:opacity-30 cursor-pointer border border-white/5"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-30 cursor-pointer border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
             >
               Trang trước
             </button>
@@ -138,7 +138,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
             <button
               disabled={reviewPage === totalPages}
               onClick={() => setReviewPage(p => Math.min(totalPages, p + 1))}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 disabled:opacity-30 cursor-pointer border border-white/5"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-30 cursor-pointer border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
             >
               Trang sau
             </button>

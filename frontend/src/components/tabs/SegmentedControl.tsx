@@ -128,7 +128,7 @@ export function SegmentedControl<T extends string = string>({
     <div
       ref={containerRef}
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-white/10 border-0 select-none shadow-xs ${sizeClasses} ${
+      className={`relative inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-white/10 border-0 select-none shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] ${sizeClasses} ${
         fullWidth ? 'w-full' : ''
       } ${className}`}
       role="group"
@@ -151,7 +151,7 @@ export function SegmentedControl<T extends string = string>({
 
       {/* Sliding Active Pill Background */}
       <motion.div
-        className={`absolute top-1 bottom-1 rounded-lg shadow-2xs pointer-events-none ${
+        className={`absolute top-1 bottom-1 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.2)] pointer-events-none ${
           activeColor || 'bg-[#2563eb]'
         }`}
         initial={false}

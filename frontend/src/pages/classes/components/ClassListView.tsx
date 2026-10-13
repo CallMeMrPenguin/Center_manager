@@ -4,6 +4,7 @@ import { Plus, Search, AlertCircle, X, LayoutGrid, List } from 'lucide-react';
 import { ClassItem } from '../types';
 import { ClassCard } from './ClassCard';
 import { ClassTableView } from './ClassTableView';
+import { Button } from '../../../components/button';
 
 interface ClassListViewProps {
   classes: ClassItem[];
@@ -52,15 +53,16 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
           </div>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
           type="button"
           onClick={onCreateClass}
-          className="flex items-center gap-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-all duration-200 cursor-pointer active:scale-95 shrink-0"
+          leftIcon={<Plus size={15} className="shrink-0" />}
           title="Tạo Lớp Học Mới"
         >
-          <Plus size={15} className="shrink-0" />
-          <span>Tạo Lớp</span>
-        </button>
+          Tạo Lớp
+        </Button>
       </div>
 
       {/* 2. SEARCH & VIEW MODE TOOLBAR */}

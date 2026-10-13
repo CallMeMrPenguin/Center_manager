@@ -17,6 +17,8 @@ interface UseScheduleActionsProps {
   mode: 'single' | 'weekdays';
   dayCfgs: Record<string, DayCfg>;
   setModalOpen: (open: boolean) => void;
+  setDayCfgs?: (cfgs: Record<string, DayCfg>) => void;
+  setForm?: React.Dispatch<React.SetStateAction<Partial<ClassSession>>>;
 }
 
 export function useScheduleActions({
@@ -33,6 +35,8 @@ export function useScheduleActions({
   mode,
   dayCfgs,
   setModalOpen,
+  setDayCfgs,
+  setForm,
 }: UseScheduleActionsProps) {
   const confirm = useConfirm();
 
@@ -166,5 +170,53 @@ export function useScheduleActions({
     }
   };
 
-  return { save, del };
+  const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
+    try {
+      const slots = await api.getClassWeeklySchedule(cid);
+      const newCfgs: Record<string, DayCfg> = DAYS.reduce((acc, d) => {
+        acc[d] = { checked: false, time: '18:00', duration: 90 };
+        return acc;
+      }, {} as Record<string, DayCfg>);
+
+      let matchedTime = '18:00';
+      let matchedDur = 90;
+
+      if (slots && slots.length > 0) {
+        slots.forEach((s: any) => {
+          if (newCfgs[s.day_of_week]) {
+            newCfgs[s.day_of_week] = {
+              checked: true,
+              time: s.start_time || '18:00',
+              duration: s.duration || 90,
+            };
+          }
+        });
+
+        if (targetDateStr) {
+          const dt = new Date(targetDateStr);
+          const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay());
+          const found = slots.find((s: any) => s.day_of_week === dayName);
+          matchedTime = (found || slots[0]).start_time;
+          matchedDur = (found || slots[0]).duration;
+        } else {
+          matchedTime = slots[0].start_time;
+          matchedDur = slots[0].duration;
+        }
+      } else {
+        newCfgs['Thứ 2'] = { checked: true, time: '18:00', duration: 90 };
+        newCfgs['Thứ 4'] = { checked: true, time: '18:00', duration: 90 };
+      }
+
+      setDayCfgs?.(newCfgs);
+      setForm?.((prev) => ({
+        ...prev,
+        start_time: matchedTime,
+        duration: matchedDur,
+      }));
+    } catch {
+      // Ignore errors fetching class schedule
+    }
+  };
+
+  return { save, del, applyClassSchedule };
 }

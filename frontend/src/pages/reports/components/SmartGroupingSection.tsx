@@ -4,6 +4,7 @@ import { GroupCardItem } from './GroupCardItem';
 import { computeSmartGroups } from '../utils/computeSmartGroups';
 import { showToast } from '../../../components/Toast';
 import { format1Dec, formatExportTimestamp } from '../../../utils';
+import { Button } from '../../../components/button';
 
 interface SmartGroupingSectionProps {
   filteredRankings: any[];
@@ -149,22 +150,25 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
 
         {/* Export Actions */}
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             type="button"
             onClick={handleCopyGrouping}
-            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1a233a] dark:hover:bg-[#253252] text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+            leftIcon={copiedGroupText ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={13} />}
           >
-            {copiedGroupText ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={13} />}
-            <span>{copiedGroupText ? 'Đã chép' : 'Sao chép'}</span>
-          </button>
-          <button
+            {copiedGroupText ? 'Đã chép' : 'Sao chép'}
+          </Button>
+          <Button
+            variant="white"
+            size="sm"
             type="button"
             onClick={handleExportGroupingExcel}
-            className="px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+            leftIcon={<FileSpreadsheet size={13} className="text-emerald-600" />}
+            className="!text-emerald-700 dark:!text-emerald-300"
           >
-            <FileSpreadsheet size={13} />
-            <span>Xuất Excel</span>
-          </button>
+            Xuất Excel
+          </Button>
         </div>
       </div>
 

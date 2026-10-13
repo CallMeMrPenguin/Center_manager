@@ -121,7 +121,7 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
             </p>
           </div>
 
-          <label className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition cursor-pointer border border-white/20 active:scale-95">
+          <label className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] transition cursor-pointer border-0 active:scale-95">
             {loading && <RefreshCw className="animate-spin" size={16} />}
             <span>Chọn Đề</span>
             <input type="file" accept=".docx" onChange={onFileUpload} className="hidden" />
@@ -151,7 +151,7 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
             </p>
             <button
               onClick={handleParsePastedJson}
-              className="flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
+              className="flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] transition cursor-pointer border-0 active:scale-95"
             >
               <FileText size={15} />
               <span>Nạp Đề Thi Từ JSON</span>

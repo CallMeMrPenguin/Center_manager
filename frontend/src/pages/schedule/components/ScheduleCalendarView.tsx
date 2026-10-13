@@ -24,6 +24,9 @@ interface ScheduleCalendarViewProps {
   openEdit: (sess: ClassSession) => void;
   setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
   viewModeToggle?: React.ReactNode;
+  hourHeight?: number;
+  setHourHeight?: React.Dispatch<React.SetStateAction<number>>;
+  hideToolbar?: boolean;
 }
 
 export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
@@ -42,6 +45,9 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   openEdit,
   setCtxMenu,
   viewModeToggle,
+  hourHeight,
+  setHourHeight,
+  hideToolbar = false,
 }) => {
   // 1. Week view row items (Supports 1 or multiple weeks)
   const weekDayRows = useMemo(() => {
@@ -150,6 +156,9 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
       openEdit={openEdit}
       setCtxMenu={setCtxMenu}
       viewModeToggle={viewModeToggle}
+      hourHeight={hourHeight}
+      setHourHeight={setHourHeight}
+      hideToolbar={hideToolbar}
     />
   );
 };

@@ -9,6 +9,7 @@ import { showToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Student } from '../../types';
 import { DataTable } from '../../components/DataTable';
+import { Button } from '../../components/button';
 import { getLocalDateStr, notifyDataChanged } from '../../utils';
 import { StudentDetailCard } from './components/StudentDetailCard';
 import { StudentModal } from './components/StudentModal';
@@ -233,14 +234,16 @@ export function StudentsPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button
+          <Button
+            variant="primary"
+            size="md"
             type="button"
             onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black shadow-[0_0_15px_rgba(37,99,235,0.35)] transition cursor-pointer"
+            leftIcon={<UserPlus size={15} />}
+            title="Thêm Học Sinh Mới"
           >
-            <UserPlus size={15} />
-            <span>Thêm Học Sinh Mới</span>
-          </button>
+            Thêm Học Sinh Mới
+          </Button>
         </div>
       </div>
 
