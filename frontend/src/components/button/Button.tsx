@@ -4,13 +4,13 @@ import { ButtonProps, ButtonVariant, ButtonSize } from './types';
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-xs border border-blue-600 active:scale-[0.98]',
+    'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-xs border-0 active:scale-[0.98]',
   secondary:
-    'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 shadow-2xs active:scale-[0.98]',
+    'bg-slate-100 hover:bg-slate-200 text-slate-800 border-0 shadow-2xs active:scale-[0.98]',
   danger:
-    'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 shadow-2xs active:scale-[0.98]',
+    'bg-rose-50 hover:bg-rose-100 text-rose-600 border-0 shadow-2xs active:scale-[0.98]',
   ghost:
-    'hover:bg-slate-100 text-slate-700 active:scale-[0.98]',
+    'hover:bg-slate-100 text-slate-700 border-0 active:scale-[0.98]',
   outline:
     'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 shadow-2xs active:scale-[0.98]',
 };

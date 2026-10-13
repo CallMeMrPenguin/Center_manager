@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Search, X, CheckSquare, Zap } from 'lucide-react';
+import { Search, X, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Table } from '@tanstack/react-table';
 import { ExportDropdown } from './ExportDropdown';
@@ -135,29 +135,6 @@ export function DataTableToolbar<TData>({
           </motion.div>
         )}
         {toolbarLeft}
-
-        {/* Selection Count Badge */}
-        <AnimatePresence>
-          {selectedCount > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85, x: -10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.85, x: -10 }}
-              transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 text-blue-700 dark:text-blue-300 border-0 shadow-2xs rounded-xl text-xs font-black"
-            >
-              <span>Đã chọn: {selectedCount} dòng</span>
-              <button
-                type="button"
-                onClick={() => table.toggleAllRowsSelected(false)}
-                className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-white transition cursor-pointer p-0.5 rounded hover:bg-white/10"
-                title="Bỏ chọn tất cả"
-              >
-                <X size={12} />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Right: Badges + ToolbarRight + Export + Column Visibility */}
@@ -181,21 +158,6 @@ export function DataTableToolbar<TData>({
           <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border-0 shadow-2xs text-amber-500 dark:text-amber-300 text-[10px] font-bold">
             <Zap size={10} />
             <span>Virtual</span>
-          </div>
-        )}
-
-        {/* Row selection badge */}
-        {enableRowSelection && selectedCount > 0 && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border-0 shadow-2xs text-emerald-600 dark:text-emerald-300 text-[10px] font-bold">
-            <CheckSquare size={10} />
-            <span>{selectedCount} đã chọn</span>
-            <button
-              type="button"
-              onClick={() => table.resetRowSelection()}
-              className="text-emerald-500 hover:text-emerald-700 dark:hover:text-white cursor-pointer"
-            >
-              <X size={10} />
-            </button>
           </div>
         )}
 

@@ -167,7 +167,7 @@ export const StudentDetailCard: React.FC<StudentDetailCardProps> = ({ student, o
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Trạng thái TK:</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Trạng thái:</span>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                 accountStatus === 'Hoạt động' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300'
               }`}>

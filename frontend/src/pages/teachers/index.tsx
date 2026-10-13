@@ -206,7 +206,7 @@ export function TeachersPage() {
     },
     {
       id: 'account',
-      header: 'Tài Khoản App',
+      header: 'Tài Khoản',
       cell: ({ row }) => {
         const t = row.original;
         const username = t.account_username || `gv_${String(t.id || 0).padStart(4, '0')}`;
@@ -241,7 +241,7 @@ export function TeachersPage() {
     },
     {
       id: 'account_status',
-      header: () => <div className="text-center w-full">Trạng Thái TK</div>,
+      header: () => <div className="text-center w-full">Trạng Thái</div>,
       size: 110,
       cell: ({ row }) => {
         const status = row.original.account_status || 'Hoạt động';
@@ -310,7 +310,7 @@ export function TeachersPage() {
               <button
                 type="button"
                 onClick={handleBulkDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-black transition cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 dark:text-rose-300 border-0 shadow-2xs text-xs font-black transition cursor-pointer"
               >
                 <Trash2 size={13} />
                 <span>Xóa {selectedTeachers.length} mục</span>

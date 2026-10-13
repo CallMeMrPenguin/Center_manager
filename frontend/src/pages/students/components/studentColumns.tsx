@@ -42,7 +42,7 @@ export const createStudentColumns = (
   },
   {
     id: 'account',
-    header: 'Tài Khoản App',
+    header: 'Tài Khoản',
     cell: ({ row }) => {
       const st = row.original;
       const username = st.account_username || `hs_${String(st.id || 0).padStart(4, '0')}`;

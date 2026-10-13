@@ -272,7 +272,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">Trạng thái TK:</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Trạng thái:</label>
                 <CustomSelect
                   value={formData.account_status || (formData.status !== 'Đã nghỉ' ? 'Hoạt động' : 'Tạm khóa')}
                   onChange={(val) => setFormData((p) => ({ ...p, account_status: String(val) }))}
@@ -303,7 +303,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
               <button
                 type="button"
                 onClick={() => onDelete(editingStudent)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-black border border-rose-200 transition cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-black border-0 shadow-2xs transition cursor-pointer"
               >
                 <Trash2 size={13} />
                 <span>Xóa học sinh</span>

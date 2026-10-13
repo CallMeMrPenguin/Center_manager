@@ -50,7 +50,17 @@ export function DataTableBody<TData>({
         return (
           <Fragment key={row.id}>
             <tr
-              onClick={() => onRowClick?.(row.original)}
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('button, a, input, [role="button"], label')) {
+                  return;
+                }
+                if (onRowClick) {
+                  onRowClick(row.original);
+                } else if (renderSubComponent) {
+                  row.toggleExpanded();
+                }
+              }}
               onDoubleClick={() => onRowDoubleClick?.(row.original)}
               className={`group transition-colors duration-150 ${
                 row.getIsSelected()
@@ -58,7 +68,7 @@ export function DataTableBody<TData>({
                   : rowIdx % 2 === 1
                   ? 'bg-slate-50/50 dark:bg-white/[0.02]'
                   : 'bg-white dark:bg-transparent'
-              } hover:bg-blue-50/40 dark:hover:bg-white/5 ${onRowClick ? 'cursor-pointer' : ''} ${customRowClass || ''}`}
+              } hover:bg-blue-50/40 dark:hover:bg-white/5 ${onRowClick || renderSubComponent ? 'cursor-pointer' : ''} ${customRowClass || ''}`}
             >
               {row.getVisibleCells().map((cell: any) => {
                 const isSelectCol = cell.column.id === 'select' || cell.column.id === '_expander';

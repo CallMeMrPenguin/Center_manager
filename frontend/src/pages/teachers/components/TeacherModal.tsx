@@ -172,7 +172,7 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Trạng thái tài khoản:</label>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Trạng thái:</label>
                 <CustomSelect
                   value={formData.account_status || 'Hoạt động'}
                   onChange={(val) => setFormData((p) => ({ ...p, account_status: String(val) }))}
@@ -203,7 +203,7 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
               <button
                 type="button"
                 onClick={() => onDelete(editingTeacher)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/15 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-black border border-rose-200 dark:border-rose-500/30 transition cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/15 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-black border-0 shadow-2xs transition cursor-pointer"
               >
                 <Trash2 size={13} />
                 <span>Xóa giáo viên</span>

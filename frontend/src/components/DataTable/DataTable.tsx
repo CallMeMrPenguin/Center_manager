@@ -8,7 +8,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle, ChevronRight } from 'lucide-react';
 import { filterWithNearMatchFallback } from '../../utils/fuzzySearch';
 import { vietnameseNameSortingFn, isNameColumn } from '../../utils/vietnameseSort';
 import { DataTableProps } from './types';
@@ -101,12 +101,43 @@ export function DataTable<TData>({
       });
     }
 
+    if (enableRowExpansion && renderSubComponent) {
+      cols.push({
+        id: '_expander',
+        size: 36,
+        minSize: 36,
+        maxSize: 36,
+        enableResizing: false,
+        enableSorting: false,
+        enableGlobalFilter: false,
+        header: () => null,
+        cell: ({ row }) => (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              row.toggleExpanded();
+            }}
+            className="p-1 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-cyan-400 hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer flex items-center justify-center border-0 outline-none"
+            title={row.getIsExpanded() ? 'Thu gọn chi tiết' : 'Xem thông tin chi tiết'}
+          >
+            <ChevronRight
+              size={15}
+              className={`transition-transform duration-200 ${
+                row.getIsExpanded() ? 'rotate-90 text-blue-600 dark:text-cyan-400' : ''
+              }`}
+            />
+          </button>
+        ),
+      });
+    }
+
     columns.forEach((col) => {
       const isName = isNameColumn(col);
       cols.push(isName && !col.sortingFn ? { ...col, sortingFn: vietnameseNameSortingFn } : col);
     });
     return cols;
-  }, [columns, enableRowSelection]);
+  }, [columns, enableRowSelection, enableRowExpansion, renderSubComponent]);
 
   const globalFuzzyFilterFn = useCallback((row: any, _columnId: string, filterValue: string): boolean => {
     if (!filterValue) return true;

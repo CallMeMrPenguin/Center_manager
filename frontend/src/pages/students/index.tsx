@@ -278,7 +278,7 @@ export function StudentsPage() {
           <button
             type="button"
             onClick={() => setCsvModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
           >
             <Upload size={14} />
             <span>Nhập CSV</span>
@@ -315,7 +315,7 @@ export function StudentsPage() {
               <button
                 type="button"
                 onClick={handleBulkDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-black transition cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 dark:text-rose-300 border-0 shadow-2xs text-xs font-black transition cursor-pointer"
               >
                 <Trash2 size={13} />
                 <span>Xóa {selectedStudents.length} mục</span>
