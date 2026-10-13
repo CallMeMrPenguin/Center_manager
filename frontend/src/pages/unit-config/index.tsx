@@ -336,6 +336,8 @@ export default function UnitConfig() {
               exportFilename={`cau_hinh_unit_lop_${selectedGrade}`}
               data={rows}
               columns={unitColumns}
+              loading={loading}
+              loadingMessage="Đang tải cấu hình Unit..."
               emptyMessage={`Chưa có bài học nào cho Khối Lớp ${selectedGrade}.`}
               pageSize={20}
               searchPlaceholder="Tìm kiếm bài học, chủ đề ngữ pháp..."

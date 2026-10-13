@@ -3,16 +3,10 @@ import { api } from '../../api';
 import { LayoutSettings } from '../../types';
 import PromptManager from '../../components/PromptManager';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { 
-  FileText, Download, Settings, 
-  ChevronRight, Upload, AlertCircle, FileCode, CheckCircle
-} from 'lucide-react';
+import { FileText, Download, Settings, ChevronRight, Upload, AlertCircle, FileCode, CheckCircle } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { cleanOptionPrefix } from '../../utils';
-import { 
-  DEFAULT_TEST_FORMATTER_PROMPTS, 
-  DEFAULT_LAYOUT 
-} from './constants';
+import { DEFAULT_TEST_FORMATTER_PROMPTS, DEFAULT_LAYOUT } from './constants';
 import { ConfigDrawer } from './components/ConfigDrawer';
 import { ExportModal } from './components/ExportModal';
 import { FastJsonEditor } from './components/FastJsonEditor';
@@ -291,8 +285,8 @@ export default function TestFormatter() {
                 onClick={() => setShowConfig(!showConfig)}
                 className={`p-2.5 rounded-xl border-0 transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
                   showConfig
-                    ? 'bg-blue-600 text-white px-3 shadow-sm'
-                    : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-2xs'
+                    ? 'bg-blue-600 text-white px-3 shadow-[0_2px_6px_rgba(37,99,235,0.28)]'
+                    : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)]'
                 }`}
                 title="Căn Lề & Chữ"
               >
@@ -308,13 +302,13 @@ export default function TestFormatter() {
                 defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS}
               />
 
-              <label className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs">
+              <label className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center cursor-pointer shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)]">
                 <Upload size={14} className="shrink-0 mr-1.5" />
                 <span>Nạp JSON</span>
                 <input type="file" accept=".json" onChange={handleDirectFileUpload} className="hidden" />
               </label>
 
-              <label className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs">
+              <label className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center cursor-pointer shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)]">
                 <Upload size={14} className="text-amber-500 shrink-0 mr-1.5" />
                 <span>Nhập DOCX</span>
                 <input type="file" accept=".docx" onChange={handleDocxFileUpload} className="hidden" />
@@ -324,7 +318,7 @@ export default function TestFormatter() {
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={compiling}
-                  className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-sm border-0"
+                  className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] border-0"
                 >
                   <Download size={14} className={`shrink-0 mr-1.5 ${compiling ? 'animate-spin' : ''}`} />
                   <span>Xuất Đề Thi</span>
@@ -332,7 +326,7 @@ export default function TestFormatter() {
                 </button>
 
                 {showExportMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#161b2e] border border-slate-300 dark:border-white/10 rounded-xl z-30 py-2 px-2 flex flex-col gap-1 shadow-2xl animate-mac-dropdown text-[0.66rem]">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#161b2e] border-0 rounded-xl z-30 py-2 px-2 flex flex-col gap-1 shadow-2xl animate-mac-dropdown text-[0.66rem]">
                     <button
                       onClick={() => {
                         setShowExportMenu(false);

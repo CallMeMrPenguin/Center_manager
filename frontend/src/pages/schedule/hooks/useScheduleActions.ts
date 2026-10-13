@@ -1,7 +1,7 @@
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { ClassSession, DayCfg, DAYS, DAY_NUM, calcEndTime, timeToMin } from '../types';
+import { ClassSession, DAYS, DAY_NUM, calcEndTime, timeToMin } from '../types';
 
 interface UseScheduleActionsProps {
   classesList: any[];
@@ -14,10 +14,8 @@ interface UseScheduleActionsProps {
   form: Partial<ClassSession>;
   color: string;
   editing: ClassSession | null;
-  mode: 'single' | 'weekdays';
-  dayCfgs: Record<string, DayCfg>;
+  mode: 'recurring' | 'temporary';
   setModalOpen: (open: boolean) => void;
-  setDayCfgs?: (cfgs: Record<string, DayCfg>) => void;
   setForm?: React.Dispatch<React.SetStateAction<Partial<ClassSession>>>;
 }
 
@@ -33,10 +31,7 @@ export function useScheduleActions({
   color,
   editing,
   mode,
-  dayCfgs,
   setModalOpen,
-  setDayCfgs,
-  setForm,
 }: UseScheduleActionsProps) {
   const confirm = useConfirm();
 
@@ -82,52 +77,57 @@ export function useScheduleActions({
       showToast('Vui lòng chọn lớp học!', 'error');
       return;
     }
+    if (!form.date) {
+      showToast('Vui lòng chọn ngày học!', 'error');
+      return;
+    }
+
     const notes = `#COLOR:${color} ${(form.notes || '').replace(/#COLOR:#[0-9a-fA-F]{6}/g, '').trim()}`.trim();
 
     try {
-      if (editing) {
+      if (editing || mode === 'temporary') {
         const conflict = checkSingleConflict({
-          id: editing.id,
+          id: editing?.id,
           class_id: form.class_id,
-          date: form.date!,
-          start_time: form.start_time!,
-          duration: form.duration!,
+          date: form.date,
+          start_time: form.start_time || '18:00',
+          duration: form.duration || 90,
         });
         if (conflict?.error) {
           showToast(conflict.error, 'error');
-          return;
-        }
-        await api.updateClassSession(form.class_id, editing.id, { ...form, notes, color });
-        showToast('Cập nhật buổi học thành công!', 'success');
-      } else if (mode === 'single') {
-        const conflict = checkSingleConflict({
-          class_id: form.class_id,
-          date: form.date!,
-          start_time: form.start_time!,
-          duration: form.duration!,
-        });
-        if (conflict?.error) {
-          showToast(conflict.error, 'error');
-          return;
-        }
-        await api.addClassSession(form.class_id, { ...form, notes, color });
-        showToast('Tạo buổi học thành công!', 'success');
-      } else {
-        const enabled = DAYS.filter((d) => dayCfgs[d]?.checked);
-        if (!enabled.length) {
-          showToast('Vui lòng chọn ít nhất 1 thứ trong tuần!', 'error');
           return;
         }
 
+        if (editing) {
+          await api.updateClassSession(form.class_id, editing.id, { ...form, notes, color });
+          showToast('Cập nhật buổi học thành công!', 'success');
+        } else {
+          await api.addClassSession(form.class_id, { ...form, notes, color });
+          showToast('Tạo buổi học thành công!', 'success');
+        }
+      } else {
+        // mode === 'recurring' (Lịch Cố Định)
+        const [y, m, d] = form.date.split('-').map(Number);
+        const targetDt = new Date(y, m - 1, d);
+        const targetDayNum = targetDt.getDay();
+        const dayName = DAYS.find((k) => DAY_NUM[k] === targetDayNum) || 'Thứ 2';
+
         const pendingItems: Array<{ date: string; start_time: string; duration: number }> = [];
-        for (let d = 1; d <= daysInMonth; d++) {
-          const dt = new Date(yr, mo - 1, d);
-          const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay());
-          if (dayName && dayCfgs[dayName]?.checked) {
-            const cfg = dayCfgs[dayName];
-            const ds = `${yr}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            pendingItems.push({ date: ds, start_time: cfg.time, duration: cfg.duration });
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dt = new Date(yr, mo - 1, day);
+          if (dt.getDay() === targetDayNum) {
+            const ds = `${yr}-${String(mo).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            pendingItems.push({
+              date: ds,
+              start_time: form.start_time || '18:00',
+              duration: form.duration || 90,
+            });
           }
+        }
+
+        if (!pendingItems.length) {
+          showToast('Không tìm thấy ngày phù hợp trong tháng!', 'error');
+          return;
         }
 
         for (const item of pendingItems) {
@@ -140,7 +140,7 @@ export function useScheduleActions({
             color,
           });
         }
-        showToast(`Đã tạo thành công ${pendingItems.length} buổi học tháng ${selectedMonth}!`, 'success');
+        showToast(`Đã tạo thành công ${pendingItems.length} buổi học (${dayName}) tháng ${selectedMonth}!`, 'success');
       }
 
       window.dispatchEvent(new CustomEvent('data-changed'));
@@ -170,53 +170,5 @@ export function useScheduleActions({
     }
   };
 
-  const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
-    try {
-      const slots = await api.getClassWeeklySchedule(cid);
-      const newCfgs: Record<string, DayCfg> = DAYS.reduce((acc, d) => {
-        acc[d] = { checked: false, time: '18:00', duration: 90 };
-        return acc;
-      }, {} as Record<string, DayCfg>);
-
-      let matchedTime = '18:00';
-      let matchedDur = 90;
-
-      if (slots && slots.length > 0) {
-        slots.forEach((s: any) => {
-          if (newCfgs[s.day_of_week]) {
-            newCfgs[s.day_of_week] = {
-              checked: true,
-              time: s.start_time || '18:00',
-              duration: s.duration || 90,
-            };
-          }
-        });
-
-        if (targetDateStr) {
-          const dt = new Date(targetDateStr);
-          const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay());
-          const found = slots.find((s: any) => s.day_of_week === dayName);
-          matchedTime = (found || slots[0]).start_time;
-          matchedDur = (found || slots[0]).duration;
-        } else {
-          matchedTime = slots[0].start_time;
-          matchedDur = slots[0].duration;
-        }
-      } else {
-        newCfgs['Thứ 2'] = { checked: true, time: '18:00', duration: 90 };
-        newCfgs['Thứ 4'] = { checked: true, time: '18:00', duration: 90 };
-      }
-
-      setDayCfgs?.(newCfgs);
-      setForm?.((prev) => ({
-        ...prev,
-        start_time: matchedTime,
-        duration: matchedDur,
-      }));
-    } catch {
-      // Ignore errors fetching class schedule
-    }
-  };
-
-  return { save, del, applyClassSchedule };
+  return { save, del };
 }

@@ -71,8 +71,18 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
         await Promise.allSettled([
           api.getStudents(),
           api.getAssignments(),
+          api.getExerciseConfig(),
         ]);
       }, 4000);
+
+      // Stage 4 (5500ms): Question Bank & Document Manager
+      runIdle(async () => {
+        await Promise.allSettled([
+          api.getDbQuestions({}),
+          api.getDocumentFolders(),
+          api.getDocuments({ folder_id: '' }),
+        ]);
+      }, 5500);
     }
 
     return () => {

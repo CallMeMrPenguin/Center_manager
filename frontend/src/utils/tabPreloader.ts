@@ -58,6 +58,10 @@ export const CORE_PREMOUNT_TABS: string[] = [
   'results',
   'kiemtra',
   'reports',
+  'question-bank',
+  'unit-config',
+  'file-manager',
+  'vocab-bank',
 ];
 
 /**
@@ -70,11 +74,7 @@ export const HEAVY_ISOLATED_TABS: string[] = [
   'pdf-editor',
   'grid-editor',
   'formatter',
-  'question-bank',
-  'file-manager',
   'settings',
-  'vocab-bank',
-  'unit-config',
   'ui-showcase',
 ];
 

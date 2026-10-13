@@ -116,7 +116,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
                 ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
               ]}
               className="w-44 shrink-0"
-              triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white shadow-xs hover:shadow-sm"
+              triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white"
             />
           )}
 
@@ -127,7 +127,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             onClick={onOpenResetModal}
             leftIcon={<RotateCcw size={14} className="shrink-0" />}
             title="Đặt Lại Điểm Số"
-            className="group shrink-0"
+            className="group shrink-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)]"
           >
             <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
               Đặt Lại Điểm Số

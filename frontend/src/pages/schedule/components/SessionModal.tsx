@@ -4,7 +4,7 @@ import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { Button } from '../../../components/button';
-import { ClassSession, DayCfg, PALETTE_20, DAYS } from '../types';
+import { ClassSession, PALETTE_20, DAYS, DAY_NUM } from '../types';
 import { getDeterministicClassColor } from '../../../theme';
 
 interface SessionModalProps {
@@ -13,17 +13,14 @@ interface SessionModalProps {
   editing: ClassSession | null;
   form: Partial<ClassSession>;
   setForm: React.Dispatch<React.SetStateAction<Partial<ClassSession>>>;
-  mode: 'single' | 'weekdays';
-  setMode: (m: 'single' | 'weekdays') => void;
+  mode: 'recurring' | 'temporary';
+  setMode: (m: 'recurring' | 'temporary') => void;
   color: string;
   setColor: (c: string) => void;
-  dayCfgs: Record<string, DayCfg>;
-  setDayCfgs: React.Dispatch<React.SetStateAction<Record<string, DayCfg>>>;
   classesList: any[];
   selectedMonth: string;
   onSave: (e: React.FormEvent) => void;
   onDelete: (sess: ClassSession) => void;
-  onApplyClassSchedule?: (cid: number, targetDateStr?: string) => Promise<void>;
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -36,13 +33,10 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   setMode,
   color,
   setColor,
-  dayCfgs,
-  setDayCfgs,
   classesList,
   selectedMonth,
   onSave,
   onDelete,
-  onApplyClassSchedule,
 }) => {
   if (!isOpen) return null;
 
@@ -76,9 +70,6 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                 setForm((prev) => ({ ...prev, class_id: cid }));
                 if (cid) {
                   setColor(getDeterministicClassColor(cid, selectedCls?.color, selectedCls?.notes));
-                }
-                if (cid && onApplyClassSchedule) {
-                  onApplyClassSchedule(cid, form.date);
                 }
               }}
               options={[
@@ -118,130 +109,67 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           </div>
 
           {!editing && (
-            <SegmentedControl<'weekdays' | 'single'>
+            <SegmentedControl<'recurring' | 'temporary'>
               value={mode}
               onChange={setMode}
               options={[
-                { value: 'weekdays', label: 'Chọn Ngày Trong Tuần' },
-                { value: 'single', label: '1 Ngày Cụ Thể' },
+                { value: 'recurring', label: 'Lịch Cố Định' },
+                { value: 'temporary', label: 'Lịch Tạm Thời' },
               ]}
               fit="fluid"
               size="sm"
             />
           )}
 
-          {!editing && mode === 'weekdays' && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Cấu Hình Theo Thứ — Tháng {selectedMonth}
-                </label>
-                {form.class_id && onApplyClassSchedule && (
-                  <button
-                    type="button"
-                    onClick={() => onApplyClassSchedule(form.class_id!)}
-                    className="text-[10px] text-blue-500 hover:text-blue-400 font-bold underline cursor-pointer"
-                  >
-                    Nạp lịch chuẩn của lớp
-                  </button>
-                )}
-              </div>
-              <div className="space-y-2 bg-slate-50 dark:bg-[#141928] p-3 rounded-xl border border-slate-200 dark:border-white/10">
-                {DAYS.map((day) => {
-                  const cfg = dayCfgs[day];
-                  return (
-                    <div key={day} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDayCfgs((p) => ({
-                            ...p,
-                            [day]: { ...p[day], checked: !p[day].checked },
-                          }))
-                        }
-                        className={`shrink-0 h-5 w-5 rounded-lg border-2 flex items-center justify-center text-[9px] font-black transition cursor-pointer ${
-                          cfg.checked ? 'bg-blue-600 border-blue-400 text-white' : 'bg-transparent border-slate-300 dark:border-white/20 text-transparent'
-                        }`}
-                      >
-                        ✓
-                      </button>
-                      <span className={`text-xs font-bold w-16 shrink-0 ${cfg.checked ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
-                        {day}
-                      </span>
-                      <input
-                        type="time"
-                        value={cfg.time}
-                        disabled={!cfg.checked}
-                        onChange={(e) =>
-                          setDayCfgs((p) => ({
-                            ...p,
-                            [day]: { ...p[day], time: e.target.value },
-                          }))
-                        }
-                        className={`flex-1 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 ${
-                          !cfg.checked ? 'opacity-30' : ''
-                        }`}
-                      />
-                      <input
-                        type="number"
-                        value={cfg.duration}
-                        min={30}
-                        max={240}
-                        step={15}
-                        disabled={!cfg.checked}
-                        onChange={(e) =>
-                          setDayCfgs((p) => ({
-                            ...p,
-                            [day]: { ...p[day], duration: parseInt(e.target.value) || 90 },
-                          }))
-                        }
-                        className={`w-14 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 ${
-                          !cfg.checked ? 'opacity-30' : ''
-                        }`}
-                      />
-                      <span className={`text-[10px] text-slate-400 dark:text-slate-500 shrink-0 ${!cfg.checked ? 'opacity-30' : ''}`}>p</span>
-                    </div>
-                  );
-                })}
-              </div>
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                {mode === 'recurring' && !editing ? 'Chọn Ngày (Lấy Thứ Trong Tuần) *' : 'Ngày Học *'}
+              </label>
+              {mode === 'recurring' && !editing && form.date && (
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg shadow-2xs">
+                  {(() => {
+                    const [y, m, d] = (form.date || '').split('-').map(Number);
+                    const dt = new Date(y, m - 1, d);
+                    const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay()) || 'Thứ 2';
+                    return `${dayName} hàng tuần (Tháng ${selectedMonth})`;
+                  })()}
+                </span>
+              )}
+              {mode === 'temporary' && !editing && form.date && (
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-lg shadow-2xs">
+                  Lịch 1 buổi: {form.date}
+                </span>
+              )}
             </div>
-          )}
+            <CustomDatePicker value={form.date || ''} onChange={(val) => setForm((prev) => ({ ...prev, date: val }))} />
+          </div>
 
-          {(editing || mode === 'single') && (
-            <>
-              <div>
-                <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                  Ngày Học *
-                </label>
-                <CustomDatePicker value={form.date || ''} onChange={(val) => setForm({ ...form, date: val })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    Giờ Bắt Đầu *
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={form.start_time || '18:00'}
-                    onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                    className="w-full bg-white dark:bg-[#181d2e] border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    Thời Lượng (phút)
-                  </label>
-                  <input
-                    type="number"
-                    value={form.duration || 90}
-                    onChange={(e) => setForm({ ...form, duration: parseInt(e.target.value) || 90 })}
-                    className="w-full bg-white dark:bg-[#181d2e] border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </>
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                Giờ Bắt Đầu *
+              </label>
+              <input
+                type="time"
+                required
+                value={form.start_time || '18:00'}
+                onChange={(e) => setForm((prev) => ({ ...prev, start_time: e.target.value }))}
+                className="w-full bg-slate-50 dark:bg-[#181d2e] border-0 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] font-semibold"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                Thời Lượng (phút)
+              </label>
+              <input
+                type="number"
+                value={form.duration || 90}
+                onChange={(e) => setForm((prev) => ({ ...prev, duration: parseInt(e.target.value) || 90 }))}
+                className="w-full bg-slate-50 dark:bg-[#181d2e] border-0 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] font-semibold"
+              />
+            </div>
+          </div>
 
           <div>
             <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">

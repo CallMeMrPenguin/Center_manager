@@ -9,6 +9,7 @@ import { SubmissionTab } from './tabs/SubmissionTab';
 import { OnlineAssignmentRunner } from './components/OnlineAssignmentRunner';
 import { Assignment } from './types';
 import { isStudentUser } from '../../utils/authUtils';
+import { Button } from '../../components/button';
 
 export const AssignmentsPage: React.FC = () => {
   const isStudent = isStudentUser();
@@ -133,13 +134,14 @@ export const AssignmentsPage: React.FC = () => {
             </div>
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="md"
             type="button"
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95 shrink-0"
           >
             Giao BTVN Mới
-          </button>
+          </Button>
         </div>
       )}
 

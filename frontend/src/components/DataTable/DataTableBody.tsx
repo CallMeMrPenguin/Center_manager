@@ -31,7 +31,7 @@ export function DataTableBody<TData>({
   getRowClassName,
   columnSizing,
 }: DataTableBodyProps<TData>) {
-  const renderedRows = useVirt && virtualItems
+  const renderedRows = useVirt && virtualItems && virtualItems.length > 0
     ? virtualItems.map((vi) => allRows[vi.index])
     : allRows;
 

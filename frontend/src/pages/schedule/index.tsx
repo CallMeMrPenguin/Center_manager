@@ -9,7 +9,7 @@ import { DataTable } from '../../components/DataTable';
 import { getLocalDateStr } from '../../utils';
 import { registerGoogleHolidays } from '../../utils/vietnamHolidays';
 import {
-  ClassSession, DayCfg, PALETTE_20, DAY_HDRS, DAYS, DAY_NUM,
+  ClassSession, PALETTE_20, DAY_HDRS,
   getSessionColor, getDynamicSessionInfo
 } from './types';
 import { getDeterministicClassColor } from '../../theme';
@@ -64,7 +64,7 @@ export default function SchedulePage() {
   const [sessions, setSessions] = useState<ClassSession[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ClassSession | null>(null);
-  const [mode, setMode] = useState<'single' | 'weekdays'>('weekdays');
+  const [mode, setMode] = useState<'recurring' | 'temporary'>('recurring');
   const [color, setColor] = useState('#2563eb');
   const [form, setForm] = useState<Partial<ClassSession>>({
     class_id: undefined,
@@ -75,13 +75,6 @@ export default function SchedulePage() {
     notes: '',
   });
 
-  const defaultDayCfgs = () =>
-    DAYS.reduce((a, d) => {
-      a[d] = { checked: d === 'Thứ 2' || d === 'Thứ 4', time: '18:00', duration: 90 };
-      return a;
-    }, {} as Record<string, DayCfg>);
-
-  const [dayCfgs, setDayCfgs] = useState<Record<string, DayCfg>>(defaultDayCfgs());
   const [hourHeight, setHourHeight] = useState(70);
   const handleZoomIn = () => setHourHeight((prev) => Math.min(140, prev + 10));
   const handleZoomOut = () => setHourHeight((prev) => Math.max(45, prev - 10));
@@ -146,7 +139,7 @@ export default function SchedulePage() {
     return () => window.removeEventListener('data-changed', h);
   }, [selectedMonth, classFilter, scheduleScope, selectedWeekStarts.join(','), customRange?.startStr, customRange?.endStr]);
 
-  const { save, del, applyClassSchedule } = useScheduleActions({
+  const { save, del } = useScheduleActions({
     classesList,
     sessions,
     selectedMonth,
@@ -158,15 +151,13 @@ export default function SchedulePage() {
     color,
     editing,
     mode,
-    dayCfgs,
     setModalOpen,
-    setDayCfgs,
     setForm,
   });
 
-  const openAdd = async (dateStr?: string) => {
+  const openAdd = (dateStr?: string) => {
     setEditing(null);
-    setMode(dateStr ? 'single' : 'weekdays');
+    setMode(dateStr ? 'temporary' : 'recurring');
     const selectedCid = (classFilter && Number(classFilter) > 0) ? Number(classFilter) : (classesList[0]?.id || 1);
     const targetCls = classesList.find((c) => c.id === selectedCid) || classesList[0];
     const initialColor = getDeterministicClassColor(selectedCid, targetCls?.color, targetCls?.notes);
@@ -181,14 +172,11 @@ export default function SchedulePage() {
       notes: '',
     });
     setModalOpen(true);
-    if (selectedCid) {
-      await applyClassSchedule(selectedCid, dStr);
-    }
   };
 
   const openEdit = (sess: ClassSession) => {
     setEditing(sess);
-    setMode('single');
+    setMode('temporary');
     setColor(getSessionColor(sess));
     setForm({ ...sess });
     setModalOpen(true);
@@ -371,13 +359,10 @@ export default function SchedulePage() {
         setMode={setMode}
         color={color}
         setColor={setColor}
-        dayCfgs={dayCfgs}
-        setDayCfgs={setDayCfgs}
         classesList={classesList}
         selectedMonth={selectedMonth}
         onSave={save}
         onDelete={del}
-        onApplyClassSchedule={applyClassSchedule}
       />
     </div>
   );

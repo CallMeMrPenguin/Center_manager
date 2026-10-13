@@ -324,6 +324,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
         <DataTable<DbQuestion>
           data={questions}
           columns={columns}
+          loading={loading}
+          loadingMessage="Đang tải danh sách câu hỏi..."
           pageSize={20}
           exportFilename="ngan_hang_cau_hoi"
           searchPlaceholder="Tìm kiếm câu hỏi, dạng bài, đáp án..."

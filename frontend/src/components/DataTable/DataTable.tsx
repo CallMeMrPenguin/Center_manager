@@ -218,7 +218,7 @@ export function DataTable<TData>({
   });
 
   const allRows = table.getRowModel().rows;
-  const useVirt = enableVirtualization ?? data.length > 500;
+  const useVirt = enableVirtualization ?? (!showPagination && data.length > 500);
 
   const rowVirtualizer = useVirtualizer({
     count: allRows.length,
