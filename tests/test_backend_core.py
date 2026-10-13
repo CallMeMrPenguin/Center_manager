@@ -178,4 +178,57 @@ def test_security_hardening():
     assert "sqlite_master" not in ALLOWED_SYNC_TABLES
     assert "app_users; DROP TABLE students;" not in ALLOWED_SYNC_TABLES
 
+def test_tombstone_engine_composite_keys():
+    """Verify that sync_tombstones engine correctly applies deletions for composite keys and protects against resurrection."""
+    import sqlite3
+    from services.sync_tombstones import apply_tombstone, is_row_tombstoned, load_tombstone_set
+
+    conn = sqlite3.connect(":memory:")
+    cur = conn.cursor()
+
+    cur.execute("CREATE TABLE class_sessions (id INTEGER PRIMARY KEY, class_id INT, date TEXT, start_time TEXT)")
+    cur.execute("CREATE TABLE class_attendance_grades (class_id INT, student_id INT, date TEXT, status TEXT)")
+    cur.execute("CREATE TABLE class_schedule_weekly (id INTEGER PRIMARY KEY, class_id INT, day_of_week TEXT)")
+    cur.execute("CREATE TABLE class_students (class_id INT, student_id INT, seat_color TEXT)")
+    cur.execute("CREATE TABLE _sync_tombstones (table_name TEXT, record_id TEXT, deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (table_name, record_id))")
+
+    # Insert test data
+    cur.execute("INSERT INTO class_sessions VALUES (10, 5, '2026-10-21', '06:00')")
+    cur.execute("INSERT INTO class_attendance_grades VALUES (5, 1, '2026-10-21', 'Có mặt')")
+    cur.execute("INSERT INTO class_schedule_weekly VALUES (20, 5, 'Thứ 4')")
+    cur.execute("INSERT INTO class_students VALUES (5, 99, '#ff0000')")
+    conn.commit()
+
+    # 1. Apply composite tombstone on class_sessions
+    assert apply_tombstone(cur, "class_sessions", "5:2026-10-21") is True
+    cur.execute("SELECT COUNT(*) FROM class_sessions WHERE class_id = 5 AND date = '2026-10-21'")
+    assert cur.fetchone()[0] == 0
+
+    # 2. Apply composite tombstone on class_attendance_grades
+    assert apply_tombstone(cur, "class_attendance_grades", "5:2026-10-21") is True
+    cur.execute("SELECT COUNT(*) FROM class_attendance_grades WHERE class_id = 5 AND date = '2026-10-21'")
+    assert cur.fetchone()[0] == 0
+
+    # 3. Apply composite tombstone on class_schedule_weekly
+    assert apply_tombstone(cur, "class_schedule_weekly", "5:Thứ 4") is True
+    cur.execute("SELECT COUNT(*) FROM class_schedule_weekly WHERE class_id = 5 AND day_of_week = 'Thứ 4'")
+    assert cur.fetchone()[0] == 0
+
+    # 4. Apply composite tombstone on class_students
+    assert apply_tombstone(cur, "class_students", "5:99") is True
+    cur.execute("SELECT COUNT(*) FROM class_students WHERE class_id = 5 AND student_id = 99")
+    assert cur.fetchone()[0] == 0
+
+    # 5. Anti-resurrection guard test
+    cur.execute("INSERT INTO _sync_tombstones (table_name, record_id) VALUES ('class_sessions', '5:2026-10-21')")
+    cur.execute("INSERT INTO _sync_tombstones (table_name, record_id) VALUES ('class_schedule_weekly', '5:Thứ 4')")
+    conn.commit()
+
+    ts_set = load_tombstone_set(cur)
+    assert is_row_tombstoned("class_sessions", {"id": 10, "class_id": 5, "date": "2026-10-21"}, ts_set) is True
+    assert is_row_tombstoned("class_sessions", {"id": 11, "class_id": 5, "date": "2026-10-22"}, ts_set) is False
+    assert is_row_tombstoned("class_schedule_weekly", {"id": 20, "class_id": 5, "day_of_week": "Thứ 4"}, ts_set) is True
+    assert is_row_tombstoned("class_schedule_weekly", {"id": 21, "class_id": 5, "day_of_week": "Thứ 5"}, ts_set) is False
+
+
 

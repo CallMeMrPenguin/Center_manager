@@ -103,45 +103,40 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
         cur = conn.cursor()
         pushed_accepted = 0
 
-        # 1. Apply client tombstones (deletions) with strict table whitelist validation
+        # 1. Apply client tombstones (deletions) with composite key support
+        from services.sync_tombstones import apply_tombstone, load_tombstone_set, is_row_tombstoned
         for ts in client_tombstones:
             tbl = ts.get("table") or ts.get("table_name")
             rec_id = ts.get("id") or ts.get("record_id")
             if tbl and tbl in ALLOWED_SYNC_TABLES and rec_id is not None:
-                try:
-                    cur.execute(f"DELETE FROM {tbl} WHERE id = ?", (rec_id,))
+                if apply_tombstone(cur, tbl, rec_id):
                     from database.utils import record_tombstone
                     record_tombstone(tbl, rec_id)
-                except Exception:
-                    pass
+
+        server_ts_set = load_tombstone_set(cur)
 
         # 2. Ingest client dirty rows using Conflict-Free Merge & LWW
         for t_info in FAST_SYNC_TABLES:
             table = t_info["table"]
             pks = t_info["pk"]
             rows = client_dirty.get(table, [])
-            if not rows:
-                continue
+            if not rows: continue
 
             target_cols = set()
             try:
                 cur.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table}';")
                 target_cols = {tr["column_name"] if isinstance(tr, dict) else tr[0] for tr in cur.fetchall()}
-            except Exception:
-                pass
+            except Exception: pass
 
             for r in rows:
-                if not isinstance(r, dict) or not r:
+                if not isinstance(r, dict) or not r or is_row_tombstoned(table, r, server_ts_set):
                     continue
                 cols = [c for c in r.keys() if not target_cols or c in target_cols]
-                if not cols:
-                    continue
+                if not cols: continue
 
                 try:
-                    try:
-                        cur.execute("SAVEPOINT row_sp;")
-                    except Exception:
-                        pass
+                    try: cur.execute("SAVEPOINT row_sp;")
+                    except Exception: pass
 
                     pk_where = " AND ".join([f"{k} = ?" for k in pks])
                     pk_vals = [r.get(k) for k in pks]
@@ -157,26 +152,26 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
                         else:
                             client_ts = _parse_ts(r.get("updated_at") or r.get("created_at"))
                             server_ts = _parse_ts(ex_dict.get("updated_at") or ex_dict.get("created_at"))
-                            if server_ts > client_ts:
-                                should_apply = False
+                            if server_ts > client_ts: should_apply = False
 
                     if should_apply:
                         sql = _build_upsert_sql(table, cols, pks)
                         cur.execute(sql, [r.get(c) for c in cols])
                         pushed_accepted += 1
 
-                    try:
-                        cur.execute("RELEASE SAVEPOINT row_sp;")
-                    except Exception:
-                        pass
+                    try: cur.execute("RELEASE SAVEPOINT row_sp;")
+                    except Exception: pass
                 except Exception as e:
-                    try:
-                        cur.execute("ROLLBACK TO SAVEPOINT row_sp;")
-                    except Exception:
-                        pass
-                    print(f"[Sync Ingest Notice on {table}]:", e)
+                    try: cur.execute("ROLLBACK TO SAVEPOINT row_sp;")
+                    except Exception: pass
 
         conn.commit()
+        has_sched_mod = any((ts.get("table") or ts.get("table_name")) in ("class_schedule_weekly", "class_sessions") for ts in client_tombstones) or "class_schedule_weekly" in client_dirty or "class_sessions" in client_dirty
+        if has_sched_mod:
+            try:
+                from database.crud_classes_sessions import sync_class_sessions_with_weekly_schedule
+                sync_class_sessions_with_weekly_schedule()
+            except Exception: pass
 
         # 3. Gather server updates modified since 'since' with 15-minute overlap buffer
         server_rows = {}
@@ -407,34 +402,32 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         server_tombstones = res_data.get("tombstones", [])
         pulled_total = 0
 
-        # 4. Ingest server tombstones (deletions) into local SQLite
+        # 4. Ingest server tombstones (deletions) into local SQLite with composite key support
+        from services.sync_tombstones import apply_tombstone, load_tombstone_set, is_row_tombstoned
         for ts in server_tombstones:
             tbl = ts.get("table") or ts.get("table_name")
             rec_id = ts.get("id") or ts.get("record_id")
-            if tbl and rec_id is not None:
-                try:
-                    scur.execute(f"DELETE FROM {tbl} WHERE id = ?", (rec_id,))
-                except Exception:
-                    pass
+            if tbl and tbl in ALLOWED_SYNC_TABLES and rec_id is not None:
+                apply_tombstone(scur, tbl, rec_id)
+
+        local_ts_set = load_tombstone_set(scur)
 
         # 5. Ingest server rows into local SQLite with Conflict-Free Merge & LWW
         for t_info in FAST_SYNC_TABLES:
             table = t_info["table"]
             pks = t_info["pk"]
             rows = server_rows.get(table, [])
-            if not rows:
-                continue
+            if not rows: continue
 
             scur.execute(f"PRAGMA table_info({table})")
             target_cols = {cr[1] for cr in scur.fetchall()}
 
             for r in rows:
-                if not isinstance(r, dict) or not r:
+                if not isinstance(r, dict) or not r or is_row_tombstoned(table, r, local_ts_set):
                     continue
 
                 cols = [c for c in r.keys() if c in target_cols]
-                if not cols:
-                    continue
+                if not cols: continue
 
                 pk_where = " AND ".join([f"{k} = ?" for k in pks])
                 pk_vals = [r.get(k) for k in pks]
@@ -450,16 +443,12 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                         else:
                             local_ts = _parse_ts(local_dict.get("updated_at") or local_dict.get("created_at"))
                             srv_ts = _parse_ts(r.get("updated_at") or r.get("created_at"))
-                            if local_ts > srv_ts:
-                                should_apply = False
-                except Exception:
-                    pass
+                            if local_ts > srv_ts: should_apply = False
+                except Exception: pass
 
-                if not should_apply:
-                    continue
+                if not should_apply: continue
 
                 sql = _build_upsert_sql(table, cols, pks)
-
                 try:
                     scur.execute(sql, [r.get(c) for c in cols])
                     pulled_total += 1
@@ -467,6 +456,12 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                     print(f"[Local SQLite Ingest Notice on {table}]:", e)
 
         sconn.commit()
+        has_srv_sched_mod = any((ts.get("table") or ts.get("table_name")) in ("class_schedule_weekly", "class_sessions") for ts in server_tombstones) or "class_schedule_weekly" in server_rows or "class_sessions" in server_rows
+        if has_srv_sched_mod:
+            try:
+                from database.crud_classes_sessions import sync_class_sessions_with_weekly_schedule
+                sync_class_sessions_with_weekly_schedule()
+            except Exception: pass
 
         # 6. Save checkpoint in _local_sync_meta
         now_utc = datetime.now(timezone.utc).isoformat()

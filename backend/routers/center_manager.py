@@ -213,17 +213,26 @@ def api_add_weekly(class_id: int, payload: WeeklySlotPayload):
 @router.post("/api/classes/{class_id}/schedule/weekly/replace")
 def api_replace_weekly_slots(class_id: int, payload: List[WeeklySlotPayload]):
     conn = get_connection()
+    old_slots = []
     try:
         cursor = conn.cursor()
+        cursor.execute("SELECT id, day_of_week FROM class_schedule_weekly WHERE class_id = ?", (class_id,))
+        old_slots = [dict(r) if isinstance(r, dict) else {"id": r[0], "day_of_week": r[1]} for r in cursor.fetchall()]
         cursor.execute("DELETE FROM class_schedule_weekly WHERE class_id = ?", (class_id,))
         for slot in payload:
-            cursor.execute("""
-                INSERT INTO class_schedule_weekly (class_id, day_of_week, start_time, duration, notes)
-                VALUES (?, ?, ?, ?, ?)
-            """, (class_id, slot.day_of_week, slot.start_time, slot.duration, slot.notes or ""))
+            cursor.execute("INSERT INTO class_schedule_weekly (class_id, day_of_week, start_time, duration, notes) VALUES (?, ?, ?, ?, ?)",
+                           (class_id, slot.day_of_week, slot.start_time, slot.duration, slot.notes or ""))
         conn.commit()
     finally:
         conn.close()
+
+    from database.utils import record_tombstone
+    new_dows = {slot.day_of_week for slot in payload}
+    for old in old_slots:
+        record_tombstone("class_schedule_weekly", old["id"])
+        if old["day_of_week"] not in new_dows:
+            record_tombstone("class_schedule_weekly", f"{class_id}:{old['day_of_week']}")
+
     sync_class_sessions_with_weekly_schedule(class_id)
     return {"status": "success"}
 
@@ -376,15 +385,10 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                         if 0 <= let_idx < len(cleaned_opts):
                             ans = cleaned_opts[let_idx]
                     q_type = q.get("type") or ("mcq" if cleaned_opts else "fill")
-                    inst = q.get("instruction") or top_inst
                     normalized_qs.append({
-                        "id": q.get("id") or q.get("number") or idx,
-                        "question": q_text,
-                        "instruction": inst,
-                        "type": q_type,
-                        "options": cleaned_opts,
-                        "answer": str(ans),
-                        "explanation": q.get("explanation", "")
+                        "id": q.get("id") or q.get("number") or idx, "question": q_text,
+                        "instruction": q.get("instruction") or top_inst, "type": q_type,
+                        "options": cleaned_opts, "answer": str(ans), "explanation": q.get("explanation", "")
                     })
                 data["questions"] = normalized_qs
                 return data
@@ -439,12 +443,8 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                     opts = q.get("o", [])
                     cleaned_opts = [_clean_opt_prefix(o) for o in opts] if isinstance(opts, list) else []
                     questions.append({
-                        "id": idx,
-                        "question": q.get("x", ""),
-                        "type": "mcq" if cleaned_opts else "fill",
-                        "options": cleaned_opts,
-                        "answer": q.get("a", ""),
-                        "explanation": ""
+                        "id": idx, "question": q.get("x", ""), "type": "mcq" if cleaned_opts else "fill",
+                        "options": cleaned_opts, "answer": q.get("a", ""), "explanation": ""
                     })
                 return {"title": file.filename, "questions": questions}
             except Exception as e:

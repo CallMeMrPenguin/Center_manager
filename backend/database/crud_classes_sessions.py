@@ -4,7 +4,7 @@ import threading
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
-from database.utils import _sync_cloud_delete, _sync_cloud_delete_sync, _sync_cloud_delete_statements
+from database.utils import record_tombstone
 from services.cache_service import cache_get, cache_set, cache_invalidate
 
 # ----------------------------------------------------
@@ -50,13 +50,11 @@ def create_class(data: Dict[str, Any]) -> int:
         auto_color = palette[(cls_cnt * 3 + 1) % len(palette)]
         chosen_color = data.get("color") or auto_color
 
-        cursor.execute("""
-            INSERT INTO classes (class_name, teacher_id, grade, subject, room, status, color, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
-            data.get("room"), data.get("status", "Đang hoạt động"), chosen_color, data.get("notes")
-        ))
+        cursor.execute(
+            "INSERT INTO classes (class_name, teacher_id, grade, subject, room, status, color, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
+             data.get("room"), data.get("status", "Đang hoạt động"), chosen_color, data.get("notes"))
+        )
         conn.commit()
         cache_invalidate("classes")
         return cursor.lastrowid
@@ -68,15 +66,11 @@ def update_class(class_id: int, data: Dict[str, Any]):
     try:
         cursor = conn.cursor()
         new_color = data.get("color")
-        cursor.execute("""
-            UPDATE classes SET
-                class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, color = COALESCE(?, color), notes = ?,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-        """, (
-            data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
-            data.get("room"), data.get("status"), new_color, data.get("notes"), class_id
-        ))
+        cursor.execute(
+            "UPDATE classes SET class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, color = COALESCE(?, color), notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
+             data.get("room"), data.get("status"), new_color, data.get("notes"), class_id)
+        )
         if new_color:
             cursor.execute("UPDATE class_sessions SET color = ? WHERE class_id = ?", (new_color, class_id))
         conn.commit()
@@ -93,9 +87,7 @@ def delete_class(class_id: int):
         cache_invalidate("classes")
     finally:
         conn.close()
-    from database.utils import record_tombstone
     record_tombstone("classes", class_id)
-
 
 def get_class_students(class_id: int) -> List[Dict[str, Any]]:
     conn = get_connection()
@@ -182,9 +174,7 @@ def unenroll_student_from_class(class_id: int, student_id: int):
         conn.commit()
     finally:
         conn.close()
-    from database.utils import record_tombstone
     record_tombstone("class_students", f"{class_id}:{student_id}")
-
 
 def update_class_student_groups(class_id: int, student_id: int, seat_color: str, grade_group: str):
     conn = get_connection()
@@ -212,10 +202,8 @@ def add_class_weekly_slot(class_id: int, day_of_week: str, start_time: str, dura
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO class_schedule_weekly (class_id, day_of_week, start_time, duration, notes)
-            VALUES (?, ?, ?, ?, ?)
-        """, (class_id, day_of_week, start_time, duration, notes))
+        cursor.execute("INSERT INTO class_schedule_weekly (class_id, day_of_week, start_time, duration, notes) VALUES (?, ?, ?, ?, ?)",
+                       (class_id, day_of_week, start_time, duration, notes))
         conn.commit()
         return cursor.lastrowid
     finally:
@@ -223,12 +211,21 @@ def add_class_weekly_slot(class_id: int, day_of_week: str, start_time: str, dura
 
 def delete_class_weekly_slot(slot_id: int):
     conn = get_connection()
+    target_cid, target_dow = None, None
     try:
         cursor = conn.cursor()
+        cursor.execute("SELECT class_id, day_of_week FROM class_schedule_weekly WHERE id = ?", (slot_id,))
+        row = cursor.fetchone()
+        if row:
+            target_cid = row[0] if isinstance(row, (list, tuple)) else row["class_id"]
+            target_dow = row[1] if isinstance(row, (list, tuple)) else row["day_of_week"]
         cursor.execute("DELETE FROM class_schedule_weekly WHERE id = ?", (slot_id,))
         conn.commit()
     finally:
         conn.close()
+    record_tombstone("class_schedule_weekly", slot_id)
+    if target_cid and target_dow:
+        record_tombstone("class_schedule_weekly", f"{target_cid}:{target_dow}")
 
 def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, Any]]:
     conn = get_connection()
@@ -415,8 +412,7 @@ def update_class_session(session_id: int, data: Dict[str, Any], class_id: int = 
 
 def delete_class_session(session_id: int):
     conn = get_connection()
-    target_cid = None
-    target_date = None
+    target_cid, target_date = None, None
     try:
         cursor = conn.cursor()
         if session_id > 0:
@@ -433,17 +429,17 @@ def delete_class_session(session_id: int):
         conn.close()
 
     if session_id > 0:
-        from database.utils import record_tombstone
         record_tombstone("class_sessions", session_id)
         if target_cid and target_date:
+            record_tombstone("class_sessions", f"{target_cid}:{target_date}")
             record_tombstone("class_attendance_grades", f"{target_cid}:{target_date}")
 
 
 def sync_class_sessions_with_weekly_schedule(class_id: Optional[int] = None) -> Dict[str, Any]:
     weekday_map = {0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"}
     conn = get_connection()
-    updated_cnt = 0
-    deleted_cnt = 0
+    updated_cnt, deleted_cnt = 0, 0
+    deleted_sess_info = []
     try:
         cursor = conn.cursor()
         if class_id and int(class_id) > 0:
@@ -461,8 +457,7 @@ def sync_class_sessions_with_weekly_schedule(class_id: Optional[int] = None) -> 
             sessions = [dict(r) for r in cursor.fetchall()]
 
             for sess in sessions:
-                sid = sess["id"]
-                date_str = sess["date"]
+                sid, date_str = sess["id"], sess["date"]
                 try:
                     s_dt = datetime.strptime(date_str, "%Y-%m-%d")
                     day_name = weekday_map[s_dt.weekday()]
@@ -482,10 +477,16 @@ def sync_class_sessions_with_weekly_schedule(class_id: Optional[int] = None) -> 
                     if att_cnt == 0 and sess.get("status") in ("Sắp diễn ra", ""):
                         cursor.execute("DELETE FROM class_sessions WHERE id = ?", (sid,))
                         deleted_cnt += 1
+                        deleted_sess_info.append((sid, cid, date_str))
 
         conn.commit()
     finally:
         conn.close()
+
+    for sid, cid, date_str in deleted_sess_info:
+        record_tombstone("class_sessions", sid)
+        record_tombstone("class_sessions", f"{cid}:{date_str}")
+
     try:
         from services.sync_worker import trigger_instant_sync
         trigger_instant_sync()
