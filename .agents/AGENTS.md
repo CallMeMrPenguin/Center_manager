@@ -193,6 +193,14 @@ Khi được yêu cầu phát hành bản cập nhật hoặc bump version:
    - Quản lý `<CustomSelect />` và `<CustomMultiSelect />`.
 6. **Bộ Chọn Ngày (`src/components/datepicker/`)**:
    - Quản lý `<CustomDatePicker />`, `<MonthGridPicker />`, và `datePickerUtils.ts`.
+7. **Hộp Thoại & Modal (`src/components/modal/`)**:
+   - Quản lý `<ConfirmDialog />`, `useConfirm()`, `<ChangePasswordModal />`.
+8. **Thẻ Tabs & Phân Đoạn (`src/components/tabs/`)**:
+   - Quản lý `<SegmentedControl />` (Sliding Pill Indicator), `<VercelTabs />`, và `<TabWrapper />`.
+9. **Ô Nhập Liệu Tiếng Việt (`src/components/input/`)**:
+   - Quản lý `<VietnameseInput />` hỗ trợ gõ Telex/VNI mượt mà không nhảy con trỏ.
+10. **Thông Báo Toasts (`src/components/toast/`)**:
+   - Quản lý hàm `showToast()` và hệ thống thông báo trạng thái.
 
 ### 10.2. Quy Tắc "Single Source of Truth & Zero Repetition"
 - **Không viết style ad-hoc**: Các trang BẮT BUỘC import thành phần trực tiếp từ thư mục đại diện (ví dụ: `import { Button } from '@/components/button'; import { CustomSelect } from '@/components/select'`).
@@ -211,7 +219,10 @@ Khi được yêu cầu phát hành bản cập nhật hoặc bump version:
 | `frontend/src/components/chart/` | Chuẩn biểu đồ, sparkline, tooltip và SVG bounds |
 | `frontend/src/components/select/` | Dropdown CustomSelect & CustomMultiSelect Light UI phẳng |
 | `frontend/src/components/datepicker/` | Bộ chọn ngày CustomDatePicker & MonthGridPicker |
-| `frontend/src/components/Toast.tsx` | Thông báo Toast phản hồi thao tác |
+| `frontend/src/components/modal/` | Hộp thoại xác nhận ConfirmDialog và các modal dùng chung |
+| `frontend/src/components/tabs/` | SegmentedControl và VercelTabs thanh điều hướng |
+| `frontend/src/components/input/` | VietnameseInput chuẩn gõ tiếng Việt |
+| `frontend/src/components/toast/` | Thông báo trạng thái showToast dùng chung |
 | `frontend/src/api.ts` | Tất cả API calls kết nối Backend |
 | `frontend/src/pages/` | Các trang chính (teachers, students, classes, courses, reports, schedule) |
 | `.agents/AGENTS.md` | Bộ quy chuẩn cốt lõi duy nhất của toàn bộ dự án |
