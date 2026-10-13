@@ -25,7 +25,7 @@ export const CollapseButton: React.FC<CollapseButtonProps> = ({
       size={`icon-${size}` as any}
       onClick={onToggle}
       title={title || defaultTitle}
-      className={`shadow-xs hover:shadow-sm border-0 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition ${className}`}
+      className={`text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition ${className}`}
     >
       {isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
     </Button>

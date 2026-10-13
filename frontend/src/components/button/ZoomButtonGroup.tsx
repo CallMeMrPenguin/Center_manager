@@ -22,7 +22,7 @@ export const ZoomButtonGroup: React.FC<ZoomButtonGroupProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center gap-0.5 bg-white dark:bg-[#181a20] rounded-xl p-0.5 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.6)] !h-8 ${className}`}
+      className={`flex items-center gap-0.5 bg-white dark:bg-[#181a20] rounded-xl p-0.5 border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] !h-8 ${className}`}
     >
       <Button
         variant="ghost"

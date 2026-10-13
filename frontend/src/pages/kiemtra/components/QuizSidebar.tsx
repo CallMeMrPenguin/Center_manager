@@ -78,7 +78,7 @@ export const QuizSidebar: React.FC<QuizSidebarProps> = ({
               }}
               className={`h-9 rounded-xl font-black text-xs transition cursor-pointer relative flex items-center justify-center border ${
                 isCurr
-                  ? 'bg-[#2563eb] text-white border-blue-400 shadow-[0_0_12px_rgba(37,99,235,0.5)] scale-105 z-10'
+                  ? 'bg-[#2563eb] text-white border-blue-400 shadow-[0_2px_10px_rgba(15,23,42,0.18),0_0_6px_rgba(15,23,42,0.10)] scale-105 z-10'
                   : isDone
                   ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
                   : 'bg-slate-100 dark:bg-[#141829] text-slate-700 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white'
@@ -96,7 +96,7 @@ export const QuizSidebar: React.FC<QuizSidebarProps> = ({
       <div className="pt-3 border-t border-slate-200 dark:border-white/10 shrink-0">
         <button
           onClick={onFinishTest}
-          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition cursor-pointer shadow-[0_2px_6px_rgba(5,150,105,0.28)] hover:shadow-[0_4px_12px_rgba(5,150,105,0.4)] border-0 active:scale-95"
+          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition cursor-pointer shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] border-0 active:scale-95"
         >
           Nộp Bài Sớm
         </button>

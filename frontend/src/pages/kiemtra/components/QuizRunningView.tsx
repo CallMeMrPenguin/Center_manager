@@ -328,7 +328,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                 setCurrentIndex(p => Math.min(activeQuestions.length - 1, (typeof p === 'number' ? p : currentIndex) + 1));
                 if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
               }}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] transition cursor-pointer border-0 active:scale-95"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] transition cursor-pointer border-0 active:scale-95"
             >
               <span>Câu tiếp</span>
               <ArrowRight size={14} />
@@ -336,7 +336,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
           ) : (
             <button
               onClick={onFinishTest}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-[0_2px_6px_rgba(5,150,105,0.28)] hover:shadow-[0_4px_12px_rgba(5,150,105,0.4)] transition cursor-pointer border-0 active:scale-95"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] transition cursor-pointer border-0 active:scale-95"
             >
               <span>Nộp Bài</span>
             </button>

@@ -4,19 +4,19 @@ import { ButtonProps, ButtonVariant, ButtonSize } from './types';
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-[0_4px_20px_rgba(37,99,235,0.38),0_0_10px_rgba(37,99,235,0.22)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.48),0_0_14px_rgba(37,99,235,0.28)] border-0 active:scale-[0.98]',
+    'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] border-0 active:scale-[0.98]',
   secondary:
-    'bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100 border-0 shadow-[0_2px_12px_rgba(15,23,42,0.08),0_0_6px_rgba(15,23,42,0.04)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.12),0_0_8px_rgba(15,23,42,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]',
+    'bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100 border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] active:scale-[0.98]',
   danger:
-    'bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border-0 shadow-[0_2px_14px_rgba(225,29,72,0.2),0_0_8px_rgba(225,29,72,0.1)] hover:shadow-[0_4px_18px_rgba(225,29,72,0.28),0_0_10px_rgba(225,29,72,0.15)] active:scale-[0.98]',
+    'bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] active:scale-[0.98]',
   ghost:
-    'bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border-0 hover:shadow-[0_2px_10px_rgba(15,23,42,0.06)] active:scale-[0.98]',
+    'bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border-0 hover:shadow-[0_2px_10px_rgba(15,23,42,0.10),0_0_4px_rgba(15,23,42,0.05)] active:scale-[0.98]',
   outline:
-    'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 border-0 shadow-[0_2px_12px_rgba(15,23,42,0.08),0_0_6px_rgba(15,23,42,0.04)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.12),0_0_8px_rgba(15,23,42,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]',
+    'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] active:scale-[0.98]',
   white:
-    'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 border-0 shadow-[0_2px_12px_rgba(15,23,42,0.08),0_0_6px_rgba(15,23,42,0.04)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.12),0_0_8px_rgba(15,23,42,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]',
+    'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] active:scale-[0.98]',
   success:
-    'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_4px_20px_rgba(5,150,105,0.38),0_0_10px_rgba(5,150,105,0.22)] hover:shadow-[0_6px_24px_rgba(5,150,105,0.48),0_0_14px_rgba(5,150,105,0.28)] border-0 active:scale-[0.98]',
+    'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] border-0 active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

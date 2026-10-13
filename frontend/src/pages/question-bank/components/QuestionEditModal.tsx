@@ -190,7 +190,7 @@ export const QuestionEditModal: React.FC<QuestionEditModalProps> = ({
               type="button"
               onClick={handleDelete}
               disabled={isSaving}
-              className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition cursor-pointer border-0 shadow-[0_1px_3px_rgba(225,29,72,0.15)]"
+              className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition cursor-pointer border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)]"
             >
               <Trash2 size={13} />
               <span>Xóa câu hỏi này</span>
@@ -200,14 +200,14 @@ export const QuestionEditModal: React.FC<QuestionEditModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer border-0"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)]"
               >
                 Hủy
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] border-0 transition cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] border-0 transition cursor-pointer disabled:opacity-50"
               >
                 {isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
               </button>

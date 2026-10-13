@@ -162,7 +162,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)] active:scale-[0.98] outline-none ${
+        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] active:scale-[0.98] outline-none ${
           triggerClassName || 'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b]'
         }`}
       >

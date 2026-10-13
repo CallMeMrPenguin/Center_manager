@@ -81,7 +81,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={onRetake}
-            className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black transition cursor-pointer shadow-[0_2px_6px_rgba(37,99,235,0.28)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.4)] border-0 active:scale-95"
+            className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black transition cursor-pointer shadow-[0_2px_10px_rgba(15,23,42,0.16),0_0_6px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.22),0_0_8px_rgba(15,23,42,0.10)] border-0 active:scale-95"
           >
             Làm lại
           </button>
