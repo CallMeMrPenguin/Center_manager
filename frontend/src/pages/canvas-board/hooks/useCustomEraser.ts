@@ -38,8 +38,112 @@ export function useCustomEraser({ containerRef, excalidrawAPI }: UseCustomEraser
       };
     };
 
+    const eraseAtScenePoint = (fromPoint: Point, toPoint: Point) => {
+      const allElements = excalidrawAPI.getSceneElements();
+      const freedrawElements = allElements.filter((el: any) => el.type === 'freedraw' && !el.isDeleted);
+      const otherElements = allElements.filter((el: any) => el.type !== 'freedraw' || el.isDeleted);
+
+      const appState = excalidrawAPI.getAppState();
+      const zoom = appState.zoom?.value || 1;
+      // Convert screen circle radius to scene radius so it matches visual red circle exactly
+      const sceneRadius = (eraserSizeRef.current / 2) / zoom;
+
+      let hasAnyChange = false;
+      let survivingFreedrawElements = freedrawElements;
+
+      // 1. Partial vector erase for freedraw strokes
+      if (freedrawElements.length > 0) {
+        const elementMetaMap = new Map<string, any>();
+        const strokeRecords: StrokeRecord[] = freedrawElements.map((el: any) => {
+          elementMetaMap.set(el.id, el);
+          return {
+            id: el.id,
+            points: el.points.map(([dx, dy]: [number, number]) => ({
+              x: el.x + dx,
+              y: el.y + dy,
+            })),
+            tool: 'pen',
+            color: el.strokeColor,
+            size: el.strokeWidth,
+          };
+        });
+
+        const { strokes: resultStrokes, hasChanged } = eraseStrokesAlongPath(
+          strokeRecords,
+          fromPoint,
+          toPoint,
+          sceneRadius
+        );
+
+        if (hasChanged) {
+          hasAnyChange = true;
+          survivingFreedrawElements = [];
+          resultStrokes.forEach((st) => {
+            const baseEl = elementMetaMap.get(st.id) || freedrawElements[0];
+            if (!st.points || st.points.length < 2) return;
+
+            const startX = st.points[0].x;
+            const startY = st.points[0].y;
+            const relativePoints = st.points.map((p) => [p.x - startX, p.y - startY]);
+            const xs = relativePoints.map((p) => p[0]);
+            const ys = relativePoints.map((p) => p[1]);
+
+            survivingFreedrawElements.push({
+              ...baseEl,
+              id: st.id,
+              x: startX,
+              y: startY,
+              width: Math.max(1, Math.max(...xs) - Math.min(...xs)),
+              height: Math.max(1, Math.max(...ys) - Math.min(...ys)),
+              points: relativePoints,
+              pressures: relativePoints.map(() => 0.5),
+              simulatePressure: false,
+              roughness: 0,
+              strokeWidth: st.size || baseEl.strokeWidth,
+              strokeColor: st.color || baseEl.strokeColor,
+              updated: Date.now(),
+            });
+          });
+        }
+      }
+
+      // 2. Erase non-freedraw elements (shapes, lines, text) when touched by eraser
+      const modifiedOther = otherElements.map((el: any) => {
+        if (el.isDeleted) return el;
+        const elLeft = el.x;
+        const elRight = el.x + (el.width || 0);
+        const elTop = el.y;
+        const elBottom = el.y + (el.height || 0);
+
+        const hit =
+          toPoint.x >= elLeft - sceneRadius &&
+          toPoint.x <= elRight + sceneRadius &&
+          toPoint.y >= elTop - sceneRadius &&
+          toPoint.y <= elBottom + sceneRadius;
+
+        if (hit) {
+          hasAnyChange = true;
+          return { ...el, isDeleted: true, updated: Date.now() };
+        }
+        return el;
+      });
+
+      if (hasAnyChange) {
+        excalidrawAPI.updateScene({
+          elements: [...modifiedOther, ...survivingFreedrawElements],
+        });
+      }
+    };
+
     const handlePointerDown = (e: PointerEvent) => {
       if (e.button !== 0) return; // Only primary left-click
+
+      // NEVER intercept clicks on UI controls (slider, buttons, popups, toolbars)
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('.custom-eraser-size-bar, input, button, select, label, [role="button"], .App-toolbar, .App-menu, .layer-ui__wrapper')) {
+        return;
+      }
+
       const appState = excalidrawAPI.getAppState();
       if (appState.activeTool?.type !== 'eraser') return;
 
@@ -47,7 +151,11 @@ export function useCustomEraser({ containerRef, excalidrawAPI }: UseCustomEraser
       e.stopPropagation();
 
       isErasingRef.current = true;
-      lastPointRef.current = getSceneCoords(e.clientX, e.clientY);
+      const pt = getSceneCoords(e.clientX, e.clientY);
+      lastPointRef.current = pt;
+
+      // Erase immediately on click (pointer down) matching old canvas logic!
+      eraseAtScenePoint(pt, pt);
     };
 
     const handlePointerMove = (e: PointerEvent) => {
@@ -73,76 +181,7 @@ export function useCustomEraser({ containerRef, excalidrawAPI }: UseCustomEraser
       e.stopPropagation();
 
       const currentPoint = getSceneCoords(e.clientX, e.clientY);
-      const allElements = excalidrawAPI.getSceneElements();
-
-      // Separate freedraw elements from other elements
-      const freedrawElements = allElements.filter((el: any) => el.type === 'freedraw' && !el.isDeleted);
-      const otherElements = allElements.filter((el: any) => el.type !== 'freedraw' || el.isDeleted);
-
-      if (freedrawElements.length === 0) {
-        lastPointRef.current = currentPoint;
-        return;
-      }
-
-      // Convert Excalidraw freedraw elements to StrokeRecords
-      const elementMetaMap = new Map<string, any>();
-      const strokeRecords: StrokeRecord[] = freedrawElements.map((el: any) => {
-        elementMetaMap.set(el.id, el);
-        return {
-          id: el.id,
-          points: el.points.map(([dx, dy]: [number, number]) => ({
-            x: el.x + dx,
-            y: el.y + dy,
-          })),
-          tool: 'pen',
-          color: el.strokeColor,
-          size: el.strokeWidth,
-        };
-      });
-
-      const radius = eraserSizeRef.current / 2;
-      const { strokes: resultStrokes, hasChanged } = eraseStrokesAlongPath(
-        strokeRecords,
-        lastPointRef.current,
-        currentPoint,
-        radius
-      );
-
-      if (hasChanged) {
-        // Convert surviving stroke segments back into Excalidraw freedraw elements
-        const survivingFreedrawElements: any[] = [];
-
-        resultStrokes.forEach((st) => {
-          // If original exists and unchanged
-          const baseEl = elementMetaMap.get(st.id) || freedrawElements[0];
-          if (!st.points || st.points.length < 2) return;
-
-          const startX = st.points[0].x;
-          const startY = st.points[0].y;
-          const relativePoints = st.points.map((p) => [p.x - startX, p.y - startY]);
-
-          survivingFreedrawElements.push({
-            ...baseEl,
-            id: st.id,
-            x: startX,
-            y: startY,
-            width: Math.max(...relativePoints.map((p) => Math.abs(p[0]))),
-            height: Math.max(...relativePoints.map((p) => Math.abs(p[1]))),
-            points: relativePoints,
-            pressures: relativePoints.map(() => 0.5),
-            simulatePressure: false,
-            roughness: 0,
-            strokeWidth: st.size || baseEl.strokeWidth,
-            strokeColor: st.color || baseEl.strokeColor,
-            updated: Date.now(),
-          });
-        });
-
-        excalidrawAPI.updateScene({
-          elements: [...otherElements, ...survivingFreedrawElements],
-        });
-      }
-
+      eraseAtScenePoint(lastPointRef.current, currentPoint);
       lastPointRef.current = currentPoint;
     };
 

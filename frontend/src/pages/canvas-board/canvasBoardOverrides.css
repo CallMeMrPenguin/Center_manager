@@ -104,22 +104,22 @@
   cursor: grabbing !important;
 }
 
-/* 9. Text placement ghost preview */
+/* 9. Text placement ghost preview (aligns 100% to Excalidraw text box origin) */
 .custom-text-placement-preview {
   position: absolute;
   pointer-events: none;
   z-index: 9998;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: rgba(37, 99, 235, 0.08);
+  width: 140px;
+  height: 28px;
+  padding: 0 6px;
+  margin: 0;
+  background: rgba(37, 99, 235, 0.05);
   border: 1.5px dashed #2563eb;
-  border-radius: 6px;
+  border-radius: 3px;
   color: #2563eb;
   font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
   user-select: none;
+  box-sizing: border-box;
 }

@@ -140,44 +140,17 @@ export function useSidebarStrokeSlider({
           applyStrokeWidth(val);
         });
 
-        // Quick Preset Buttons container
-        const presetsRow = document.createElement('div');
-        presetsRow.className = 'custom-stroke-presets-row';
-        presetsRow.style.cssText = 'display: flex; gap: 4px; margin-top: 8px; justify-content: space-between;';
-
-        const presets = [
-          { label: '0.4px', val: 0.4 },
-          { label: '0.8px', val: 0.8 },
-          { label: '1.5px', val: 1.5 },
-          { label: '3px', val: 3 },
-          { label: '6px', val: 6 },
-        ];
-
-        presets.forEach((p) => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.textContent = p.label;
-          btn.style.cssText =
-            'flex: 1; padding: 2px 0; font-size: 10px; font-weight: 600; border-radius: 4px; border: 1px solid var(--color-border-outline, #e2e8f0); background: var(--button-bg, #f8fafc); color: var(--text-primary-color, #334155); cursor: pointer; text-align: center;';
-          btn.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            slider.value = String(p.val);
-            slider.title = `Độ dày nét: ${p.val}px`;
-            updateSliderVisual(slider, valueBubble, p.val);
-            applyStrokeWidth(p.val);
-          });
-          presetsRow.appendChild(btn);
-        });
-
         sliderWrapper.appendChild(slider);
         sliderWrapper.appendChild(valueBubble);
         targetFieldset.appendChild(sliderWrapper);
-        targetFieldset.appendChild(presetsRow);
 
         requestAnimationFrame(() => {
           updateSliderVisual(slider, valueBubble, strokeWidthRef.current);
         });
       } else {
+        const oldPresets = targetFieldset.querySelector('.custom-stroke-presets-row');
+        if (oldPresets) oldPresets.remove();
+
         const sliderInput = sliderWrapper.querySelector('input') as HTMLInputElement | null;
         const valueBubble = sliderWrapper.querySelector('.value-bubble') as HTMLElement | null;
         const oldZero = sliderWrapper.querySelector('.zero-label');

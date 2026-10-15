@@ -17,12 +17,12 @@ export const TextBoxPlacementPreview = memo(function TextBoxPlacementPreview({
     <div
       className="custom-text-placement-preview"
       style={{
-        left: pos.x + 8,
-        top: pos.y + 8,
+        left: pos.x,
+        top: pos.y,
       }}
     >
-      <Type size={14} strokeWidth={2.4} className="text-blue-600 animate-pulse" />
-      <span className="opacity-90">Nhấp để đặt hộp văn bản...</span>
+      <span className="w-0.5 h-4 bg-blue-600 animate-pulse mr-1" />
+      <span className="text-xs text-blue-600/75 select-none font-sans">Văn bản...</span>
     </div>
   );
 });
