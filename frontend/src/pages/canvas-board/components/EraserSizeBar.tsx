@@ -54,7 +54,7 @@ export const EraserSizeBar = memo(function EraserSizeBar({
       </div>
 
       <div
-        className="rounded-full shrink-0 border border-red-500/40 bg-red-500/20"
+        className="rounded-full shrink-0 border-0 bg-red-500/30"
         style={{
           width: Math.min(24, Math.max(6, size / 3)),
           height: Math.min(24, Math.max(6, size / 3)),

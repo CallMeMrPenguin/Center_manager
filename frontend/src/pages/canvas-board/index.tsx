@@ -19,7 +19,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [excalidrawAPI, setExcalidrawAPI] = useState<any | null>(null);
-  const [strokeWidth, setStrokeWidth] = useState<number>(1.2);
+  const [strokeWidth, setStrokeWidth] = useState<number>(1);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
 
   // Text tool placement preview state
@@ -318,7 +318,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
               lastActiveTool: null,
             } as any,
             currentItemRoughness: 0,
-            currentItemStrokeWidth: 1.2,
+            currentItemStrokeWidth: 1,
           },
         }}
         UIOptions={{

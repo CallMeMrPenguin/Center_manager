@@ -37,7 +37,7 @@ export function useSidebarStrokeSlider({
       bubbleEl: HTMLElement | null,
       val: number
     ) => {
-      const min = 0.2;
+      const min = 1;
       const max = 24;
       const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
 
@@ -49,7 +49,7 @@ export function useSidebarStrokeSlider({
         const thumbWidth = 15;
         const position = (pct / 100) * (inputWidth - thumbWidth) + thumbWidth / 2;
         bubbleEl.style.left = `${position}px`;
-        const formatted = val < 1 ? val.toFixed(1) : Number.isInteger(val) ? String(val) : val.toFixed(1);
+        const formatted = Number.isInteger(val) ? String(val) : val.toFixed(1);
         bubbleEl.textContent = `${formatted}px`;
         bubbleEl.style.display = 'block';
       }
@@ -118,14 +118,14 @@ export function useSidebarStrokeSlider({
 
         const slider = document.createElement('input');
         slider.type = 'range';
-        slider.min = '0.2';
+        slider.min = '1';
         slider.max = '24';
         slider.step = '0.1';
         slider.className = 'range-input custom-stroke-slider-input';
-        slider.value = String(strokeWidthRef.current);
+        slider.value = String(Math.max(1, strokeWidthRef.current));
         slider.style.cssText =
           'width: 100%; height: 4px; -webkit-appearance: none; border-radius: 2px; outline: none; cursor: pointer;';
-        slider.title = `Độ dày nét: ${strokeWidthRef.current}px`;
+        slider.title = `Độ dày nét: ${Math.max(1, strokeWidthRef.current)}px`;
 
         // Floating value bubble underneath the thumb, tracking position dynamically
         const valueBubble = document.createElement('div');
@@ -134,7 +134,7 @@ export function useSidebarStrokeSlider({
           'position: absolute; bottom: 0; transform: translateX(-50%); font-size: 12px; color: var(--text-primary-color, currentColor); font-weight: 600; white-space: nowrap;';
 
         slider.addEventListener('input', (e) => {
-          const val = parseFloat((e.target as HTMLInputElement).value) || 0.5;
+          const val = Math.max(1, parseFloat((e.target as HTMLInputElement).value) || 1);
           slider.title = `Độ dày nét: ${val}px`;
           updateSliderVisual(slider, valueBubble, val);
           applyStrokeWidth(val);
@@ -145,7 +145,7 @@ export function useSidebarStrokeSlider({
         targetFieldset.appendChild(sliderWrapper);
 
         requestAnimationFrame(() => {
-          updateSliderVisual(slider, valueBubble, strokeWidthRef.current);
+          updateSliderVisual(slider, valueBubble, Math.max(1, strokeWidthRef.current));
         });
       } else {
         const oldPresets = targetFieldset.querySelector('.custom-stroke-presets-row');
@@ -158,9 +158,18 @@ export function useSidebarStrokeSlider({
         const oldMax = sliderWrapper.querySelector('.max-label');
         if (oldMax) oldMax.remove();
 
-        if (sliderInput && sliderInput.value !== String(strokeWidthRef.current)) {
-          sliderInput.value = String(strokeWidthRef.current);
-          updateSliderVisual(sliderInput, valueBubble, strokeWidthRef.current);
+        if (sliderInput) {
+          sliderInput.min = '1';
+          const currentVal = parseFloat(sliderInput.value) || 1;
+          if (currentVal < 1) {
+            sliderInput.value = '1';
+            strokeWidthRef.current = 1;
+            updateSliderVisual(sliderInput, valueBubble, 1);
+            applyStrokeWidth(1);
+          } else if (sliderInput.value !== String(strokeWidthRef.current)) {
+            sliderInput.value = String(strokeWidthRef.current);
+            updateSliderVisual(sliderInput, valueBubble, strokeWidthRef.current);
+          }
         }
       }
     };
