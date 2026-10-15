@@ -2,10 +2,15 @@
    Whiteboard (Excalidraw) UI Customizations & Overrides
    ============================================================================== */
 
-/* 1. Hide unwanted toolbar items: Line, Rectangle, Lock, Library, Help */
+/* 1. Hide unwanted toolbar items: Line, Rectangle, Lock, Library, Help, Hand (Pan is right-click) */
 .canvas-board-wrapper [data-testid="toolbar-line"],
 .canvas-board-wrapper [data-testid="toolbar-rectangle"],
 .canvas-board-wrapper [data-testid="toolbar-lock"],
+.canvas-board-wrapper [data-testid="toolbar-hand"],
+.canvas-board-wrapper [data-testid="hand"],
+.canvas-board-wrapper input[value="hand"],
+.canvas-board-wrapper button[aria-label*="Hand" i],
+.canvas-board-wrapper button[aria-label*="Tay" i],
 .canvas-board-wrapper .ToolIcon__lock,
 .canvas-board-wrapper .default-sidebar-trigger,
 .canvas-board-wrapper .sidebar-trigger,
@@ -15,7 +20,7 @@
 
 /* 2. Hide Sloppiness section in properties panel (Always defaults to Architect = 0) */
 .canvas-board-wrapper fieldset:has([name="sloppiness"]),
-.canvas-board-wrapper fieldset:has([value="0"][name*="sloppiness"]) {
+.canvas-board-wrapper fieldset:has([data-testid*="sloppiness"]) {
   display: none !important;
 }
 
@@ -33,8 +38,9 @@
   display: none !important;
 }
 
-/* 5. Custom Highlighter button in top toolbar matching native Excalidraw button styling */
-.custom-highlighter-tool-btn {
+/* 5. Custom Highlighter & Style buttons in top toolbar matching native Excalidraw button styling */
+.custom-highlighter-tool-btn,
+.custom-style-tool-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +54,8 @@
   margin: 0;
 }
 
-.custom-highlighter-tool-btn .ToolIcon__icon {
+.custom-highlighter-tool-btn .ToolIcon__icon,
+.custom-style-tool-btn .ToolIcon__icon {
   width: var(--lg-button-size, 2.25rem);
   height: var(--lg-button-size, 2.25rem);
   display: flex;
@@ -59,16 +66,18 @@
   transition: background 120ms ease;
 }
 
-.custom-highlighter-tool-btn:hover .ToolIcon__icon {
+.custom-highlighter-tool-btn:hover .ToolIcon__icon,
+.custom-style-tool-btn:hover .ToolIcon__icon {
   background: var(--button-hover-bg, rgba(0, 0, 0, 0.05));
 }
 
-.custom-highlighter-tool-btn.active .ToolIcon__icon {
+.custom-highlighter-tool-btn.active .ToolIcon__icon,
+.custom-style-tool-btn.active .ToolIcon__icon {
   background: var(--color-surface-primary-container, #e0e7ff);
   color: var(--color-on-primary-container, #3730a3);
 }
 
-/* 6. Partial Vector Eraser visual circular cursor */
+/* 6. Partial Vector Eraser visual circular cursor (Clean Red Circle) */
 .custom-eraser-circular-cursor {
   position: absolute;
   pointer-events: none;
@@ -78,4 +87,39 @@
   transform: translate(-50%, -50%);
   z-index: 9999;
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+/* 7. Hide Excalidraw native white-circle eraser cursor so ONLY our red circle cursor is shown */
+.canvas-board-wrapper.eraser-active,
+.canvas-board-wrapper.eraser-active canvas,
+.canvas-board-wrapper.eraser-active .interactive-canvas,
+.canvas-board-wrapper.eraser-active .excalidraw__canvas {
+  cursor: none !important;
+}
+
+/* 8. Smooth Right-Click Pan cursor */
+.canvas-board-wrapper.panning-active,
+.canvas-board-wrapper.panning-active canvas,
+.canvas-board-wrapper.panning-active * {
+  cursor: grabbing !important;
+}
+
+/* 9. Text placement ghost preview */
+.custom-text-placement-preview {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1.5px dashed #2563eb;
+  border-radius: 6px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  user-select: none;
 }

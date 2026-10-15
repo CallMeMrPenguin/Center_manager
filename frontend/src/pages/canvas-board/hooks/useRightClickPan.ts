@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface UseRightClickPanProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -10,6 +10,7 @@ interface UseRightClickPanProps {
  * and completely suppresses the OS and Excalidraw context selection menus on right-click.
  */
 export function useRightClickPan({ containerRef, excalidrawAPI }: UseRightClickPanProps) {
+  const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
   const startPosRef = useRef({ x: 0, y: 0 });
   const startScrollRef = useRef({ scrollX: 0, scrollY: 0 });
@@ -25,6 +26,7 @@ export function useRightClickPan({ containerRef, excalidrawAPI }: UseRightClickP
         e.stopPropagation();
 
         isPanningRef.current = true;
+        setIsPanning(true);
         startPosRef.current = { x: e.clientX, y: e.clientY };
 
         const appState = excalidrawAPI.getAppState();
@@ -33,7 +35,8 @@ export function useRightClickPan({ containerRef, excalidrawAPI }: UseRightClickP
           scrollY: appState.scrollY || 0,
         };
 
-        container.style.cursor = 'grabbing';
+        container.classList.add('panning-active');
+        document.body.classList.add('panning-active');
       }
     };
 
@@ -64,7 +67,9 @@ export function useRightClickPan({ containerRef, excalidrawAPI }: UseRightClickP
           e.stopPropagation();
         }
         isPanningRef.current = false;
-        container.style.cursor = '';
+        setIsPanning(false);
+        container.classList.remove('panning-active');
+        document.body.classList.remove('panning-active');
       }
     };
 
@@ -87,7 +92,10 @@ export function useRightClickPan({ containerRef, excalidrawAPI }: UseRightClickP
       window.removeEventListener('pointerup', handlePointerUp, true);
       window.removeEventListener('pointercancel', handlePointerUp, true);
       container.removeEventListener('contextmenu', handleContextMenu, true);
-      container.style.cursor = '';
+      container.classList.remove('panning-active');
+      document.body.classList.remove('panning-active');
     };
   }, [containerRef, excalidrawAPI]);
+
+  return { isPanning };
 }

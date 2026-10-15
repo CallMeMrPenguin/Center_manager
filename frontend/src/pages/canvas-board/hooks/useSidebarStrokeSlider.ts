@@ -37,7 +37,7 @@ export function useSidebarStrokeSlider({
       bubbleEl: HTMLElement | null,
       val: number
     ) => {
-      const min = 1;
+      const min = 0.2;
       const max = 24;
       const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
 
@@ -49,8 +49,35 @@ export function useSidebarStrokeSlider({
         const thumbWidth = 15;
         const position = (pct / 100) * (inputWidth - thumbWidth) + thumbWidth / 2;
         bubbleEl.style.left = `${position}px`;
-        bubbleEl.textContent = `${val}px`;
+        const formatted = val < 1 ? val.toFixed(1) : Number.isInteger(val) ? String(val) : val.toFixed(1);
+        bubbleEl.textContent = `${formatted}px`;
         bubbleEl.style.display = 'block';
+      }
+    };
+
+    const applyStrokeWidth = (val: number) => {
+      setStrokeWidthRef.current(val);
+      const api = excalidrawAPIRef.current;
+      if (api) {
+        const appState = api.getAppState();
+        const selectedIds = appState.selectedElementIds || {};
+        const hasSelection = Object.keys(selectedIds).some((id: string) => selectedIds[id]);
+
+        if (hasSelection) {
+          const elements = api.getSceneElements().map((el: any) => {
+            if (selectedIds[el.id]) return { ...el, strokeWidth: val };
+            return el;
+          });
+          api.updateScene({
+            elements,
+            appState: { currentItemStrokeWidth: val },
+            commitToHistory: true,
+          });
+        } else {
+          api.updateScene({
+            appState: { currentItemStrokeWidth: val },
+          });
+        }
       }
     };
 
@@ -91,9 +118,9 @@ export function useSidebarStrokeSlider({
 
         const slider = document.createElement('input');
         slider.type = 'range';
-        slider.min = '1';
+        slider.min = '0.2';
         slider.max = '24';
-        slider.step = '0.5';
+        slider.step = '0.1';
         slider.className = 'range-input custom-stroke-slider-input';
         slider.value = String(strokeWidthRef.current);
         slider.style.cssText =
@@ -107,38 +134,45 @@ export function useSidebarStrokeSlider({
           'position: absolute; bottom: 0; transform: translateX(-50%); font-size: 12px; color: var(--text-primary-color, currentColor); font-weight: 600; white-space: nowrap;';
 
         slider.addEventListener('input', (e) => {
-          const val = parseFloat((e.target as HTMLInputElement).value) || 1;
+          const val = parseFloat((e.target as HTMLInputElement).value) || 0.5;
           slider.title = `Độ dày nét: ${val}px`;
           updateSliderVisual(slider, valueBubble, val);
-          setStrokeWidthRef.current(val);
+          applyStrokeWidth(val);
+        });
 
-          const api = excalidrawAPIRef.current;
-          if (api) {
-            const appState = api.getAppState();
-            const selectedIds = appState.selectedElementIds || {};
-            const hasSelection = Object.keys(selectedIds).some((id: string) => selectedIds[id]);
+        // Quick Preset Buttons container
+        const presetsRow = document.createElement('div');
+        presetsRow.className = 'custom-stroke-presets-row';
+        presetsRow.style.cssText = 'display: flex; gap: 4px; margin-top: 8px; justify-content: space-between;';
 
-            if (hasSelection) {
-              const elements = api.getSceneElements().map((el: any) => {
-                if (selectedIds[el.id]) return { ...el, strokeWidth: val };
-                return el;
-              });
-              api.updateScene({
-                elements,
-                appState: { currentItemStrokeWidth: val },
-                commitToHistory: true,
-              });
-            } else {
-              api.updateScene({
-                appState: { currentItemStrokeWidth: val },
-              });
-            }
-          }
+        const presets = [
+          { label: '0.4px', val: 0.4 },
+          { label: '0.8px', val: 0.8 },
+          { label: '1.5px', val: 1.5 },
+          { label: '3px', val: 3 },
+          { label: '6px', val: 6 },
+        ];
+
+        presets.forEach((p) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = p.label;
+          btn.style.cssText =
+            'flex: 1; padding: 2px 0; font-size: 10px; font-weight: 600; border-radius: 4px; border: 1px solid var(--color-border-outline, #e2e8f0); background: var(--button-bg, #f8fafc); color: var(--text-primary-color, #334155); cursor: pointer; text-align: center;';
+          btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            slider.value = String(p.val);
+            slider.title = `Độ dày nét: ${p.val}px`;
+            updateSliderVisual(slider, valueBubble, p.val);
+            applyStrokeWidth(p.val);
+          });
+          presetsRow.appendChild(btn);
         });
 
         sliderWrapper.appendChild(slider);
         sliderWrapper.appendChild(valueBubble);
         targetFieldset.appendChild(sliderWrapper);
+        targetFieldset.appendChild(presetsRow);
 
         requestAnimationFrame(() => {
           updateSliderVisual(slider, valueBubble, strokeWidthRef.current);

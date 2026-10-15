@@ -5,21 +5,23 @@ interface UseWhiteboardUIAdjustmentsProps {
   excalidrawAPI: any | null;
   eraserSize: number;
   setEraserSize: (size: number) => void;
+  strokeWidth: number;
 }
 
 /**
  * Manages UI adjustments for Whiteboard:
- * 1. Toggles properties panel on re-clicking the active tool (hidden by default).
- * 2. Injects big paint brush Highlighter button next to Pencil.
+ * 1. Toggles properties panel on clicking the Style button or re-clicking the active tool.
+ * 2. Injects big paint brush Highlighter button and dedicated Style button next to Pencil.
  * 3. Enforces keep-selected-tool-active (tool lock always on).
  * 4. Injects eraser size slider into properties panel when eraser is selected.
- * 5. Hides Sloppiness controls.
+ * 5. Safely hides Sloppiness controls without hiding Stroke color picker.
  */
 export function useWhiteboardUIAdjustments({
   containerRef,
   excalidrawAPI,
   eraserSize,
   setEraserSize,
+  strokeWidth,
 }: UseWhiteboardUIAdjustmentsProps) {
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(false);
   const [isHighlighterMode, setIsHighlighterMode] = useState(false);
@@ -36,6 +38,9 @@ export function useWhiteboardUIAdjustments({
   const setEraserSizeRef = useRef(setEraserSize);
   setEraserSizeRef.current = setEraserSize;
 
+  const strokeWidthRef = useRef(strokeWidth);
+  strokeWidthRef.current = strokeWidth;
+
   // Toggle hide-properties-panel CSS class on container
   useEffect(() => {
     const container = containerRef.current;
@@ -48,6 +53,27 @@ export function useWhiteboardUIAdjustments({
     }
   }, [containerRef, isPropertiesOpen]);
 
+  // Ensure stroke settings are immediately shown when opening properties
+  const openPropertiesPanel = () => {
+    setIsPropertiesOpen((prev) => {
+      const next = !prev;
+      if (next && excalidrawAPI) {
+        const appState = excalidrawAPI.getAppState();
+        const selectedIds = appState.selectedElementIds || {};
+        const hasSelection = Object.keys(selectedIds).some((id: string) => selectedIds[id]);
+        if (!hasSelection && appState.activeTool?.type === 'selection') {
+          // Switch to freedraw so stroke color and width are immediately visible
+          excalidrawAPI.updateScene({
+            appState: {
+              activeTool: { type: 'freedraw', locked: true },
+            },
+          });
+        }
+      }
+      return next;
+    });
+  };
+
   // Toolbar button interception & properties panel toggle logic
   useEffect(() => {
     const container = containerRef.current;
@@ -56,6 +82,15 @@ export function useWhiteboardUIAdjustments({
     const handleToolbarClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
+
+      // Check if user clicked custom style (palette) button
+      const styleBtn = target.closest('.custom-style-tool-btn') as HTMLElement | null;
+      if (styleBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        openPropertiesPanel();
+        return;
+      }
 
       // Check if user clicked a tool button inside toolbar
       const toolBtn = target.closest('[data-testid^="toolbar-"], .custom-highlighter-tool-btn') as HTMLElement | null;
@@ -71,7 +106,7 @@ export function useWhiteboardUIAdjustments({
 
         if (isHighlighterModeRef.current) {
           // Re-clicked active highlighter: toggle properties panel
-          setIsPropertiesOpen((prev) => !prev);
+          openPropertiesPanel();
         } else {
           // Switch to highlighter mode: freedraw with 35% opacity & 16px width
           setIsHighlighterMode(true);
@@ -92,16 +127,16 @@ export function useWhiteboardUIAdjustments({
       if (testId === 'toolbar-freedraw') {
         if (!isHighlighterModeRef.current && currentTool === 'freedraw') {
           // Re-clicked active pen: toggle properties panel
-          setIsPropertiesOpen((prev) => !prev);
+          openPropertiesPanel();
         } else {
-          // Switch back to normal solid pen (100% opacity, 2px stroke)
+          // Switch back to normal solid pen with preserved stroke width
           setIsHighlighterMode(false);
           setIsPropertiesOpen(false);
           excalidrawAPI.updateScene({
             appState: {
               activeTool: { type: 'freedraw', locked: true },
               currentItemOpacity: 100,
-              currentItemStrokeWidth: 2,
+              currentItemStrokeWidth: strokeWidthRef.current || 1.2,
             },
           });
         }
@@ -111,7 +146,7 @@ export function useWhiteboardUIAdjustments({
       // Any other tool: check if re-clicked
       const clickedTool = testId?.replace('toolbar-', '');
       if (clickedTool && clickedTool === currentTool) {
-        setIsPropertiesOpen((prev) => !prev);
+        openPropertiesPanel();
       } else {
         setIsPropertiesOpen(false);
         setIsHighlighterMode(false);
@@ -125,7 +160,7 @@ export function useWhiteboardUIAdjustments({
     };
   }, [containerRef, excalidrawAPI]);
 
-  // Enforce tool lock always on and inject custom DOM elements (Highlighter button & Eraser slider)
+  // Enforce tool lock always on and inject custom DOM elements
   useEffect(() => {
     const container = containerRef.current;
     if (!container || !excalidrawAPI) return;
@@ -142,16 +177,22 @@ export function useWhiteboardUIAdjustments({
         });
       }
 
-      // 2. Hide Sloppiness fieldsets
+      // 2. Hide Sloppiness fieldsets safely (never hide Stroke or Nét vẽ!)
       const fieldsets = Array.from(container.querySelectorAll('fieldset'));
       fieldsets.forEach((fs) => {
-        const legendText = (fs.querySelector('legend')?.textContent || '').toLowerCase();
-        if (legendText.includes('sloppiness') || legendText.includes('độ thô') || legendText.includes('nét vẽ')) {
+        const hasSloppinessInput = fs.querySelector('[name*="sloppiness"], [data-testid*="sloppiness"]');
+        const legendText = (fs.querySelector('legend')?.textContent || '').toLowerCase().trim();
+        if (
+          hasSloppinessInput ||
+          legendText === 'sloppiness' ||
+          legendText === 'hoa văn nét' ||
+          legendText === 'độ thô'
+        ) {
           fs.style.display = 'none';
         }
       });
 
-      // 3. Inject big paint brush Highlighter button right next to native Freedraw button
+      // 3. Inject Highlighter & Style (Palette) buttons next to native Freedraw button
       const freedrawBtn = container.querySelector('[data-testid="toolbar-freedraw"]') as HTMLElement | null;
       if (freedrawBtn && freedrawBtn.parentElement) {
         let hlBtn = container.querySelector('.custom-highlighter-tool-btn') as HTMLButtonElement | null;
@@ -162,7 +203,6 @@ export function useWhiteboardUIAdjustments({
           hlBtn.title = 'Bút dạ quang (Highlighter)';
           hlBtn.setAttribute('aria-label', 'Bút dạ quang');
 
-          // Big paint brush SVG icon
           hlBtn.innerHTML = `
             <div class="ToolIcon__icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -177,6 +217,30 @@ export function useWhiteboardUIAdjustments({
           freedrawBtn.parentElement.insertBefore(hlBtn, freedrawBtn.nextSibling);
         }
 
+        // Dedicated Style / Palette button to quickly toggle colors and stroke width
+        let styleBtn = container.querySelector('.custom-style-tool-btn') as HTMLButtonElement | null;
+        if (!styleBtn) {
+          styleBtn = document.createElement('button');
+          styleBtn.type = 'button';
+          styleBtn.className = 'custom-style-tool-btn';
+          styleBtn.title = 'Bảng màu & Cỡ nét vẽ';
+          styleBtn.setAttribute('aria-label', 'Bảng màu & Cỡ nét');
+
+          styleBtn.innerHTML = `
+            <div class="ToolIcon__icon">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+                <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+                <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+                <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+              </svg>
+            </div>
+          `;
+
+          hlBtn.parentElement?.insertBefore(styleBtn, hlBtn.nextSibling);
+        }
+
         // Sync active state on highlighter button
         if (isHighlighterModeRef.current && appState.activeTool?.type === 'freedraw') {
           hlBtn.classList.add('active');
@@ -185,6 +249,13 @@ export function useWhiteboardUIAdjustments({
           if (freedrawInput) freedrawInput.checked = false;
         } else {
           hlBtn.classList.remove('active');
+        }
+
+        // Sync active state on style button
+        if (isPropertiesOpenRef.current) {
+          styleBtn.classList.add('active');
+        } else {
+          styleBtn.classList.remove('active');
         }
       }
 
@@ -200,7 +271,7 @@ export function useWhiteboardUIAdjustments({
           eraserFieldset.style.cssText = 'border: none; padding: 4px 8px; margin: 4px 0; width: 100%;';
           eraserFieldset.innerHTML = `
             <legend style="font-size: 11px; font-weight: 700; opacity: 0.8; margin-bottom: 6px;">Độ lớn tẩy: <span class="eraser-val">${eraserSizeRef.current}px</span></legend>
-            <input type="range" min="6" max="64" step="2" value="${eraserSizeRef.current}" class="custom-eraser-slider" style="width: 100%; cursor: pointer;" />
+            <input type="range" min="6" max="80" step="2" value="${eraserSizeRef.current}" class="custom-eraser-slider" style="width: 100%; cursor: pointer;" />
           `;
 
           const slider = eraserFieldset.querySelector('.custom-eraser-slider') as HTMLInputElement | null;

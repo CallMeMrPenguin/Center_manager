@@ -9,19 +9,28 @@ import { useRightClickPan } from './hooks/useRightClickPan';
 import { useUniformPenPressure } from './hooks/useUniformPenPressure';
 import { useCustomEraser } from './hooks/useCustomEraser';
 import { useWhiteboardUIAdjustments } from './hooks/useWhiteboardUIAdjustments';
+import { EraserSizeBar } from './components/EraserSizeBar';
+import { TextBoxPlacementPreview } from './components/TextBoxPlacementPreview';
+import { RightClickPanIndicator } from './components/RightClickPanIndicator';
+import { Point } from './types';
 import { UploadCloud } from 'lucide-react';
 
 function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [excalidrawAPI, setExcalidrawAPI] = useState<any | null>(null);
-  const [strokeWidth, setStrokeWidth] = useState<number>(2);
+  const [strokeWidth, setStrokeWidth] = useState<number>(1.2);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
+
+  // Text tool placement preview state
+  const [textPreviewPos, setTextPreviewPos] = useState<Point | null>(null);
+  const [isTextToolActive, setIsTextToolActive] = useState<boolean>(false);
+  const [isTypingText, setIsTypingText] = useState<boolean>(false);
 
   // File import (Natural name sorting & 2-column wrapping layout)
   const { isImporting, processAndImportFiles } = useExcalidrawFileImporter(excalidrawAPI);
 
-  // Smooth stroke width slider in left sidebar
+  // Smooth stroke width slider in left sidebar (supports ultra-fine down to 0.2px)
   useSidebarStrokeSlider({
     containerRef,
     excalidrawAPI,
@@ -36,7 +45,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   });
 
   // Hold right-click to pan freely & suppress context menu
-  useRightClickPan({
+  const { isPanning } = useRightClickPan({
     containerRef,
     excalidrawAPI,
   });
@@ -53,13 +62,79 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
     excalidrawAPI,
   });
 
-  // Tool customization panel toggle, big paint brush highlighter & UI cleanups
+  // Tool customization panel toggle, big paint brush highlighter, style button & UI cleanups
   useWhiteboardUIAdjustments({
     containerRef,
     excalidrawAPI,
     eraserSize,
     setEraserSize,
+    strokeWidth,
   });
+
+  // Force Excalidraw canvas bounding rect refresh on tab active / resize to prevent coordinate shift
+  useEffect(() => {
+    if (isActive && excalidrawAPI) {
+      const timer = setTimeout(() => {
+        try {
+          excalidrawAPI.refresh();
+        } catch {
+          // Ignore if unmounted
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive, excalidrawAPI]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !excalidrawAPI) return;
+
+    const ro = new ResizeObserver(() => {
+      try {
+        excalidrawAPI.refresh();
+      } catch {
+        // Ignore if unmounted
+      }
+    });
+
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [excalidrawAPI]);
+
+  // Track cursor position for Text Box placement preview
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !excalidrawAPI) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const appState = excalidrawAPI.getAppState();
+      const isText = appState.activeTool?.type === 'text';
+      setIsTextToolActive(isText);
+
+      if (isText) {
+        const isWysiwygActive = !!container.querySelector('.excalidraw-wysiwyg');
+        setIsTypingText(isWysiwygActive);
+
+        if (!isWysiwygActive) {
+          const rect = container.getBoundingClientRect();
+          setTextPreviewPos({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          });
+        } else {
+          setTextPreviewPos(null);
+        }
+      } else {
+        setTextPreviewPos(null);
+        setIsTypingText(false);
+      }
+    };
+
+    container.addEventListener('pointermove', handlePointerMove, true);
+    return () => {
+      container.removeEventListener('pointermove', handlePointerMove, true);
+    };
+  }, [containerRef, excalidrawAPI]);
 
   // Intercept the native Image tool in Excalidraw's top toolbar to enable multi-file picker
   useEffect(() => {
@@ -197,7 +272,23 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
         </div>
       )}
 
-      {/* Custom Partial Vector Eraser visual circular cursor */}
+      {/* Floating Eraser Size Toolbar (Always accessible when eraser is active) */}
+      <EraserSizeBar
+        isVisible={isEraserActive}
+        size={eraserSize}
+        onSizeChange={setEraserSize}
+      />
+
+      {/* Text Box Placement Preview Tooltip */}
+      <TextBoxPlacementPreview
+        isVisible={isTextToolActive && !isTypingText}
+        pos={textPreviewPos}
+      />
+
+      {/* Right-click Pan Active indicator & bottom hint */}
+      <RightClickPanIndicator isPanning={isPanning} />
+
+      {/* Custom Partial Vector Eraser visual circular cursor (Red Circle only) */}
       {isEraserActive && cursorPos && (
         <div
           className="custom-eraser-circular-cursor"
@@ -216,7 +307,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
         langCode="vi-VN"
         gridModeEnabled={false}
         zenModeEnabled={false}
-        detectScroll={false}
+        detectScroll={true}
         autoFocus={false}
         initialData={{
           appState: {
@@ -227,7 +318,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
               lastActiveTool: null,
             } as any,
             currentItemRoughness: 0,
-            currentItemStrokeWidth: 2,
+            currentItemStrokeWidth: 1.2,
           },
         }}
         UIOptions={{
@@ -253,3 +344,4 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
 }
 
 export default memo(CanvasBoardPage);
+

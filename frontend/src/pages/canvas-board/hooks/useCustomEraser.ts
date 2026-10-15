@@ -56,12 +56,14 @@ export function useCustomEraser({ containerRef, excalidrawAPI }: UseCustomEraser
       setIsEraserActive(isEraser);
 
       if (isEraser) {
+        container.classList.add('eraser-active');
         const rect = container.getBoundingClientRect();
         setCursorPos({
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         });
       } else {
+        container.classList.remove('eraser-active');
         setCursorPos(null);
       }
 
@@ -162,18 +164,33 @@ export function useCustomEraser({ containerRef, excalidrawAPI }: UseCustomEraser
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea') return;
+      if (e.key === '[' || e.key === '{') {
+        e.preventDefault();
+        setEraserSize((prev) => Math.max(6, prev - 4));
+      } else if (e.key === ']' || e.key === '}') {
+        e.preventDefault();
+        setEraserSize((prev) => Math.min(80, prev + 4));
+      }
+    };
+
     container.addEventListener('pointerdown', handlePointerDown, true);
     window.addEventListener('pointermove', handlePointerMove, true);
     window.addEventListener('pointerup', handlePointerUp, true);
     window.addEventListener('pointercancel', handlePointerUp, true);
     container.addEventListener('pointerleave', handlePointerLeave);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      container.classList.remove('eraser-active');
       container.removeEventListener('pointerdown', handlePointerDown, true);
       window.removeEventListener('pointermove', handlePointerMove, true);
       window.removeEventListener('pointerup', handlePointerUp, true);
       window.removeEventListener('pointercancel', handlePointerUp, true);
       container.removeEventListener('pointerleave', handlePointerLeave);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [containerRef, excalidrawAPI]);
 
