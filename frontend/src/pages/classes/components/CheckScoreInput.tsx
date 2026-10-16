@@ -167,7 +167,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   });
 
   const commitValue = useCallback((rawVal: string, immediate = false) => {
-    const formatted = parseAndFormatScore(rawVal);
+    let cleanVal = rawVal;
+    if (cleanVal.startsWith('0') && !cleanVal.includes('.') && cleanVal.length >= 2 && cleanVal !== '00') {
+      cleanVal = `0.${cleanVal.slice(1)}`;
+    }
+    const formatted = parseAndFormatScore(cleanVal);
     setVal(formatted);
     lastCommittedRef.current = formatted;
     onUpdateRecord(rec.student_id, field, formatted, immediate);
@@ -285,13 +289,21 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       <input
         ref={inputRef}
         type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
         data-score-input="true"
         data-student-id={rec.student_id}
         data-score-field={field}
         data-row-index={rowIndex}
         value={val}
         onChange={(e) => {
-          const raw = e.target.value.replace(/[^0-9.,]/g, '');
+          let raw = e.target.value.replace(/[^0-9.,]/g, '');
+          if (raw.startsWith('0') && !raw.includes('.') && raw.length >= 2 && raw !== '00') {
+            raw = `0.${raw.slice(1)}`;
+          }
           setVal(raw);
           const parsed = parseAndFormatScore(raw);
           lastCommittedRef.current = parsed !== '' ? parsed : raw;

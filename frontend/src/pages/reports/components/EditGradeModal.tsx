@@ -5,6 +5,7 @@ import { showToast } from '../../../components/Toast';
 import { api } from '../../../api';
 import { notifyDataChanged } from '../../../utils';
 import { formatFullDate } from '../utils';
+import { parseAndFormatScore } from '../../classes/utils/attendanceHelpers';
 
 interface EditGradeModalProps {
   record: any | null;
@@ -44,11 +45,15 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
     e.preventDefault();
     setSaving(true);
     try {
-      const c1 = editCheck1.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck1.replace(',', '.')) || 0)) : null;
-      const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : null;
-      const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : null;
-      const hw2 = editHomework2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework2.replace(',', '.')) || 0)) : null;
-      const mock = editMockTest.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editMockTest.replace(',', '.')) || 0)) : null;
+      const parseVal = (str: string) => {
+        const formatted = parseAndFormatScore(str);
+        return formatted !== '' ? Math.max(0, Math.min(10, parseFloat(formatted) || 0)) : null;
+      };
+      const c1 = parseVal(editCheck1);
+      const c2 = parseVal(editCheck2);
+      const hw = parseVal(editHomework);
+      const hw2 = parseVal(editHomework2);
+      const mock = parseVal(editMockTest);
 
       await api.saveClassAttendance(record.class_id, record.date, [{
         student_id: record.student_id,
@@ -137,9 +142,20 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="0.0"
                 value={editCheck1}
-                onChange={(e) => setEditCheck1(e.target.value)}
+                onChange={(e) => {
+                  let v = e.target.value.replace(/[^0-9.,]/g, '');
+                  if (v.startsWith('0') && !v.includes('.') && v.length >= 2 && v !== '00') {
+                    v = `0.${v.slice(1)}`;
+                  }
+                  setEditCheck1(v);
+                }}
                 className="w-full bg-white border border-blue-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -150,9 +166,20 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="0.0"
                 value={editCheck2}
-                onChange={(e) => setEditCheck2(e.target.value)}
+                onChange={(e) => {
+                  let v = e.target.value.replace(/[^0-9.,]/g, '');
+                  if (v.startsWith('0') && !v.includes('.') && v.length >= 2 && v !== '00') {
+                    v = `0.${v.slice(1)}`;
+                  }
+                  setEditCheck2(v);
+                }}
                 className="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-purple-500"
               />
             </div>
@@ -163,9 +190,20 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="0.0"
                 value={editHomework}
-                onChange={(e) => setEditHomework(e.target.value)}
+                onChange={(e) => {
+                  let v = e.target.value.replace(/[^0-9.,]/g, '');
+                  if (v.startsWith('0') && !v.includes('.') && v.length >= 2 && v !== '00') {
+                    v = `0.${v.slice(1)}`;
+                  }
+                  setEditHomework(v);
+                }}
                 className="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-emerald-500"
               />
             </div>
@@ -176,9 +214,20 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="0.0"
                 value={editHomework2}
-                onChange={(e) => setEditHomework2(e.target.value)}
+                onChange={(e) => {
+                  let v = e.target.value.replace(/[^0-9.,]/g, '');
+                  if (v.startsWith('0') && !v.includes('.') && v.length >= 2 && v !== '00') {
+                    v = `0.${v.slice(1)}`;
+                  }
+                  setEditHomework2(v);
+                }}
                 className="w-full bg-white border border-teal-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-teal-500"
               />
             </div>
@@ -189,9 +238,20 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="0.0"
                 value={editMockTest}
-                onChange={(e) => setEditMockTest(e.target.value)}
+                onChange={(e) => {
+                  let v = e.target.value.replace(/[^0-9.,]/g, '');
+                  if (v.startsWith('0') && !v.includes('.') && v.length >= 2 && v !== '00') {
+                    v = `0.${v.slice(1)}`;
+                  }
+                  setEditMockTest(v);
+                }}
                 className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-amber-500"
               />
             </div>

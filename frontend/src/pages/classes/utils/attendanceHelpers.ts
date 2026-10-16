@@ -8,7 +8,10 @@ export function parseAndFormatScore(val: any): string {
 
   let numVal = parseFloat(valStr);
   if (numVal < 0) return '';
-  if (numVal > 10) {
+  if (valStr.startsWith('0') && !valStr.includes('.') && valStr.length >= 2 && valStr !== '00') {
+    const sub = valStr.slice(1);
+    numVal = parseFloat(`0.${sub}`);
+  } else if (numVal > 10) {
     if (valStr.startsWith('10')) {
       numVal = 10;
     } else {

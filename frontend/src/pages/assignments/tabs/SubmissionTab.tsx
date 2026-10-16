@@ -57,10 +57,14 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
   }, []);
 
   const handleScoreChange = useCallback((studentId: number, val: string) => {
+    let cleanVal = val.trim().replace(',', '.');
+    if (cleanVal.startsWith('0') && !cleanVal.includes('.') && cleanVal.length >= 2 && cleanVal !== '00') {
+      cleanVal = `0.${cleanVal.slice(1)}`;
+    }
     setLocalList((prev) =>
       prev.map((item) => {
         if (item.student_id === studentId) {
-          const num = val === '' ? null : Math.max(0, Math.min(100, parseFloat(val) || 0));
+          const num = cleanVal === '' ? null : Math.max(0, Math.min(100, parseFloat(cleanVal) || 0));
           return { ...item, score: num };
         }
         return item;
@@ -182,10 +186,12 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
         header: 'Điểm Lần Cuối',
         cell: ({ row }) => (
           <input
-            type="number"
-            min="0"
-            max={assignment?.max_score || 10}
-            step="0.1"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
             value={row.original.score !== null && row.original.score !== undefined ? row.original.score : ''}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => handleScoreChange(row.original.student_id, e.target.value)}
