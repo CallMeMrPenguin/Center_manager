@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Code2, Copy } from 'lucide-react';
-import { CustomDatePicker, MonthGridPicker } from '../../../components/datepicker';
+import { Calendar as CalendarIcon, Clock, Code2, Copy, CalendarRange } from 'lucide-react';
+import { CustomDatePicker, CustomDateRangePicker, MonthGridPicker, DateRangeValue } from '../../../components/datepicker';
 import { CustomTimePicker } from '../../../components/timepicker';
 import { showToast } from '../../../components/Toast';
 import { dateTimeSources } from '../sources/dateTimeSources';
@@ -12,12 +12,17 @@ interface DateTimeDemoViewProps {
 
 export const DateTimeDemoView: React.FC<DateTimeDemoViewProps> = ({ onViewCode }) => {
   const [date, setDate] = useState('2026-10-19');
+  const [dateRange, setDateRange] = useState<DateRangeValue | null>({
+    startStr: '2026-10-12',
+    endStr: '2026-10-19',
+  });
   const [time, setTime] = useState('18:00');
   const [month, setMonth] = useState('2026-10');
   const [year, setYear] = useState(2026);
 
-  const dateSource = dateTimeSources[0]; // CustomDatePicker
-  const timeSource = dateTimeSources[1]; // CustomTimePicker
+  const dateSource = dateTimeSources[0];      // CustomDatePicker
+  const rangeSource = dateTimeSources[1];     // CustomDateRangePicker
+  const timeSource = dateTimeSources[2];      // CustomTimePicker
 
   return (
     <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm space-y-8">
@@ -26,38 +31,39 @@ export const DateTimeDemoView: React.FC<DateTimeDemoViewProps> = ({ onViewCode }
         <div>
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <CalendarIcon size={18} className="text-blue-600 dark:text-blue-400" />
-            <span>Bộ Chọn Ngày & Giờ (CustomDatePicker & CustomTimePicker)</span>
+            <span>Bộ Chọn Ngày, Khoảng Ngày & Giờ (DatePicker, DateRangePicker & TimePicker)</span>
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Bộ chọn thời gian chuyên nghiệp tuân thủ AGENTS.md Rule 2.4 & Rule 6: Không dùng input native của OS, hỗ trợ highlight ngày học, con lăn giờ 24h mượt mà.
+            Bộ chọn thời gian nâng cao theo AGENTS.md Rule 2.4 & Rule 6: Không dùng input native OS, hỗ trợ chọn khoảng ngày có hiệu ứng ruy băng trượt (hover ribbon connectors) và con lăn giờ 24h.
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => onViewCode(dateSource)}
+            onClick={() => onViewCode(rangeSource)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition cursor-pointer border-0 shadow-2xs"
           >
             <Code2 size={13} />
-            <span>Mã Nguồn (CustomDatePicker.tsx)</span>
+            <span>Mã Nguồn (CustomDateRangePicker.tsx)</span>
           </button>
         </div>
       </div>
 
-      {/* Grid of Date, Time and Month Picker */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* 1. Custom Date Picker */}
+      {/* Grid of Date, Range, Time and Month Picker */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 1. Custom Date Range Picker */}
         <div className="p-5 bg-slate-50 dark:bg-[#0c0f1e] rounded-2xl border border-slate-100 dark:border-white/5 space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
-              1. CustomDatePicker
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <CalendarRange size={14} className="text-blue-600" />
+              <span>1. Range Picker</span>
             </h4>
             <button
               type="button"
               onClick={() => {
-                navigator.clipboard.writeText(dateSource.usageCode);
-                showToast('Đã chép ví dụ sử dụng CustomDatePicker!', 'success');
+                navigator.clipboard.writeText(rangeSource.usageCode);
+                showToast('Đã chép ví dụ sử dụng CustomDateRangePicker!', 'success');
               }}
               className="text-xs font-bold text-blue-600 hover:underline border-0 bg-transparent cursor-pointer"
             >
@@ -66,7 +72,48 @@ export const DateTimeDemoView: React.FC<DateTimeDemoViewProps> = ({ onViewCode }
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs text-slate-500 block">Chọn ngày học (Highlight T2, T4, T6):</label>
+            <label className="text-xs text-slate-500 block">Chọn khoảng ngày (Hiệu ứng hover ruy băng):</label>
+            <CustomDateRangePicker
+              value={dateRange}
+              onChange={setDateRange}
+              placeholder="Chọn khoảng ngày..."
+            />
+          </div>
+
+          <div className="p-2.5 bg-white dark:bg-white/5 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-300">
+            Khoảng ngày: <span className="font-bold text-blue-600">{dateRange ? `${dateRange.startStr} → ${dateRange.endStr}` : 'Chưa chọn'}</span>
+          </div>
+        </div>
+
+        {/* 2. Custom Date Picker */}
+        <div className="p-5 bg-slate-50 dark:bg-[#0c0f1e] rounded-2xl border border-slate-100 dark:border-white/5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
+              2. Single DatePicker
+            </h4>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(dateSource.usageCode);
+                  showToast('Đã chép ví dụ sử dụng CustomDatePicker!', 'success');
+                }}
+                className="text-xs font-bold text-blue-600 hover:underline border-0 bg-transparent cursor-pointer"
+              >
+                Chép cách dùng
+              </button>
+              <button
+                type="button"
+                onClick={() => onViewCode(dateSource)}
+                className="text-xs font-bold text-blue-600 hover:underline border-0 bg-transparent cursor-pointer"
+              >
+                Mã nguồn
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-slate-500 block">Chọn ngày học (Có hover glow):</label>
             <CustomDatePicker
               value={date}
               onChange={setDate}
@@ -76,15 +123,15 @@ export const DateTimeDemoView: React.FC<DateTimeDemoViewProps> = ({ onViewCode }
           </div>
 
           <div className="p-2.5 bg-white dark:bg-white/5 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-300">
-            Giá trị ISO: <span className="font-bold text-blue-600">{date}</span>
+            Ngày đã chọn: <span className="font-bold text-blue-600">{date}</span>
           </div>
         </div>
 
-        {/* 2. Custom Time Picker */}
+        {/* 3. Custom Time Picker */}
         <div className="p-5 bg-slate-50 dark:bg-[#0c0f1e] rounded-2xl border border-slate-100 dark:border-white/5 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
-              2. CustomTimePicker
+              3. CustomTimePicker
             </h4>
             <div className="flex items-center gap-2">
               <button
@@ -117,15 +164,15 @@ export const DateTimeDemoView: React.FC<DateTimeDemoViewProps> = ({ onViewCode }
           </div>
 
           <div className="p-2.5 bg-white dark:bg-white/5 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-300">
-            Giá trị 24h: <span className="font-bold text-blue-600">{time}</span>
+            Giờ 24h: <span className="font-bold text-blue-600">{time}</span>
           </div>
         </div>
 
-        {/* 3. Month Grid Picker */}
+        {/* 4. Month Grid Picker */}
         <div className="p-5 bg-slate-50 dark:bg-[#0c0f1e] rounded-2xl border border-slate-100 dark:border-white/5 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
-              3. MonthGridPicker
+              4. MonthGridPicker
             </h4>
             <span className="text-[11px] font-mono text-slate-400">12 Tháng / Năm</span>
           </div>

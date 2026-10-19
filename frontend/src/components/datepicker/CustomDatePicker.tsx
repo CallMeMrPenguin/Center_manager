@@ -280,7 +280,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                           title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                         >
                           {!item.isSelected && (
-                            <div className="absolute inset-0.5 rounded-xl bg-slate-100 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none" />
+                            <div className="absolute inset-0.5 rounded-xl bg-blue-50 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none group-hover:scale-105" />
                           )}
 
                           {item.isSelected && (
