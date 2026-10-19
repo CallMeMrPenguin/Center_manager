@@ -229,10 +229,14 @@ export function useExcalidrawFileImporter(excalidrawAPI: any | null) {
         // 1. Add binary file payloads to Excalidraw cache
         excalidrawAPI.addFiles(binaryFiles);
 
-        // 2. Add image elements to scene
+        // 2. Add image elements to scene and set activeTool to freedraw so user can draw immediately
         const existing = excalidrawAPI.getSceneElements();
         excalidrawAPI.updateScene({
           elements: [...existing, ...newElements],
+          appState: {
+            activeTool: { type: 'freedraw', locked: true },
+            selectedElementIds: {},
+          },
           commitToHistory: true,
         });
 

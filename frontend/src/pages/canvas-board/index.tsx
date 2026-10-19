@@ -3,15 +3,15 @@ import { Excalidraw, MainMenu } from '@excalidraw/excalidraw';
 import '@excalidraw/excalidraw/index.css';
 import './canvasBoardOverrides.css';
 import { useExcalidrawFileImporter } from './hooks/useExcalidrawFileImporter';
-import { useSidebarStrokeSlider } from './hooks/useSidebarStrokeSlider';
+import { useSidebarStrokeSlider, toActualStrokeWidth } from './hooks/useSidebarStrokeSlider';
 import { useImageStrokeBinder } from './hooks/useImageStrokeBinder';
 import { useRightClickPan } from './hooks/useRightClickPan';
 import { useUniformPenPressure } from './hooks/useUniformPenPressure';
 import { useCustomEraser } from './hooks/useCustomEraser';
 import { useWhiteboardUIAdjustments } from './hooks/useWhiteboardUIAdjustments';
+import { useWhiteboardFullscreen } from './hooks/useWhiteboardFullscreen';
 import { EraserSizeBar } from './components/EraserSizeBar';
 import { TextBoxPlacementPreview } from './components/TextBoxPlacementPreview';
-import { RightClickPanIndicator } from './components/RightClickPanIndicator';
 import { Point } from './types';
 import { UploadCloud } from 'lucide-react';
 
@@ -45,7 +45,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   });
 
   // Hold right-click to pan freely & suppress context menu
-  const { isPanning } = useRightClickPan({
+  useRightClickPan({
     containerRef,
     excalidrawAPI,
   });
@@ -69,6 +69,12 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
     eraserSize,
     setEraserSize,
     strokeWidth,
+  });
+
+  // Fullscreen expansion (hides sidetabs & expands canvas board with matching toolbar button)
+  useWhiteboardFullscreen({
+    containerRef,
+    excalidrawAPI,
   });
 
   // Force Excalidraw canvas bounding rect refresh on tab active / resize to prevent coordinate shift
@@ -285,9 +291,6 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
         pos={textPreviewPos}
       />
 
-      {/* Right-click Pan Active indicator & bottom hint */}
-      <RightClickPanIndicator isPanning={isPanning} />
-
       {/* Custom Partial Vector Eraser visual circular cursor (Red Circle only) */}
       {isEraserActive && cursorPos && (
         <div
@@ -318,7 +321,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
               lastActiveTool: null,
             } as any,
             currentItemRoughness: 0,
-            currentItemStrokeWidth: 1,
+            currentItemStrokeWidth: toActualStrokeWidth(1),
           },
         }}
         UIOptions={{

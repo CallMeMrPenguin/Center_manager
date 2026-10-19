@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { toActualStrokeWidth } from './useSidebarStrokeSlider';
 
 interface UseWhiteboardUIAdjustmentsProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -12,9 +13,10 @@ interface UseWhiteboardUIAdjustmentsProps {
  * Manages UI adjustments for Whiteboard:
  * 1. Toggles properties panel on clicking the Style button or re-clicking the active tool.
  * 2. Injects big paint brush Highlighter button and dedicated Style button next to Pencil.
- * 3. Enforces keep-selected-tool-active (tool lock always on).
- * 4. Injects eraser size slider into properties panel when eraser is selected.
- * 5. Safely hides Sloppiness controls without hiding Stroke color picker.
+ * 3. Injects Fullscreen expand/collapse button into toolbar (hiding sidetab and expanding to full screen).
+ * 4. Enforces keep-selected-tool-active (tool lock always on).
+ * 5. Injects eraser size slider into properties panel when eraser is selected.
+ * 6. Safely hides Sloppiness controls without hiding Stroke color picker.
  */
 export function useWhiteboardUIAdjustments({
   containerRef,
@@ -60,12 +62,17 @@ export function useWhiteboardUIAdjustments({
       if (next && excalidrawAPI) {
         const appState = excalidrawAPI.getAppState();
         const selectedIds = appState.selectedElementIds || {};
-        const hasSelection = Object.keys(selectedIds).some((id: string) => selectedIds[id]);
-        if (!hasSelection && appState.activeTool?.type === 'selection') {
-          // Switch to freedraw so stroke color and width are immediately visible
+        const elements = excalidrawAPI.getSceneElements?.() || [];
+        const hasImageSelected = elements.some((el: any) => selectedIds[el.id] && el.type === 'image');
+        const hasStrokeElements = elements.some((el: any) => selectedIds[el.id] && el.type !== 'image');
+
+        // If an image is selected or no stroke-editable elements are selected or tool is not freedraw:
+        // Clear image selection and activate freedraw so stroke width & color settings are 100% visible!
+        if (hasImageSelected || !hasStrokeElements || appState.activeTool?.type !== 'freedraw') {
           excalidrawAPI.updateScene({
             appState: {
               activeTool: { type: 'freedraw', locked: true },
+              selectedElementIds: {},
             },
           });
         }
@@ -136,7 +143,7 @@ export function useWhiteboardUIAdjustments({
             appState: {
               activeTool: { type: 'freedraw', locked: true },
               currentItemOpacity: 100,
-              currentItemStrokeWidth: strokeWidthRef.current || 1.2,
+              currentItemStrokeWidth: toActualStrokeWidth(strokeWidthRef.current || 1),
             },
           });
         }
@@ -270,7 +277,7 @@ export function useWhiteboardUIAdjustments({
           eraserFieldset.className = 'custom-eraser-size-fieldset';
           eraserFieldset.style.cssText = 'border: none; padding: 4px 8px; margin: 4px 0; width: 100%;';
           eraserFieldset.innerHTML = `
-            <legend style="font-size: 11px; font-weight: 700; opacity: 0.8; margin-bottom: 6px;">Độ lớn tẩy: <span class="eraser-val">${eraserSizeRef.current}px</span></legend>
+            <legend style="font-size: 11px; font-weight: 700; opacity: 0.8; margin-bottom: 6px;">Kích thước: <span class="eraser-val">${eraserSizeRef.current}px</span></legend>
             <input type="range" min="6" max="80" step="2" value="${eraserSizeRef.current}" class="custom-eraser-slider" style="width: 100%; cursor: pointer;" />
           `;
 

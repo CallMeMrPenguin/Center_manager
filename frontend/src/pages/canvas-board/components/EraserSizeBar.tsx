@@ -19,9 +19,8 @@ export const EraserSizeBar = memo(function EraserSizeBar({
       onPointerDown={(e) => e.stopPropagation()}
       className="custom-eraser-size-bar absolute top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-3.5 py-2 bg-white dark:bg-[#121626] rounded-2xl shadow-lg border-0 select-none animate-in fade-in zoom-in-95 duration-150"
     >
-      <div className="flex items-center gap-1.5 text-red-500 font-bold text-xs shrink-0">
-        <Eraser size={16} strokeWidth={2.4} />
-        <span>Cỡ tẩy:</span>
+      <div className="flex items-center text-red-500 font-bold text-xs shrink-0">
+        <span>Kích thước:</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -34,7 +33,7 @@ export const EraserSizeBar = memo(function EraserSizeBar({
           onPointerDown={(e) => e.stopPropagation()}
           onChange={(e) => onSizeChange(parseInt(e.target.value, 10) || 24)}
           className="w-32 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500"
-          title={`Cỡ tẩy: ${size}px (Phím tắt: [ hoặc ])`}
+          title={`Kích thước: ${size}px (Phím tắt: [ hoặc ])`}
         />
         <div className="flex items-center gap-1">
           <input
@@ -52,15 +51,6 @@ export const EraserSizeBar = memo(function EraserSizeBar({
           <span className="text-[11px] font-mono font-semibold text-slate-400">px</span>
         </div>
       </div>
-
-      <div
-        className="rounded-full shrink-0 border-0 bg-red-500/30"
-        style={{
-          width: Math.min(24, Math.max(6, size / 3)),
-          height: Math.min(24, Math.max(6, size / 3)),
-        }}
-        title={`Xem trước kích thước: ${size}px`}
-      />
     </div>
   );
 });

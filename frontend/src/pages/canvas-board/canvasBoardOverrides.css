@@ -38,9 +38,10 @@
   display: none !important;
 }
 
-/* 5. Custom Highlighter & Style buttons in top toolbar matching native Excalidraw button styling */
+/* 5. Custom Highlighter, Style & Fullscreen buttons in top toolbar matching native Excalidraw button styling */
 .custom-highlighter-tool-btn,
-.custom-style-tool-btn {
+.custom-style-tool-btn,
+.custom-fullscreen-tool-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -55,7 +56,8 @@
 }
 
 .custom-highlighter-tool-btn .ToolIcon__icon,
-.custom-style-tool-btn .ToolIcon__icon {
+.custom-style-tool-btn .ToolIcon__icon,
+.custom-fullscreen-tool-btn .ToolIcon__icon {
   width: var(--lg-button-size, 2.25rem);
   height: var(--lg-button-size, 2.25rem);
   display: flex;
@@ -67,14 +69,31 @@
 }
 
 .custom-highlighter-tool-btn:hover .ToolIcon__icon,
-.custom-style-tool-btn:hover .ToolIcon__icon {
+.custom-style-tool-btn:hover .ToolIcon__icon,
+.custom-fullscreen-tool-btn:hover .ToolIcon__icon {
   background: var(--button-hover-bg, rgba(0, 0, 0, 0.05));
 }
 
 .custom-highlighter-tool-btn.active .ToolIcon__icon,
-.custom-style-tool-btn.active .ToolIcon__icon {
+.custom-style-tool-btn.active .ToolIcon__icon,
+.custom-fullscreen-tool-btn.active .ToolIcon__icon {
   background: var(--color-surface-primary-container, #e0e7ff);
   color: var(--color-on-primary-container, #3730a3);
+}
+
+/* 5b. Hide Excalidraw hint viewer ("Click and drag, release when you're finished") */
+.canvas-board-wrapper .HintViewer,
+.canvas-board-wrapper .footer-center .HintViewer {
+  display: none !important;
+}
+
+/* 5c. Fullscreen mode: overlay entire screen and hide sidetab, header and footer */
+.canvas-board-wrapper.whiteboard-fullscreen-mode {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
 }
 
 /* 6. Partial Vector Eraser visual circular cursor (Soft Red Circle, No Hard Border) */

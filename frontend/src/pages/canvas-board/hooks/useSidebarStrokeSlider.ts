@@ -7,6 +7,10 @@ interface UseSidebarStrokeSliderProps {
   setStrokeWidth: (w: number) => void;
 }
 
+export const STROKE_SCALE = 0.35;
+export const toActualStrokeWidth = (uiVal: number) => Number((uiVal * STROKE_SCALE).toFixed(2));
+export const fromActualStrokeWidth = (actual: number) => Math.max(1, Math.round((actual / STROKE_SCALE) * 10) / 10);
+
 /**
  * Injects a smooth stroke width range slider into Excalidraw's left sidebar settings,
  * matching 100% the layout, classes and visual styling of Excalidraw's native Opacity slider.
@@ -59,23 +63,24 @@ export function useSidebarStrokeSlider({
       setStrokeWidthRef.current(val);
       const api = excalidrawAPIRef.current;
       if (api) {
+        const actualWidth = toActualStrokeWidth(val);
         const appState = api.getAppState();
         const selectedIds = appState.selectedElementIds || {};
         const hasSelection = Object.keys(selectedIds).some((id: string) => selectedIds[id]);
 
         if (hasSelection) {
           const elements = api.getSceneElements().map((el: any) => {
-            if (selectedIds[el.id]) return { ...el, strokeWidth: val };
+            if (selectedIds[el.id] && el.type !== 'image') return { ...el, strokeWidth: actualWidth };
             return el;
           });
           api.updateScene({
             elements,
-            appState: { currentItemStrokeWidth: val },
+            appState: { currentItemStrokeWidth: actualWidth },
             commitToHistory: true,
           });
         } else {
           api.updateScene({
-            appState: { currentItemStrokeWidth: val },
+            appState: { currentItemStrokeWidth: actualWidth },
           });
         }
       }
