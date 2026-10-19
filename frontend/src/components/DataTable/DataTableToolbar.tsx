@@ -31,8 +31,8 @@ interface DataTableToolbarProps<TData> {
   onMoveColumn?: (colId: string, direction: 'up' | 'down') => void;
   onExportExcel?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[] }) => void;
   onExportDocx?: () => void;
-  onExportPdf?: () => void;
-  onExportPng?: () => void;
+  onExportPdf?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[]; headers?: string[] }) => void;
+  onExportPng?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[]; headers?: string[] }) => void;
 }
 
 export function DataTableToolbar<TData>({

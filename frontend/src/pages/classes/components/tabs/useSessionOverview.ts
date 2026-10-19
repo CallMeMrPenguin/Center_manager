@@ -119,21 +119,22 @@ export function useSessionOverview(attendanceRecords: AttendanceRecord[]) {
     attendanceRecords.forEach((rec) => {
       if (rec.status === 'Vắng mặt') return;
 
+      // Điểm > 8.0 dù thấp hơn trung bình lớp vẫn được coi là Đạt yêu cầu
       if (rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '') {
         const val = Number(rec.check_1);
-        if (!isNaN(val) && val < threshC1) {
+        if (!isNaN(val) && val < threshC1 && val <= 8.0) {
           belowC1.push({ student_id: rec.student_id, student_name: rec.student_name, score: val });
         }
       }
       if (rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '') {
         const val = Number(rec.check_2);
-        if (!isNaN(val) && val < threshC2) {
+        if (!isNaN(val) && val < threshC2 && val <= 8.0) {
           belowC2.push({ student_id: rec.student_id, student_name: rec.student_name, score: val });
         }
       }
       if (rec.homework !== null && rec.homework !== undefined && rec.homework !== '') {
         const val = Number(rec.homework);
-        if (!isNaN(val) && val < threshHw) {
+        if (!isNaN(val) && val < threshHw && val <= 8.0) {
           belowHw.push({ student_id: rec.student_id, student_name: rec.student_name, score: val });
         }
       }

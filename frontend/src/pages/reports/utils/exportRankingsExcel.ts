@@ -1,6 +1,36 @@
 import { getStudentTier } from '../types';
-import { format1Dec, trunc1Dec, formatExportTimestamp } from '../../../utils';
+import { format1Dec, formatExportTimestamp } from '../../../utils';
 import { computeStudentOverallScore } from '../utils';
+
+export const RANKINGS_COLUMN_ALIASES: Record<string, string> = {
+  stt: 'stt',
+  full_name: 'full_name',
+  name: 'full_name',
+  class_name: 'class_name',
+  class: 'class_name',
+  sessions_count: 'sessions_count',
+  present_count: 'present_count',
+  attendance: 'present_count',
+  avg_vocab: 'avg_vocab',
+  c1: 'avg_vocab',
+  vocab: 'avg_vocab',
+  avg_grammar: 'avg_grammar',
+  c2: 'avg_grammar',
+  grammar: 'avg_grammar',
+  avg_homework: 'avg_homework',
+  hw1: 'avg_homework',
+  homework: 'avg_homework',
+  avg_homework_2: 'avg_homework_2',
+  hw2: 'avg_homework_2',
+  homework_2: 'avg_homework_2',
+  trend_sparkline: 'trend_sparkline',
+  trend: 'trend_sparkline',
+  rankTier: 'rankTier',
+  rank: 'rankTier',
+  overallAvg: 'overallAvg',
+  score: 'overallAvg',
+  eval: 'overallAvg',
+};
 
 export async function exportRankingsExcel({
   classes,
@@ -32,11 +62,41 @@ export async function exportRankingsExcel({
           return total > 0 ? `${Math.round((present / total) * 100)}%` : '100%';
         },
       },
-      c1: { header: 'Từ Vựng', getValue: (r) => { const v = Number(r.avg_vocab ?? r.avg_check_1 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
-      c2: { header: 'Ngữ Pháp', getValue: (r) => { const v = Number(r.avg_grammar ?? r.avg_check_2 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
-      hw1: { header: 'BTVN 1', getValue: (r) => { const v = Number(r.avg_homework ?? r.avg_homework_1 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
-      hw2: { header: 'BTVN 2', getValue: (r) => { const v = Number(r.avg_homework_2 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
-      trend_sparkline: { header: 'Xu Hướng', getValue: (r) => Number(r.trend_slope || 0) > 0 ? `+${format1Dec(Number(r.trend_slope))}/buổi` : `${format1Dec(Number(r.trend_slope || 0))}/buổi` },
+      avg_vocab: {
+        header: 'Từ Vựng',
+        getValue: (r) => {
+          const v = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+          return v > 0 ? format1Dec(v) : '-';
+        },
+      },
+      avg_grammar: {
+        header: 'Ngữ Pháp',
+        getValue: (r) => {
+          const v = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
+          return v > 0 ? format1Dec(v) : '-';
+        },
+      },
+      avg_homework: {
+        header: 'BTVN 1',
+        getValue: (r) => {
+          const v = Number(r.avg_homework ?? r.avg_homework_1 ?? 0);
+          return v > 0 ? format1Dec(v) : '-';
+        },
+      },
+      avg_homework_2: {
+        header: 'BTVN 2',
+        getValue: (r) => {
+          const v = Number(r.avg_homework_2 ?? 0);
+          return v > 0 ? format1Dec(v) : '-';
+        },
+      },
+      trend_sparkline: {
+        header: 'Xu Hướng',
+        getValue: (r) =>
+          Number(r.trend_slope || 0) > 0
+            ? `+${format1Dec(Number(r.trend_slope))}/buổi`
+            : `${format1Dec(Number(r.trend_slope || 0))}/buổi`,
+      },
       rankTier: {
         header: 'Hạng',
         getValue: (r) => {
@@ -53,15 +113,19 @@ export async function exportRankingsExcel({
       },
     };
 
+    // Filter strictly by visible columns and preserve their exact order
     let activeColDefs: Array<{ header: string; getValue: (r: any, idx: number) => any }> = [];
     if (visibleColumnIds && visibleColumnIds.length > 0) {
       visibleColumnIds.forEach((id) => {
-        if (ALL_COLS[id]) activeColDefs.push(ALL_COLS[id]);
+        const canonical = RANKINGS_COLUMN_ALIASES[id.toLowerCase().trim()] || id;
+        if (ALL_COLS[canonical] && !activeColDefs.includes(ALL_COLS[canonical])) {
+          activeColDefs.push(ALL_COLS[canonical]);
+        }
       });
     }
 
     if (activeColDefs.length === 0) {
-      const defaultOrder = ['stt', 'full_name', 'class_name', 'sessions_count', 'present_count', 'c1', 'c2', 'hw1', 'hw2', 'overallAvg'];
+      const defaultOrder = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'trend_sparkline', 'rankTier', 'overallAvg'];
       activeColDefs = defaultOrder.map((id) => ALL_COLS[id]).filter(Boolean);
     }
 
@@ -80,15 +144,17 @@ export async function exportRankingsExcel({
           headerRow: true,
           totalsRow: false,
           style: { theme: 'TableStyleMedium13', showRowStripes: true },
-          columns: headers.map(h => ({ name: h, filterButton: true })),
-          rows: rows.map(r => r.map(val => {
-            if (val === null || val === undefined) return '';
-            if (typeof val === 'object' && (val as any).formula) return val;
-            if (typeof val === 'number') return val;
-            const num = Number(val);
-            if (!isNaN(num) && String(val).trim() === String(num)) return num;
-            return val;
-          })),
+          columns: headers.map((h) => ({ name: h, filterButton: true })),
+          rows: rows.map((r) =>
+            r.map((val) => {
+              if (val === null || val === undefined) return '';
+              if (typeof val === 'object' && (val as any).formula) return val;
+              if (typeof val === 'number') return val;
+              const num = Number(val);
+              if (!isNaN(num) && String(val).trim() === String(num)) return num;
+              return val;
+            })
+          ),
         });
 
         worksheet.eachRow((row, rowNumber) => {
@@ -103,7 +169,7 @@ export async function exportRankingsExcel({
 
         worksheet.columns.forEach((col, colIdx) => {
           let maxLen = String(headers[colIdx] || '').length;
-          rows.forEach(r => {
+          rows.forEach((r) => {
             const cellVal = String(r[colIdx] ?? '');
             if (cellVal.length > maxLen) maxLen = cellVal.length;
           });
@@ -115,14 +181,14 @@ export async function exportRankingsExcel({
     if (!selectedClassId) {
       addClassSheet('Tất Cả Lớp', studentRankings);
       const groups: Record<string, any[]> = {};
-      studentRankings.forEach(r => {
+      studentRankings.forEach((r) => {
         const cName = r.class_name || 'Khác';
         if (!groups[cName]) groups[cName] = [];
         groups[cName].push(r);
       });
-      Object.keys(groups).sort().forEach(cName => addClassSheet(cName, groups[cName]));
+      Object.keys(groups).sort().forEach((cName) => addClassSheet(cName, groups[cName]));
     } else {
-      const selClassObj = classes.find(c => String(c.id) === selectedClassId);
+      const selClassObj = classes.find((c) => String(c.id) === selectedClassId);
       const name = selClassObj?.class_name || 'Bảng Xếp Hạng';
       addClassSheet(name, filteredRankings);
     }
@@ -137,6 +203,6 @@ export async function exportRankingsExcel({
     a.click();
     URL.revokeObjectURL(url);
   } catch (err: any) {
-    console.error("Lỗi xuất Excel xếp hạng:", err);
+    console.error('Lỗi xuất Excel xếp hạng:', err);
   }
 }

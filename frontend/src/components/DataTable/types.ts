@@ -79,8 +79,8 @@ export interface DataTableProps<TData> {
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactNode;
   onExportExcel?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[] }) => void;
   onExportDocx?: () => void;
-  onExportPdf?: () => void;
-  onExportPng?: () => void;
+  onExportPdf?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[]; headers?: string[] }) => void;
+  onExportPng?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[]; headers?: string[] }) => void;
 
   // Toolbar slots
   toolbarLeft?: React.ReactNode;

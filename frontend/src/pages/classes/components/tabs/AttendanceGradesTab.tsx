@@ -53,7 +53,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
     onOpenStudentActionModal,
   });
 
-  const handleExportExcelWithThresholds = (info?: { visibleColumnIds?: string[] }) => {
+  const getResolvedVisibleColumns = (info?: { visibleColumnIds?: string[] }) => {
     let visibleColumnIds = info?.visibleColumnIds;
     if (!visibleColumnIds || visibleColumnIds.length === 0) {
       try {
@@ -68,7 +68,11 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         }
       } catch (e) {}
     }
+    return visibleColumnIds;
+  };
 
+  const handleExportExcelWithThresholds = (info?: { visibleColumnIds?: string[] }) => {
+    const visibleColumnIds = getResolvedVisibleColumns(info);
     onExportExcel({
       check_1: sessionOverview.threshC1,
       check_2: sessionOverview.threshC2,
@@ -78,14 +82,36 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
     });
   };
 
-  const handleExportPng = async () => {
+  const handleExportPng = async (info?: { visibleColumnIds?: string[] }) => {
     if (onSaveAttendance) {
       await onSaveAttendance();
     }
+    const visibleColumnIds = getResolvedVisibleColumns(info);
     await exportClassReportPng({
       classItem: selectedClass,
       attendanceDate,
       records: attendanceRecords,
+      visibleColumns: visibleColumnIds,
+      thresholds: {
+        check_1: sessionOverview.threshC1,
+        check_2: sessionOverview.threshC2,
+        homework: sessionOverview.threshHw,
+        divergence: sessionOverview.divergenceMin,
+      },
+    });
+  };
+
+  const handleExportPdf = async (info?: { visibleColumnIds?: string[] }) => {
+    if (onSaveAttendance) {
+      await onSaveAttendance();
+    }
+    const visibleColumnIds = getResolvedVisibleColumns(info);
+    await exportClassReportPng({
+      classItem: selectedClass,
+      attendanceDate,
+      records: attendanceRecords,
+      visibleColumns: visibleColumnIds,
+      asPdf: true,
       thresholds: {
         check_1: sessionOverview.threshC1,
         check_2: sessionOverview.threshC2,
@@ -139,6 +165,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
           onExportExcel={handleExportExcelWithThresholds}
           onExportPng={handleExportPng}
+          onExportPdf={handleExportPdf}
           onExportDocx={onExportDocx}
           toolbarRight={
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

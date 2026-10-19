@@ -1,14 +1,11 @@
-import React, { useMemo, useCallback } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import React, { useCallback } from 'react';
 import { GraduationCap } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { CustomSelect } from '../../../components/CustomSelect';
-import { MiniTrendSparkline } from './MiniTrendSparkline';
-import { getStudentTier } from '../types';
-import { format1Dec, trunc1Dec } from '../../../utils';
 import { exportRankingsExcel } from '../utils/exportRankingsExcel';
+import { exportRankingsVisual } from '../utils/exportRankingsVisual';
 import { DistributionScoreBin } from '../utils/distributionAnalytics';
-import { computeStudentOverallScore } from '../utils';
+import { useRankingColumns } from './useRankingColumns';
 
 interface StudentRankingsTableProps {
   loading: boolean;
@@ -41,7 +38,9 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
   selectedScoreBin,
   onClearScoreBin,
 }) => {
-  const handleExportRankingsExcel = useCallback((info?: { visibleColumnIds?: string[] }) => {
+  const { rankingColumns } = useRankingColumns({ studentSessionsMap, selectedStudentId });
+
+  const getResolvedVisibleCols = (info?: { visibleColumnIds?: string[] }) => {
     let visibleColumnIds = info?.visibleColumnIds;
     if (!visibleColumnIds || visibleColumnIds.length === 0) {
       try {
@@ -50,13 +49,17 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           const parsed = JSON.parse(layout);
           const vis = parsed.visibility || {};
           const ord: string[] = parsed.order || [];
-          const defaultCols = ['stt', 'full_name', 'class_name', 'present_count', 'c1', 'c2', 'hw1', 'hw2', 'trend_sparkline', 'rankTier', 'overallAvg'];
+          const defaultCols = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'trend_sparkline', 'rankTier', 'overallAvg'];
           const baseOrder = ord.length ? ord : defaultCols;
           visibleColumnIds = baseOrder.filter((id) => vis[id] !== false && defaultCols.includes(id));
         }
       } catch (e) {}
     }
+    return visibleColumnIds;
+  };
 
+  const handleExportRankingsExcel = useCallback((info?: { visibleColumnIds?: string[] }) => {
+    const visibleColumnIds = getResolvedVisibleCols(info);
     exportRankingsExcel({
       classes,
       selectedClassId,
@@ -66,270 +69,27 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     });
   }, [selectedClassId, classes, studentRankings, filteredRankings]);
 
-  const rankingColumns = useMemo<ColumnDef<any>[]>(() => [
-    {
-      id: 'stt',
-      header: () => <div className="text-center w-full">STT</div>,
-      meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
-      cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
-      enableSorting: false,
-      enableGlobalFilter: false,
-    },
-    {
-      accessorKey: 'full_name',
-      header: 'Họ và Tên',
-      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
-      cell: ({ row }) => {
-        const r = row.original;
-        return (
-          <div className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg flex items-center justify-between gap-2">
-            <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'class_name',
-      header: 'Lớp Học',
-      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
-      cell: (info) => (
-        <span className="font-bold text-slate-700 dark:text-slate-300 text-sm sm:text-base">
-          {info.getValue<string>() || 'Lớp học'}
-        </span>
-      ),
-    },
-    {
-      id: 'present_count',
-      accessorFn: (r) => (r.total_sessions > 0 ? (r.present_count / r.total_sessions) * 100 : 100),
-      header: () => <div className="text-center w-full">Điểm Danh</div>,
-      meta: {
-        headerText: 'Điểm Danh',
-        exportValue: (r: any) => {
-          const total = r.total_sessions || 0;
-          const present = r.present_count || 0;
-          const pct = total > 0 ? Math.round((present / total) * 100) : 100;
-          return `${pct}% (${present}/${total} buổi)`;
-        }
-      },
-      cell: ({ row }) => {
-        const r = row.original;
-        const total = r.total_sessions || 0;
-        const present = r.present_count || 0;
-        const pct = total > 0 ? Math.round((present / total) * 100) : 100;
+  const handleExportRankingsPdf = useCallback((info?: { visibleColumnIds?: string[] }) => {
+    const visibleColumnIds = getResolvedVisibleCols(info);
+    const selClass = classes.find((c) => String(c.id) === selectedClassId);
+    exportRankingsVisual({
+      className: selClass?.class_name || 'Tất Cả Lớp',
+      rankings: filteredRankings,
+      visibleColumnIds,
+      asPdf: true,
+    });
+  }, [classes, selectedClassId, filteredRankings]);
 
-        let pctColor = 'text-emerald-700 dark:text-emerald-400';
-        let subColor = 'text-emerald-800 dark:text-emerald-300';
-        let badgeBg = 'bg-emerald-500/15';
-        if (total > 0) {
-          if (pct < 50) {
-            pctColor = 'text-rose-700 dark:text-rose-400';
-            subColor = 'text-rose-800 dark:text-rose-300';
-            badgeBg = 'bg-rose-500/15';
-          } else if (pct < 75) {
-            pctColor = 'text-orange-700 dark:text-orange-400';
-            subColor = 'text-orange-800 dark:text-orange-300';
-            badgeBg = 'bg-orange-500/15';
-          } else if (pct < 90) {
-            pctColor = 'text-amber-700 dark:text-amber-400';
-            subColor = 'text-amber-800 dark:text-amber-300';
-            badgeBg = 'bg-amber-500/15';
-          }
-        }
-
-        return (
-          <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <div className={`font-mono font-extrabold text-base leading-tight ${pctColor}`}>
-              {pct}%
-            </div>
-            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded-md border-0 shadow-2xs ${badgeBg} ${subColor}`}>
-              {present}/{total} buổi
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      id: 'avg_vocab',
-      accessorFn: (r) => Number(r.avg_vocab ?? r.avg_check_1 ?? 0),
-      header: () => <div className="text-center w-full">Từ Vựng</div>,
-      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => { const v = Number(r.avg_vocab ?? r.avg_check_1); return v > 0 ? format1Dec(v) : '-'; } },
-      cell: ({ row }) => {
-        const val = Number(row.original.avg_vocab ?? row.original.avg_check_1) || 0;
-        const pred = Number(row.original.pred_c1 ?? row.original.pred_vocab) || 0;
-        return (
-          <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className="font-mono font-extrabold text-blue-600 dark:text-blue-400 text-sm sm:text-base">
-              {val > 0 ? format1Dec(val) : '-'}
-            </span>
-            {pred > 0 && (
-              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15' :
-                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15' :
-                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15' :
-                'text-rose-800 dark:text-rose-300 bg-rose-500/15'
-              }`}>
-                <span>PD: {format1Dec(pred)}</span>
-              </div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      id: 'avg_grammar',
-      accessorFn: (r) => Number(r.avg_grammar ?? r.avg_check_2 ?? 0),
-      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
-      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => { const v = Number(r.avg_grammar ?? r.avg_check_2); return v > 0 ? format1Dec(v) : '-'; } },
-      cell: ({ row }) => {
-        const val = Number(row.original.avg_grammar ?? row.original.avg_check_2) || 0;
-        const pred = Number(row.original.pred_c2 ?? row.original.pred_grammar) || 0;
-        return (
-          <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className="font-mono font-extrabold text-purple-600 dark:text-purple-400 text-sm sm:text-base">
-              {val > 0 ? format1Dec(val) : '-'}
-            </span>
-            {pred > 0 && (
-              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15' :
-                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15' :
-                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15' :
-                'text-rose-800 dark:text-rose-300 bg-rose-500/15'
-              }`}>
-                <span>PD: {format1Dec(pred)}</span>
-              </div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'avg_homework',
-      header: () => <div className="text-center w-full">BTVN</div>,
-      meta: { headerText: 'BTVN', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
-      cell: ({ row, getValue }) => {
-        const val = Number(getValue()) || 0;
-        const pred = Number(row.original.pred_hw ?? row.original.pred_homework) || 0;
-        return (
-          <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className="font-mono font-extrabold text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">
-              {val > 0 ? format1Dec(val) : '-'}
-            </span>
-            {pred > 0 && (
-              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15' :
-                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15' :
-                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15' :
-                'text-rose-800 dark:text-rose-300 bg-rose-500/15'
-              }`}>
-                <span>PD: {format1Dec(pred)}</span>
-              </div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      id: 'trend_sparkline',
-      header: () => <div className="text-center w-full">Xu Hướng</div>,
-      meta: { headerText: 'Xu Hướng', exportValue: (r: any) => Number(r.trend_slope || 0) > 0 ? `+${format1Dec(Number(r.trend_slope))}/buổi` : `${format1Dec(Number(r.trend_slope || 0))}/buổi` },
-      enableSorting: false,
-      enableGlobalFilter: false,
-      cell: ({ row }) => {
-        const r = row.original;
-        const sSessions = (studentSessionsMap[r.student_id] || [])
-          .filter(sess => Number(sess.check_1) > 0 || Number(sess.check_2) > 0 || Number(sess.homework) > 0 || Number(sess.homework_2) > 0);
-        const recentScores = sSessions.slice(-5).map(sess => {
-          const c1 = Number(sess.check_1 || 0);
-          const c2 = Number(sess.check_2 || 0);
-          const hw = Number(sess.homework || 0);
-          const hw2 = Number(sess.homework_2 || 0);
-          const valid = [c1, c2, hw, hw2].filter(v => v > 0);
-          return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
-        }).filter(v => v > 0);
-        const slope = Number(r.trend_slope || 0);
-        const ema = Number(r.ema_level || 0);
-        return <MiniTrendSparkline points={recentScores} slope={slope} ema={ema} />;
-      },
-    },
-    {
-      id: 'rankTier',
-      header: () => <div className="text-center w-full">Hạng</div>,
-      meta: {
-        headerText: 'Hạng',
-        exportValue: (r: any) => {
-          const avg = computeStudentOverallScore(r);
-          if (avg === 0) return 'Chưa xếp hạng';
-          const tier = getStudentTier(avg);
-          return `${tier.name} (${tier.title})`;
-        }
-      },
-      accessorFn: (r: any) => computeStudentOverallScore(r),
-      cell: ({ getValue }) => {
-        const avg = getValue<number>();
-        if (avg === 0) {
-          return (
-            <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border-0 shadow-2xs">Chưa xếp hạng</span>
-            </div>
-          );
-        }
-        const tier = getStudentTier(avg);
-        return (
-          <div className="flex items-center justify-center gap-3 py-0.5">
-            <div className="w-12 h-12 flex items-center justify-center shrink-0">
-              <img
-                src={tier.badge}
-                alt={tier.name}
-                className={`w-full h-full object-contain ${tier.scale || 'scale-100'} transform hover:scale-115 transition-transform duration-200`}
-              />
-            </div>
-            <div className="text-left">
-              <span className={`text-base font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
-              <span className={`text-xs font-bold leading-tight ${tier.text} opacity-75`}>{tier.title}</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      id: 'overallAvg',
-      header: () => <div className="text-center w-full">Đánh Giá</div>,
-      meta: {
-        headerText: 'Đánh Giá',
-        exportValue: (r: any) => {
-          const avg = computeStudentOverallScore(r);
-          if (avg === 0) return 'Chưa có điểm';
-          const tier = getStudentTier(avg);
-          return `${tier.title} (${format1Dec(avg)})`;
-        }
-      },
-      accessorFn: (r: any) => computeStudentOverallScore(r),
-      cell: ({ getValue }) => {
-        const avg = getValue<number>();
-        if (avg === 0) {
-          return (
-            <div className="text-center py-0.5 flex flex-col items-center justify-center">
-              <span className="font-mono font-extrabold text-slate-500 text-sm sm:text-base">-</span>
-              <div className="text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none bg-slate-500/10 text-slate-400">
-                <span>Chưa có điểm</span>
-              </div>
-            </div>
-          );
-        }
-        const tier = getStudentTier(avg);
-        return (
-          <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className={`font-mono font-extrabold text-sm sm:text-base ${tier.text}`}>
-              {format1Dec(avg)}
-            </span>
-            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${tier.bg} ${tier.text}`}>
-              <span>{tier.title}</span>
-            </div>
-          </div>
-        );
-      },
-    },
-  ], [selectedStudentId, studentSessionsMap]);
+  const handleExportRankingsPng = useCallback((info?: { visibleColumnIds?: string[] }) => {
+    const visibleColumnIds = getResolvedVisibleCols(info);
+    const selClass = classes.find((c) => String(c.id) === selectedClassId);
+    exportRankingsVisual({
+      className: selClass?.class_name || 'Tất Cả Lớp',
+      rankings: filteredRankings,
+      visibleColumnIds,
+      asPdf: false,
+    });
+  }, [classes, selectedClassId, filteredRankings]);
 
   return (
     <div className={`bg-white dark:bg-[#141417] border-0 rounded-2xl flex flex-col shadow-sm dark:shadow-xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
@@ -338,15 +98,26 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
             BẢNG XẾP HẠNG
           </h3>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Xếp hạng học sinh theo điểm trung bình tổng hợp và tiến độ học tập
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
           <CustomSelect
             value={selectedClassId}
-            onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
+            onChange={(val) => {
+              setSelectedClassId(val);
+              setSelectedStudentId('');
+            }}
             options={[
               { value: '', label: 'Tất cả lớp học' },
-              ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
+              ...classes.map((c) => ({
+                value: String(c.id),
+                label: c.class_name,
+              })),
             ]}
+            icon={<GraduationCap size={15} className="text-blue-500" />}
             className="w-44"
           />
         </div>
@@ -383,6 +154,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         onRowClick={(r: any) => onSelectRankingStudent?.(r.student_id)}
         initialSorting={[{ id: 'overallAvg', desc: true }]}
         onExportExcel={handleExportRankingsExcel}
+        onExportPdf={handleExportRankingsPdf}
+        onExportPng={handleExportRankingsPng}
         getRowClassName={(row: any) =>
           String(row.student_id) === String(selectedStudentId)
             ? '!bg-blue-500/15 dark:!bg-blue-600/25 hover:!bg-blue-500/25 dark:hover:!bg-blue-600/35 font-black ring-1 ring-inset ring-blue-500/50 shadow-inner'

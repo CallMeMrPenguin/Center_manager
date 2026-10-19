@@ -314,15 +314,16 @@ def export_class_excel(
                 diff_val = trunc_1_dec(abs(hw1 - c_avg))
 
         below_subs = []
-        if c1 > 0 and t_c1 > 0 and c1 < t_c1:
+        # Điểm > 8.0 dù thấp hơn trung bình vẫn là đạt yêu cầu
+        if c1 > 0 and t_c1 > 0 and c1 < t_c1 and c1 <= 8.0:
             below_subs.append("Check 1")
-        if c2 > 0 and t_c2 > 0 and c2 < t_c2:
+        if c2 > 0 and t_c2 > 0 and c2 < t_c2 and c2 <= 8.0:
             below_subs.append("Check 2")
-        if hw1 > 0 and t_hw1 > 0 and hw1 < t_hw1:
+        if hw1 > 0 and t_hw1 > 0 and hw1 < t_hw1 and hw1 <= 8.0:
             below_subs.append("BTVN 1")
-        if hw2 > 0 and t_hw2 > 0 and hw2 < t_hw2:
+        if hw2 > 0 and t_hw2 > 0 and hw2 < t_hw2 and hw2 <= 8.0:
             below_subs.append("BTVN 2")
-        if mt > 0 and t_mt > 0 and mt < t_mt:
+        if mt > 0 and t_mt > 0 and mt < t_mt and mt <= 8.0:
             below_subs.append("Luyện Đề")
 
         ctx = {
@@ -365,16 +366,16 @@ def export_class_excel(
     # Spacing row
     ws.row_dimensions[avg_row_idx + 1].height = 12
 
-    # Summary rows (Below Average Lists)
+    # Summary rows (Below Average Lists - Điểm > 8.0 dù thấp hơn TB vẫn là Đạt)
     candidate_labels = [
-        ("Check 1", t_c1, [r.get("student_name") for r in attendance if c_num(r.get("check_1")) > 0 and c_num(r.get("check_1")) < t_c1 and str(r.get("status")) != "Vắng mặt"]),
-        ("Check 2", t_c2, [r.get("student_name") for r in attendance if c_num(r.get("check_2")) > 0 and c_num(r.get("check_2")) < t_c2 and str(r.get("status")) != "Vắng mặt"]),
-        ("BTVN", t_hw1, [r.get("student_name") for r in attendance if c_num(r.get("homework")) > 0 and c_num(r.get("homework")) < t_hw1 and str(r.get("status")) != "Vắng mặt"]),
+        ("Check 1", t_c1, [r.get("student_name") for r in attendance if c_num(r.get("check_1")) > 0 and c_num(r.get("check_1")) < t_c1 and c_num(r.get("check_1")) <= 8.0 and str(r.get("status")) != "Vắng mặt"]),
+        ("Check 2", t_c2, [r.get("student_name") for r in attendance if c_num(r.get("check_2")) > 0 and c_num(r.get("check_2")) < t_c2 and c_num(r.get("check_2")) <= 8.0 and str(r.get("status")) != "Vắng mặt"]),
+        ("BTVN", t_hw1, [r.get("student_name") for r in attendance if c_num(r.get("homework")) > 0 and c_num(r.get("homework")) < t_hw1 and c_num(r.get("homework")) <= 8.0 and str(r.get("status")) != "Vắng mặt"]),
     ]
     if t_hw2 > 0 or len(hw2_vals) > 0:
-        candidate_labels.append(("BTVN 2", t_hw2, [r.get("student_name") for r in attendance if c_num(r.get("homework_2")) > 0 and c_num(r.get("homework_2")) < t_hw2 and str(r.get("status")) != "Vắng mặt"]))
+        candidate_labels.append(("BTVN 2", t_hw2, [r.get("student_name") for r in attendance if c_num(r.get("homework_2")) > 0 and c_num(r.get("homework_2")) < t_hw2 and c_num(r.get("homework_2")) <= 8.0 and str(r.get("status")) != "Vắng mặt"]))
     if t_mt > 0 or len(mt_vals) > 0:
-        candidate_labels.append(("Luyện Đề", t_mt, [r.get("student_name") for r in attendance if c_num(r.get("mock_test")) > 0 and c_num(r.get("mock_test")) < t_mt and str(r.get("status")) != "Vắng mặt"]))
+        candidate_labels.append(("Luyện Đề", t_mt, [r.get("student_name") for r in attendance if c_num(r.get("mock_test")) > 0 and c_num(r.get("mock_test")) < t_mt and c_num(r.get("mock_test")) <= 8.0 and str(r.get("status")) != "Vắng mặt"]))
 
     for idx, (m_label, thresh_val, below_list) in enumerate(candidate_labels):
         r_idx = avg_row_idx + 2 + idx

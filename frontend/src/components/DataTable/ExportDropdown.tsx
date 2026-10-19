@@ -12,9 +12,9 @@ interface ExportDropdownProps<TData> {
   table: Table<TData>;
   filename: string;
   onExportExcel?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[] }) => void;
-  onExportPdf?: () => void;
+  onExportPdf?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[]; headers?: string[] }) => void;
   onExportDocx?: () => void;
-  onExportPng?: () => void;
+  onExportPng?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[]; headers?: string[] }) => void;
 }
 
 export function ExportDropdown<TData>({
@@ -167,7 +167,12 @@ export function ExportDropdown<TData>({
 
   const exportPDF = () => {
     if (onExportPdf) {
-      onExportPdf();
+      onExportPdf({
+        visibleColumnIds: visibleCols.map((col) => col.id),
+        visibleColumns: visibleCols,
+        rows: table.getSortedRowModel().rows,
+        headers: getHeaders(),
+      });
       setOpen(false);
       return;
     }
@@ -233,7 +238,12 @@ export function ExportDropdown<TData>({
             <button
               type="button"
               onClick={() => {
-                onExportPng();
+                onExportPng({
+                  visibleColumnIds: visibleCols.map((col) => col.id),
+                  visibleColumns: visibleCols,
+                  rows: table.getSortedRowModel().rows,
+                  headers: getHeaders(),
+                });
                 setOpen(false);
               }}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl hover:bg-purple-50 dark:hover:bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold transition cursor-pointer"
