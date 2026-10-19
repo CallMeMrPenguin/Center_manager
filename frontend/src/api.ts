@@ -353,6 +353,8 @@ export const api = {
   checkUpdate: () => request<any>('/api/system/update-check'),
   getUpdateStatus: () => request<any>('/api/system/update-status'),
   applyUpdate: () => request<any>('/api/system/update-apply', { method: 'POST' }),
+  getToolsStatus: () => request<any>('/api/system/tools-status'),
+  syncTools: () => request<any>('/api/system/sync-tools', { method: 'POST' }),
   getSyncStatus: () => request<{ status: 'synced' | 'syncing' | 'offline'; last_synced_at: string | null; syncing: boolean; last_error?: string | null }>('/api/sync/status', { forceRefresh: true }),
   triggerSync: () => request<any>('/api/sync/trigger', { method: 'POST' }),
   runFullSync: () => request<any>('/api/sync/bidirectional?force_full=true', { method: 'POST' }),

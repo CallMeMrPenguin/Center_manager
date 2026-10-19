@@ -199,6 +199,17 @@ export function useWhiteboardUIAdjustments({
         }
       });
 
+      // 2b. Hide Hand (Pan) tool button since pan is handled by right-click
+      const handBtn = container.querySelector(
+        '[data-testid="toolbar-hand"], [data-testid="hand"], input[value="hand"]'
+      ) as HTMLElement | null;
+      if (handBtn) {
+        const handLabel = handBtn.closest('label') || handBtn;
+        if (handLabel && handLabel.style.display !== 'none') {
+          handLabel.style.display = 'none';
+        }
+      }
+
       // 3. Inject Highlighter & Style (Palette) buttons next to native Freedraw button
       const freedrawBtn = container.querySelector('[data-testid="toolbar-freedraw"]') as HTMLElement | null;
       if (freedrawBtn && freedrawBtn.parentElement) {

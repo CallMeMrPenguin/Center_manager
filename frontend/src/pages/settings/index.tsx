@@ -31,6 +31,7 @@ export default function Settings() {
   const [updateState, setUpdateState] = useState<any>(null);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [applyingUpdate, setApplyingUpdate] = useState(false);
+  const [syncingTools, setSyncingTools] = useState(false);
   const updatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -178,6 +179,25 @@ export default function Settings() {
     }
   };
 
+  const handleSyncTools = async () => {
+    setSyncingTools(true);
+    try {
+      await api.syncTools();
+      showToast('Đang tiến hành đồng bộ công cụ PDF/Excel/Word...', 'info');
+      setTimeout(async () => {
+        try {
+          const res = await api.checkUpdate();
+          setUpdateState(res);
+          showToast('Đã kiểm tra và đồng bộ công cụ hoàn tất', 'success');
+        } catch {}
+        setSyncingTools(false);
+      }, 3500);
+    } catch (e: any) {
+      showToast('Lỗi khi đồng bộ công cụ: ' + e.message, 'error');
+      setSyncingTools(false);
+    }
+  };
+
   return (
     <div className="h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] overflow-y-auto px-8 py-6 select-none text-slate-800 dark:text-slate-200 flex flex-col gap-6">
       {/* Page Title */}
@@ -218,8 +238,10 @@ export default function Settings() {
         updateState={updateState}
         checkingUpdate={checkingUpdate}
         applyingUpdate={applyingUpdate}
+        syncingTools={syncingTools}
         onCheckUpdate={handleCheckUpdate}
         onApplyUpdate={handleApplyUpdate}
+        onSyncTools={handleSyncTools}
       />
     </div>
   );

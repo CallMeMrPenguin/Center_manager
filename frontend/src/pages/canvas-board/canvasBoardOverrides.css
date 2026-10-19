@@ -3,6 +3,14 @@
    ============================================================================== */
 
 /* 1. Hide unwanted toolbar items: Line, Rectangle, Lock, Library, Help, Hand (Pan is right-click) */
+.canvas-board-wrapper label:has([data-testid="toolbar-hand"]),
+.canvas-board-wrapper label:has([data-testid="hand"]),
+.canvas-board-wrapper label:has(input[value="hand"]),
+.canvas-board-wrapper label:has(input[aria-label*="Hand" i]),
+.canvas-board-wrapper label:has(input[aria-label*="Tay" i]),
+.canvas-board-wrapper label:has([data-testid="toolbar-line"]),
+.canvas-board-wrapper label:has([data-testid="toolbar-rectangle"]),
+.canvas-board-wrapper label:has([data-testid="toolbar-lock"]),
 .canvas-board-wrapper [data-testid="toolbar-line"],
 .canvas-board-wrapper [data-testid="toolbar-rectangle"],
 .canvas-board-wrapper [data-testid="toolbar-lock"],

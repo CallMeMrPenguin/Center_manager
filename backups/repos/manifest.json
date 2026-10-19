@@ -1,12 +1,12 @@
 {
-  "last_synced": "2026-10-12 16:00:00",
+  "last_synced": "2026-10-19 18:12:04",
   "repos": [
     {
       "id": "wordcraft",
       "name": "WordCraft",
       "repo_url": "https://github.com/storytold/wordcraft.git",
       "source_backup_file": "wordcraft-source.zip",
-      "backup_size_bytes": 9120813,
+      "backup_size_bytes": 10952501,
       "status": "backed_up"
     },
     {
@@ -14,7 +14,7 @@
       "name": "PdfCraft",
       "repo_url": "https://github.com/storytold/pdfcraft.git",
       "source_backup_file": "pdfcraft-source.zip",
-      "backup_size_bytes": 14958387,
+      "backup_size_bytes": 16124350,
       "status": "backed_up"
     },
     {
@@ -22,7 +22,7 @@
       "name": "GridCraft",
       "repo_url": "https://github.com/storytold/gridcraft.git",
       "source_backup_file": "gridcraft-source.zip",
-      "backup_size_bytes": 4231224,
+      "backup_size_bytes": 4427845,
       "status": "backed_up"
     }
   ]

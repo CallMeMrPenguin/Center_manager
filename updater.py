@@ -47,7 +47,56 @@ _update_state = {
     "last_checked": None,
     "progress": None,   # e.g. "Downloading... 45%"
     "applied": False,
+    "tools": [],
+    "has_tools_update": False,
+    "syncing_tools": False,
 }
+
+
+def _get_tools_module():
+    try:
+        from scripts import sync_upstream_tools
+        return sync_upstream_tools
+    except Exception:
+        try:
+            import sync_upstream_tools
+            return sync_upstream_tools
+        except Exception:
+            return None
+
+
+def get_tools_status() -> dict:
+    mod = _get_tools_module()
+    if mod and hasattr(mod, "get_tools_status"):
+        try:
+            return mod.get_tools_status()
+        except Exception as e:
+            return {"tools": [], "has_any_update": False, "error": str(e)}
+    return {"tools": [], "has_any_update": False}
+
+
+def sync_tools() -> bool:
+    global _update_state
+    _update_state["syncing_tools"] = True
+    mod = _get_tools_module()
+    if not mod:
+        _update_state["syncing_tools"] = False
+        return False
+    try:
+        if hasattr(mod, "sync_wasm_releases"):
+            mod.sync_wasm_releases()
+        if hasattr(mod, "backup_repository_sources"):
+            mod.backup_repository_sources()
+        # Refresh tools status
+        t_status = get_tools_status()
+        _update_state["tools"] = t_status.get("tools", [])
+        _update_state["has_tools_update"] = t_status.get("has_any_update", False)
+        _update_state["syncing_tools"] = False
+        return True
+    except Exception as e:
+        _update_state["error"] = f"Tool sync error: {e}"
+        _update_state["syncing_tools"] = False
+        return False
 
 
 def get_current_version() -> str:
@@ -135,6 +184,9 @@ def check_for_update() -> dict:
         except Exception:
             has_update = tag != current
 
+    # Check upstream tools (WordCraft, PdfCraft, GridCraft)
+    tools_info = get_tools_status()
+
     _update_state.update({
         "checking": False,
         "has_update": has_update,
@@ -142,6 +194,8 @@ def check_for_update() -> dict:
         "download_url": source_zip if has_update else None,
         "last_checked": time.time(),
         "error": None if tag else _update_state.get("error"),
+        "tools": tools_info.get("tools", []),
+        "has_tools_update": tools_info.get("has_any_update", False),
     })
 
     return dict(_update_state)
@@ -229,6 +283,14 @@ def apply_update(download_url: str = None) -> bool:
                 shutil.copytree(src, dst, dirs_exist_ok=True)
             elif os.path.isfile(src):
                 shutil.copy2(src, dst)
+
+        # --- STEP 6: Verify and sync upstream tools if updated ---
+        if _update_state.get("has_tools_update"):
+            _update_state["progress"] = "Đang đồng bộ công cụ PDF/Excel/Word..."
+            try:
+                sync_tools()
+            except Exception:
+                pass
 
         _update_state.update({
             "applying": False,

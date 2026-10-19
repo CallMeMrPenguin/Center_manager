@@ -150,6 +150,14 @@ def sync_wasm_releases():
 
             # Extract into frontend/public/<subdir>/
             print(f"  Extracting {asset_name} into {target_dir}...")
+            # Clean old wasm/js/ico files first to prevent binary bloat
+            for existing_f in os.listdir(target_dir):
+                if existing_f.endswith((".wasm", ".js", ".ico")):
+                    try:
+                        os.remove(os.path.join(target_dir, existing_f))
+                    except Exception:
+                        pass
+
             with zipfile.ZipFile(release_backup_path) as z:
                 for member in z.infolist():
                     parts = member.filename.split("/", 1)
@@ -162,13 +170,112 @@ def sync_wasm_releases():
                             with z.open(member) as src, open(target_file, "wb") as dst:
                                 shutil.copyfileobj(src, dst)
 
-            print(f"  Successfully synced {item['name']} runtime assets.")
+            # Record installed version in manifest
+            _update_manifest_tool_version(repo_id, tag_name)
+            print(f"  Successfully synced {item['name']} runtime assets ({tag_name}).")
 
         except Exception as e:
             print(f"  Notice while syncing {repo_id}: {e}")
 
 
+def _update_manifest_tool_version(repo_id: str, version: str):
+    """Updates installed version of a tool in manifest.json."""
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+    manifest_path = os.path.join(BACKUP_DIR, "manifest.json")
+    manifest = {"last_synced": time.strftime("%Y-%m-%d %H:%M:%S"), "repos": []}
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+        except Exception:
+            pass
+
+    found = False
+    for r in manifest.get("repos", []):
+        if r.get("id") == repo_id:
+            r["installed_version"] = version
+            r["last_updated"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            found = True
+            break
+    if not found:
+        manifest.setdefault("repos", []).append({
+            "id": repo_id,
+            "installed_version": version,
+            "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+
+def get_tools_status() -> dict:
+    """Checks installed vs latest upstream versions for WordCraft, PdfCraft, and GridCraft."""
+    manifest_path = os.path.join(BACKUP_DIR, "manifest.json")
+    manifest_versions = {}
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for r in data.get("repos", []):
+                    if r.get("id") and r.get("installed_version"):
+                        manifest_versions[r["id"]] = r["installed_version"]
+        except Exception:
+            pass
+
+    tools = []
+    has_any_update = False
+
+    for item in REPOSITORIES:
+        repo_id = item["id"]
+        installed = manifest_versions.get(repo_id, "v0.8.0" if repo_id != "pdfcraft" else "v0.9.0")
+        latest = installed
+        has_update = False
+
+        try:
+            req = urllib.request.Request(item["api_releases"], headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                rel = json.loads(resp.read().decode("utf-8"))
+                tag = rel.get("tag_name", "")
+                if tag:
+                    latest = tag
+                    has_update = latest.lstrip("v") != installed.lstrip("v")
+        except Exception:
+            pass
+
+        if has_update:
+            has_any_update = True
+
+        tools.append({
+            "id": repo_id,
+            "name": item["name"],
+            "installed_version": installed,
+            "latest_version": latest,
+            "has_update": has_update,
+            "repo_url": item["repo_url"],
+        })
+
+    return {
+        "tools": tools,
+        "has_any_update": has_any_update,
+        "last_checked": time.time(),
+    }
+
+
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Center Manager Upstream Tools Syncer")
+    parser.add_argument("--check", action="store_true", help="Check upstream versions only")
+    parser.add_argument("--sync", action="store_true", help="Sync releases and backups")
+    args = parser.parse_args()
+
+    if args.check:
+        print("Checking upstream tools status...")
+        status = get_tools_status()
+        for t in status["tools"]:
+            up = " (UPDATE AVAILABLE)" if t["has_update"] else " (UP TO DATE)"
+            print(f"  - {t['name']}: {t['installed_version']} -> {t['latest_version']}{up}")
+        return
+
     print("=" * 65)
     print("  CENTER MANAGER — UPSTREAM TOOLS SYNCER & REPOSITORY BACKUP")
     print("=" * 65)
@@ -181,3 +288,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

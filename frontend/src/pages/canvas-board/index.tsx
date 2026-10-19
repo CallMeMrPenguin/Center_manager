@@ -12,6 +12,7 @@ import { useWhiteboardUIAdjustments } from './hooks/useWhiteboardUIAdjustments';
 import { useWhiteboardFullscreen } from './hooks/useWhiteboardFullscreen';
 import { EraserSizeBar } from './components/EraserSizeBar';
 import { TextBoxPlacementPreview } from './components/TextBoxPlacementPreview';
+import { CanvasTransformOverlay } from './components/CanvasTransformOverlay';
 import { Point } from './types';
 import { UploadCloud } from 'lucide-react';
 
@@ -80,6 +81,9 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   // Force Excalidraw canvas bounding rect refresh on tab active / resize to prevent coordinate shift
   useEffect(() => {
     if (isActive && excalidrawAPI) {
+      try {
+        excalidrawAPI.refresh();
+      } catch {}
       const timer = setTimeout(() => {
         try {
           excalidrawAPI.refresh();
@@ -95,6 +99,14 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
     const container = containerRef.current;
     if (!container || !excalidrawAPI) return;
 
+    const handlePointerEnter = () => {
+      try {
+        excalidrawAPI.refresh();
+      } catch {}
+    };
+
+    container.addEventListener('pointerenter', handlePointerEnter);
+
     const ro = new ResizeObserver(() => {
       try {
         excalidrawAPI.refresh();
@@ -104,7 +116,10 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
     });
 
     ro.observe(container);
-    return () => ro.disconnect();
+    return () => {
+      container.removeEventListener('pointerenter', handlePointerEnter);
+      ro.disconnect();
+    };
   }, [excalidrawAPI]);
 
   // Track cursor position for Text Box placement preview
@@ -238,10 +253,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
       onDrop={handleDrop}
       className="canvas-board-wrapper hide-properties-panel h-full w-full overflow-hidden flex flex-col relative bg-[#f8f9fa]"
       style={{
-        contain: 'strict',
         isolation: 'isolate',
-        transform: 'translateZ(0)',
-        contentVisibility: isActive ? 'visible' : 'hidden',
         pointerEvents: isActive ? 'auto' : 'none',
       }}
     >
@@ -289,6 +301,12 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
       <TextBoxPlacementPreview
         isVisible={isTextToolActive && !isTypingText}
         pos={textPreviewPos}
+      />
+
+      {/* Rotation Angle & Element Spacing Measurement HUD Overlay */}
+      <CanvasTransformOverlay
+        containerRef={containerRef}
+        excalidrawAPI={excalidrawAPI}
       />
 
       {/* Custom Partial Vector Eraser visual circular cursor (Red Circle only) */}

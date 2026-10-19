@@ -350,3 +350,21 @@ def api_update_status():
     if not _UPDATER_AVAILABLE:
         return {"error": "Updater module not available", "has_update": False, "current_version": "unknown"}
     return _updater.get_update_state()
+
+
+@router.get("/api/system/tools-status")
+def api_tools_status():
+    """Return installed and latest upstream versions for WordCraft, PdfCraft, and GridCraft."""
+    if not _UPDATER_AVAILABLE or not hasattr(_updater, "get_tools_status"):
+        return {"tools": [], "has_any_update": False}
+    return _updater.get_tools_status()
+
+
+@router.post("/api/system/sync-tools")
+def api_sync_tools():
+    """Trigger background sync of upstream tools (PDF, Excel, Word)."""
+    if not _UPDATER_AVAILABLE or not hasattr(_updater, "sync_tools"):
+        raise HTTPException(status_code=503, detail="Updater/Syncer not available")
+    threading.Thread(target=_updater.sync_tools, daemon=True).start()
+    return {"success": True, "message": "Đang đồng bộ công cụ PDF/Excel/Word..."}
+
