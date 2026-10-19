@@ -29,7 +29,7 @@ interface DataTableToolbarProps<TData> {
   onAutoFitColumnWidths?: () => void;
   onResetColumnWidths?: () => void;
   onMoveColumn?: (colId: string, direction: 'up' | 'down') => void;
-  onExportExcel?: () => void;
+  onExportExcel?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[] }) => void;
   onExportDocx?: () => void;
   onExportPdf?: () => void;
   onExportPng?: () => void;

@@ -295,7 +295,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     if (!selectedClass) return;
     try {
       const recordsToExport = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
-      const res = await api.exportClassExcel(selectedClass.id, attendanceDate, recordsToExport, thresholds);
+      const visibleCols = thresholds?.visibleColumns;
+      const res = await api.exportClassExcel(selectedClass.id, attendanceDate, recordsToExport, thresholds, undefined, visibleCols);
       if (res && res.filename) {
         const link = document.createElement('a');
         link.href = `/api/files/download/${encodeURIComponent(res.filename)}`;

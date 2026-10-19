@@ -77,7 +77,7 @@ export interface DataTableProps<TData> {
   onRowDoubleClick?: (row: TData) => void;
   onSelectionChange?: (selectedRows: TData[]) => void;
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactNode;
-  onExportExcel?: () => void;
+  onExportExcel?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[] }) => void;
   onExportDocx?: () => void;
   onExportPdf?: () => void;
   onExportPng?: () => void;

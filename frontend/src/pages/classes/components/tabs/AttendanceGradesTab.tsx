@@ -53,12 +53,28 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
     onOpenStudentActionModal,
   });
 
-  const handleExportExcelWithThresholds = () => {
+  const handleExportExcelWithThresholds = (info?: { visibleColumnIds?: string[] }) => {
+    let visibleColumnIds = info?.visibleColumnIds;
+    if (!visibleColumnIds || visibleColumnIds.length === 0) {
+      try {
+        const layout = localStorage.getItem('dt_layout_classes-attendance-table');
+        if (layout) {
+          const parsed = JSON.parse(layout);
+          const vis = parsed.visibility || {};
+          const ord: string[] = parsed.order || [];
+          const defaultCols = ['stt', 'student_name', 'status', 'check_1', 'check_2', 'homework', 'homework_2', 'mock_test', 'score_discrepancy'];
+          const baseOrder = ord.length ? ord : defaultCols;
+          visibleColumnIds = baseOrder.filter((id) => vis[id] !== false && defaultCols.includes(id));
+        }
+      } catch (e) {}
+    }
+
     onExportExcel({
       check_1: sessionOverview.threshC1,
       check_2: sessionOverview.threshC2,
       homework: sessionOverview.threshHw,
       divergence: sessionOverview.divergenceMin,
+      visibleColumns: visibleColumnIds,
     });
   };
 

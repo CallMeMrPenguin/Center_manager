@@ -11,7 +11,7 @@ import { getColumnHeaderText } from './types';
 interface ExportDropdownProps<TData> {
   table: Table<TData>;
   filename: string;
-  onExportExcel?: () => void;
+  onExportExcel?: (info?: { visibleColumnIds?: string[]; visibleColumns?: any[]; rows?: any[] }) => void;
   onExportPdf?: () => void;
   onExportDocx?: () => void;
   onExportPng?: () => void;
@@ -41,7 +41,7 @@ export function ExportDropdown<TData>({
   }, [open]);
 
   const visibleCols = table
-    .getVisibleFlatColumns()
+    .getVisibleLeafColumns()
     .filter((col) => col.id !== 'select' && col.id !== '_expander');
 
   const getHeaders = () =>
@@ -65,7 +65,11 @@ export function ExportDropdown<TData>({
 
   const exportExcel = async () => {
     if (onExportExcel) {
-      onExportExcel();
+      onExportExcel({
+        visibleColumnIds: visibleCols.map((col) => col.id),
+        visibleColumns: visibleCols,
+        rows: table.getSortedRowModel().rows,
+      });
       setOpen(false);
       return;
     }

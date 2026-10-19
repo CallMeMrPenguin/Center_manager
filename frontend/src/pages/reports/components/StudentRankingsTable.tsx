@@ -41,12 +41,28 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
   selectedScoreBin,
   onClearScoreBin,
 }) => {
-  const handleExportRankingsExcel = useCallback(() => {
+  const handleExportRankingsExcel = useCallback((info?: { visibleColumnIds?: string[] }) => {
+    let visibleColumnIds = info?.visibleColumnIds;
+    if (!visibleColumnIds || visibleColumnIds.length === 0) {
+      try {
+        const layout = localStorage.getItem('dt_layout_reports-rankings-table');
+        if (layout) {
+          const parsed = JSON.parse(layout);
+          const vis = parsed.visibility || {};
+          const ord: string[] = parsed.order || [];
+          const defaultCols = ['stt', 'full_name', 'class_name', 'present_count', 'c1', 'c2', 'hw1', 'hw2', 'trend_sparkline', 'rankTier', 'overallAvg'];
+          const baseOrder = ord.length ? ord : defaultCols;
+          visibleColumnIds = baseOrder.filter((id) => vis[id] !== false && defaultCols.includes(id));
+        }
+      } catch (e) {}
+    }
+
     exportRankingsExcel({
       classes,
       selectedClassId,
       studentRankings,
       filteredRankings,
+      visibleColumnIds,
     });
   }, [selectedClassId, classes, studentRankings, filteredRankings]);
 

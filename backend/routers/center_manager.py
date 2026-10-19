@@ -292,7 +292,7 @@ def api_delete_attendance(class_id: int, date: str):
 
 @router.post("/api/classes/{class_id}/export/excel")
 def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
-    return export_class_excel(class_id, payload.get("date"), payload.get("records"), payload.get("thresholds"), payload.get("test_config"))
+    return export_class_excel(class_id, payload.get("date"), payload.get("records"), payload.get("thresholds"), payload.get("test_config"), payload.get("visible_columns"))
 
 @router.post("/api/classes/{class_id}/export/png")
 def api_export_class_png(class_id: int, payload: Dict[str, Any]):

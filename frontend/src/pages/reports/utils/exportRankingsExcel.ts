@@ -7,50 +7,71 @@ export async function exportRankingsExcel({
   selectedClassId,
   studentRankings,
   filteredRankings,
+  visibleColumnIds,
 }: {
   classes: any[];
   selectedClassId: string;
   studentRankings: any[];
   filteredRankings: any[];
+  visibleColumnIds?: string[];
 }) {
   try {
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
-    // Headers without Rank ('Hạng') column
-    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'BTVN 1', 'BTVN 2', 'Đánh Giá'];
+
+    const ALL_COLS: Record<string, { header: string; getValue: (r: any, idx: number) => any }> = {
+      stt: { header: 'STT', getValue: () => ({ formula: 'ROW()-1' }) },
+      full_name: { header: 'Họ và Tên', getValue: (r) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      class_name: { header: 'Lớp Học', getValue: (r) => r.class_name || 'Lớp học' },
+      sessions_count: { header: 'Buổi Học', getValue: (r) => `${r.present_count ?? 0}/${r.total_sessions ?? 0} buổi` },
+      present_count: {
+        header: 'Điểm Danh %',
+        getValue: (r) => {
+          const total = r.total_sessions ?? 0;
+          const present = r.present_count ?? 0;
+          return total > 0 ? `${Math.round((present / total) * 100)}%` : '100%';
+        },
+      },
+      c1: { header: 'Từ Vựng', getValue: (r) => { const v = Number(r.avg_vocab ?? r.avg_check_1 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
+      c2: { header: 'Ngữ Pháp', getValue: (r) => { const v = Number(r.avg_grammar ?? r.avg_check_2 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
+      hw1: { header: 'BTVN 1', getValue: (r) => { const v = Number(r.avg_homework ?? r.avg_homework_1 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
+      hw2: { header: 'BTVN 2', getValue: (r) => { const v = Number(r.avg_homework_2 ?? 0); return v > 0 ? format1Dec(v) : '-'; } },
+      trend_sparkline: { header: 'Xu Hướng', getValue: (r) => Number(r.trend_slope || 0) > 0 ? `+${format1Dec(Number(r.trend_slope))}/buổi` : `${format1Dec(Number(r.trend_slope || 0))}/buổi` },
+      rankTier: {
+        header: 'Hạng',
+        getValue: (r) => {
+          const avg = computeStudentOverallScore(r);
+          return avg > 0 ? `${getStudentTier(avg).name} (${getStudentTier(avg).title})` : 'Chưa xếp hạng';
+        },
+      },
+      overallAvg: {
+        header: 'Đánh Giá',
+        getValue: (r) => {
+          const avg = computeStudentOverallScore(r);
+          return avg > 0 ? `${getStudentTier(avg).title} (${format1Dec(avg)})` : 'Chưa có điểm';
+        },
+      },
+    };
+
+    let activeColDefs: Array<{ header: string; getValue: (r: any, idx: number) => any }> = [];
+    if (visibleColumnIds && visibleColumnIds.length > 0) {
+      visibleColumnIds.forEach((id) => {
+        if (ALL_COLS[id]) activeColDefs.push(ALL_COLS[id]);
+      });
+    }
+
+    if (activeColDefs.length === 0) {
+      const defaultOrder = ['stt', 'full_name', 'class_name', 'sessions_count', 'present_count', 'c1', 'c2', 'hw1', 'hw2', 'overallAvg'];
+      activeColDefs = defaultOrder.map((id) => ALL_COLS[id]).filter(Boolean);
+    }
+
+    const headers = activeColDefs.map((c) => c.header);
 
     const addClassSheet = (sheetName: string, items: any[]) => {
       const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';
       const worksheet = workbook.addWorksheet(safeName);
 
-      const rows = items.map((r) => {
-        const present = r.present_count ?? 0;
-        const total = r.total_sessions ?? 0;
-        const pct = total > 0 ? Math.round((present / total) * 100) : 100;
-        const c1 = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
-        const c2 = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-        const hw = Number(r.avg_homework ?? r.avg_homework_1 ?? 0);
-        const hw2 = Number(r.avg_homework_2 ?? 0);
-        const avg = computeStudentOverallScore(r);
-        let evalStr = 'Chưa có điểm';
-        if (avg > 0) {
-          const tier = getStudentTier(avg);
-          evalStr = `${tier.title} (${format1Dec(avg)})`;
-        }
-
-        return [
-          { formula: 'ROW()-1' },
-          `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}`,
-          r.class_name || 'Lớp học',
-          `${present}/${total} buổi`,
-          `${pct}%`,
-          c1 > 0 ? format1Dec(c1) : '-',
-          c2 > 0 ? format1Dec(c2) : '-',
-          hw > 0 ? format1Dec(hw) : '-',
-          hw2 > 0 ? format1Dec(hw2) : '-',
-          evalStr
-        ];
-      });
+      const rows = items.map((r, idx) => activeColDefs.map((c) => c.getValue(r, idx)));
 
       if (rows.length > 0) {
         worksheet.addTable({
