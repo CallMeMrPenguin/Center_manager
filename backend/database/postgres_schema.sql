@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS public.friend_group_members (
     group_id BIGINT REFERENCES public.friend_groups(id) ON DELETE CASCADE,
     student_id BIGINT REFERENCES public.students(id) ON DELETE CASCADE,
     class_id BIGINT REFERENCES public.classes(id) ON DELETE CASCADE,
-    PRIMARY KEY (class_id, student_id)
+    PRIMARY KEY (group_id, student_id)
 );
 
 CREATE TABLE IF NOT EXISTS public.conflict_relationships (

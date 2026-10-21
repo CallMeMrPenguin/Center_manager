@@ -64,17 +64,20 @@ def add_member_to_group(group_id: int, student_id: int, class_id: int):
         cursor.execute("""
             INSERT INTO friend_group_members (group_id, student_id, class_id)
             VALUES (?, ?, ?)
-            ON CONFLICT(class_id, student_id) DO UPDATE SET group_id = EXCLUDED.group_id
+            ON CONFLICT(group_id, student_id) DO UPDATE SET class_id = EXCLUDED.class_id
         """, (group_id, student_id, class_id))
         conn.commit()
     finally:
         conn.close()
 
-def remove_member_from_group(class_id: int, student_id: int):
+def remove_member_from_group(class_id: int, student_id: int, group_id: Optional[int] = None):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        if group_id:
+            cursor.execute("DELETE FROM friend_group_members WHERE group_id = ? AND student_id = ?", (group_id, student_id))
+        else:
+            cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
         conn.commit()
     finally:
         conn.close()

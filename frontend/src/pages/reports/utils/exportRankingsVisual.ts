@@ -95,6 +95,15 @@ export async function exportRankingsVisual({
         return { text: v > 0 ? format1Dec(v) : '-', textCol: '#059669', bold: true };
       },
     },
+    avg_mock_test: {
+      id: 'avg_mock_test',
+      header: 'Luyện Đề',
+      width: 80,
+      getValue: (r) => {
+        const v = Number(r.avg_mock_test ?? 0);
+        return { text: v > 0 ? format1Dec(v) : '-', textCol: '#D97706', bold: true };
+      },
+    },
     trend_sparkline: {
       id: 'trend_sparkline',
       header: 'Xu Hướng',
@@ -139,7 +148,7 @@ export async function exportRankingsVisual({
     });
   }
   if (activeCols.length === 0) {
-    const defaultIds = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'trend_sparkline', 'rankTier', 'overallAvg'];
+    const defaultIds = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'avg_mock_test', 'trend_sparkline', 'rankTier', 'overallAvg'];
     activeCols = defaultIds.map((id) => ALL_COLS_MAP[id]).filter(Boolean);
   }
 

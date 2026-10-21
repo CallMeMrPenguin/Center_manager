@@ -26,7 +26,7 @@ def get_grade_weights() -> Dict[str, float]:
         from database.crud_settings import get_db_grade_weights
         return get_db_grade_weights()
     except Exception:
-        return {"check_1": 0.55, "check_2": 0.35, "homework": 0.10, "mock_test": 0.0}
+        return {"check_1": 0.30, "check_2": 0.30, "homework": 0.05, "mock_test": 0.35}
 
 _get_grade_weights = get_grade_weights
 

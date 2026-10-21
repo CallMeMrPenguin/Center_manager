@@ -49,7 +49,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           const parsed = JSON.parse(layout);
           const vis = parsed.visibility || {};
           const ord: string[] = parsed.order || [];
-          const defaultCols = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'trend_sparkline', 'rankTier', 'overallAvg'];
+          const defaultCols = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'avg_mock_test', 'trend_sparkline', 'rankTier', 'overallAvg'];
           const baseOrder = ord.length ? ord : defaultCols;
           visibleColumnIds = baseOrder.filter((id) => vis[id] !== false && defaultCols.includes(id));
         }

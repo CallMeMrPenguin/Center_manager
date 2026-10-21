@@ -73,10 +73,10 @@ export function useStudentResults() {
   const [selectedPhaseId, setSelectedPhaseId] = useState<string>('');
 
   const [gradeTypesList] = useState<GradeTypeItem[]>([
-    { id: 'check_1', label: 'Kiểm Tra 1', weight: 40, color: '#3b82f6' },
-    { id: 'check_2', label: 'Kiểm Tra 2', weight: 40, color: '#a855f7' },
-    { id: 'homework', label: 'BTVN', weight: 20, color: '#10b981' },
-    { id: 'mock_test', label: 'Thi Thử', weight: 0, color: '#34d399' },
+    { id: 'check_1', label: 'Kiểm Tra 1', weight: 30, color: '#3b82f6' },
+    { id: 'check_2', label: 'Kiểm Tra 2', weight: 30, color: '#a855f7' },
+    { id: 'homework', label: 'BTVN', weight: 5, color: '#10b981' },
+    { id: 'mock_test', label: 'Luyện Đề', weight: 35, color: '#f59e0b' },
   ]);
 
   // 1. Fetch Students & Classes list on mount
@@ -230,8 +230,13 @@ export function useStudentResults() {
     const avg_homework = hwScores.length > 0 ? hwScores.reduce((a, b) => a + b, 0) / hwScores.length : null;
     const avg_mock_test = mockScores.length > 0 ? mockScores.reduce((a, b) => a + b, 0) / mockScores.length : null;
 
-    const allScores = [...c1Scores, ...c2Scores, ...hwScores, ...mockScores];
-    const overall_avg = allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : null;
+    let wSum = 0;
+    let wTot = 0;
+    if (avg_check_1 !== null) { wSum += avg_check_1 * 0.30; wTot += 0.30; }
+    if (avg_check_2 !== null) { wSum += avg_check_2 * 0.30; wTot += 0.30; }
+    if (avg_homework !== null) { wSum += avg_homework * 0.05; wTot += 0.05; }
+    if (avg_mock_test !== null) { wSum += avg_mock_test * 0.35; wTot += 0.35; }
+    const overall_avg = wTot > 0 ? Math.trunc(((wSum / wTot) + 0.0000001) * 10) / 10 : null;
 
     const tier = computeTier(overall_avg);
     const performance_index = overall_avg !== null ? trunc1Dec(overall_avg * 10) : '0.0';

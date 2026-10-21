@@ -206,6 +206,42 @@ export function useRankingColumns({ studentSessionsMap }: UseRankingColumnsProps
       },
     },
     {
+      accessorKey: 'avg_mock_test',
+      id: 'avg_mock_test',
+      header: () => <div className="text-center w-full">Luyện Đề</div>,
+      meta: {
+        headerText: 'Luyện Đề',
+        exportValue: (r: any) =>
+          Number(r.avg_mock_test) > 0 ? format1Dec(Number(r.avg_mock_test)) : '-',
+      },
+      cell: ({ row, getValue }) => {
+        const val = Number(getValue()) || 0;
+        const pred = Number(row.original.pred_mt ?? row.original.pred_mock_test) || 0;
+        return (
+          <div className="text-center py-0.5 flex flex-col items-center justify-center">
+            <span className="font-mono font-extrabold text-amber-600 dark:text-amber-400 text-sm sm:text-base">
+              {val > 0 ? format1Dec(val) : '-'}
+            </span>
+            {pred > 0 && (
+              <div
+                className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
+                  pred >= 8.0
+                    ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15'
+                    : pred >= 6.5
+                    ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15'
+                    : pred >= 5.0
+                    ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15'
+                    : 'text-rose-800 dark:text-rose-300 bg-rose-500/15'
+                }`}
+              >
+                <span>PD: {format1Dec(pred)}</span>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       id: 'trend_sparkline',
       header: () => <div className="text-center w-full">Xu Hướng</div>,
       meta: {

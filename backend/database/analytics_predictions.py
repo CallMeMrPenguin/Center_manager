@@ -135,10 +135,10 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
         records_by_student[sid].append(r)
 
     gw = get_grade_weights()
-    w_c1 = gw.get("check_1", 0.55)
-    w_c2 = gw.get("check_2", 0.35)
-    w_hw = gw.get("homework", 0.10)
-    w_mt = gw.get("mock_test", 0.0)
+    w_c1 = gw.get("check_1", 0.30)
+    w_c2 = gw.get("check_2", 0.30)
+    w_hw = gw.get("homework", 0.05)
+    w_mt = gw.get("mock_test", 0.35)
 
     predictions: Dict[int, Dict[str, Any]] = {}
     all_class_scores = [float(r["check_1"]) for r in rows if r.get("check_1") is not None]
@@ -345,7 +345,7 @@ def get_prediction_accuracy_stats() -> Dict[str, Any]:
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT class_id, student_id, date, check_1, check_2, homework, status
+            SELECT class_id, student_id, date, check_1, check_2, homework, mock_test, status
             FROM class_attendance_grades
             ORDER BY student_id, date ASC
         """)
@@ -361,7 +361,8 @@ def get_prediction_accuracy_stats() -> Dict[str, Any]:
         "check_1": {"id": "check_1", "label": "Từ Vựng", "color": "#3b82f6", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
         "check_2": {"id": "check_2", "label": "Ngữ Pháp", "color": "#a855f7", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
         "homework": {"id": "homework", "label": "Bài Tập Về Nhà", "color": "#10b981", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
-        "overall": {"id": "overall", "label": "Điểm Tổng Buổi", "color": "#f59e0b", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
+        "mock_test": {"id": "mock_test", "label": "Luyện Đề", "color": "#f59e0b", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
+        "overall": {"id": "overall", "label": "Điểm Tổng Buổi", "color": "#6366f1", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
     }
 
     total_exact_all = 0
@@ -373,6 +374,7 @@ def get_prediction_accuracy_stats() -> Dict[str, Any]:
         history_c1: List[float] = []
         history_c2: List[float] = []
         history_hw: List[float] = []
+        history_mt: List[float] = []
         history_ov: List[float] = []
 
         for r in recs:
@@ -383,21 +385,25 @@ def get_prediction_accuracy_stats() -> Dict[str, Any]:
             c1 = float(r["check_1"]) if r.get("check_1") is not None else None
             c2 = float(r["check_2"]) if r.get("check_2") is not None else None
             hw = float(r["homework"]) if r.get("homework") is not None else None
+            mt = float(r["mock_test"]) if r.get("mock_test") is not None else None
 
-            # Actual session overall score
+            # Actual session overall score (weights: 30 / 30 / 5 / 35)
             weights = []
             if c1 is not None:
-                weights.append((c1, 0.55))
+                weights.append((c1, 0.30))
             if c2 is not None:
-                weights.append((c2, 0.35))
+                weights.append((c2, 0.30))
             if hw is not None and hw > 0:
-                weights.append((hw, 0.10))
+                weights.append((hw, 0.05))
+            if mt is not None:
+                weights.append((mt, 0.35))
             actual_ov = sum(s * w for s, w in weights) / sum(w for _, w in weights) if weights else None
 
             pairs = [
                 ("check_1", history_c1, c1),
                 ("check_2", history_c2, c2),
                 ("homework", history_hw, hw),
+                ("mock_test", history_mt, mt),
                 ("overall", history_ov, actual_ov),
             ]
 
@@ -426,11 +432,13 @@ def get_prediction_accuracy_stats() -> Dict[str, Any]:
                 history_c2.append(c2)
             if hw is not None and hw > 0:
                 history_hw.append(hw)
+            if mt is not None:
+                history_mt.append(mt)
             if actual_ov is not None:
                 history_ov.append(actual_ov)
 
     items = []
-    for k in ["check_1", "check_2", "homework", "overall"]:
+    for k in ["check_1", "check_2", "homework", "mock_test", "overall"]:
         v = results[k]
         tot = v["total"]
         exact_rate = trunc_1_dec(v["exact"] / tot * 100) if tot else 0.0

@@ -26,21 +26,24 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
   const pointX = hoveredPoint.x;
   const pointY = hoveredPoint.y;
   const cardWidth = 230;
-  const cardHeight = 175;
+  const cardHeight = 205;
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const c1Item = gradeTypesList?.find((g) => g.id === 'check_1');
   const c2Item = gradeTypesList?.find((g) => g.id === 'check_2');
   const hwItem = gradeTypesList?.find((g) => g.id === 'homework');
+  const mtItem = gradeTypesList?.find((g) => g.id === 'mock_test');
 
   const c1Color = c1Item?.color || '#3b82f6';
   const c2Color = c2Item?.color || '#a855f7';
   const hwColor = hwItem?.color || '#10b981';
+  const mtColor = mtItem?.color || '#f59e0b';
 
   const c1Label = c1Item?.label || 'Từ Vựng';
   const c2Label = c2Item?.label || 'Ngữ Pháp';
   const hwLabel = hwItem?.label || 'BTVN';
+  const mtLabel = mtItem?.label || 'Luyện Đề';
 
   if (isMobile) {
     return (
@@ -63,6 +66,11 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
           {hoveredPoint.homework > 0 && (
             <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5" style={{ color: hwColor }}>
               {hwLabel}: {format1Dec(hoveredPoint.homework)}
+            </span>
+          )}
+          {(hoveredPoint.mockTest ?? 0) > 0 && (
+            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5" style={{ color: mtColor }}>
+              {mtLabel}: {format1Dec(hoveredPoint.mockTest!)}
             </span>
           )}
         </div>
@@ -89,9 +97,10 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
     top = pointY + 20;
   }
 
-  const c1Weight = (c1Item?.weight ?? 55) / 100;
-  const c2Weight = (c2Item?.weight ?? 35) / 100;
-  const hwWeight = (hwItem?.weight ?? 10) / 100;
+  const c1Weight = (c1Item?.weight ?? 30) / 100;
+  const c2Weight = (c2Item?.weight ?? 30) / 100;
+  const hwWeight = (hwItem?.weight ?? 5) / 100;
+  const mtWeight = (mtItem?.weight ?? 35) / 100;
 
   let wSum = 0;
   let wTot = 0;
@@ -106,6 +115,10 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
   if (hoveredPoint.homework > 0) {
     wSum += hoveredPoint.homework * hwWeight;
     wTot += hwWeight;
+  }
+  if ((hoveredPoint.mockTest ?? 0) > 0) {
+    wSum += hoveredPoint.mockTest! * mtWeight;
+    wTot += mtWeight;
   }
   const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
 
@@ -194,6 +207,29 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
               {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
                 <span className={`text-[10px] font-mono font-semibold ${getScoreTierColor(hoveredPoint.fittedHw)} opacity-75`}>
                   ({format1Dec(hoveredPoint.fittedHw)})
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Mock Test */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: mtColor }}
+              />
+              <span className="font-extrabold truncate" style={{ color: mtColor }}>
+                {mtLabel}:
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className={`font-mono font-black ${(hoveredPoint.mockTest ?? 0) > 0 ? getScoreTierColor(hoveredPoint.mockTest!) : 'text-slate-400 dark:text-slate-500'}`}>
+                {(hoveredPoint.mockTest ?? 0) > 0 ? format1Dec(hoveredPoint.mockTest!) : '-'}
+              </span>
+              {(hoveredPoint.mockTest ?? 0) > 0 && hoveredPoint.fittedMt !== null && hoveredPoint.fittedMt !== undefined && (
+                <span className={`text-[10px] font-mono font-semibold ${getScoreTierColor(hoveredPoint.fittedMt)} opacity-75`}>
+                  ({format1Dec(hoveredPoint.fittedMt)})
                 </span>
               )}
             </div>

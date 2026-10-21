@@ -70,11 +70,13 @@ export interface HoveredChartPoint {
   check1: number;
   check2: number;
   homework: number;
+  mockTest?: number;
   x: number;
   y: number;
   fittedC1: number | null;
   fittedC2: number | null;
   fittedHw: number | null;
+  fittedMt?: number | null;
   predModel: string;
 }
 
@@ -84,5 +86,7 @@ export interface ChartSessionItem {
   check1: number;
   check2: number;
   homework: number;
+  mockTest?: number;
   overall: number;
 }
+

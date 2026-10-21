@@ -49,10 +49,14 @@ export function computeDistributionStats(
       const c1 = Number(rec.check_1 || 0);
       const c2 = Number(rec.check_2 || 0);
       const hw = Number(rec.homework || 0);
-      if (c1 > 0 || c2 > 0 || hw > 0) {
-        return trunc1Dec(c1 * 0.55 + c2 * 0.35 + hw * 0.1);
-      }
-      return null;
+      const mt = Number(rec.mock_test || 0);
+      let wSum = 0;
+      let wTot = 0;
+      if (c1 > 0) { wSum += c1 * 0.30; wTot += 0.30; }
+      if (c2 > 0) { wSum += c2 * 0.30; wTot += 0.30; }
+      if (hw > 0) { wSum += hw * 0.05; wTot += 0.05; }
+      if (mt > 0) { wSum += mt * 0.35; wTot += 0.35; }
+      return wTot > 0 ? trunc1Dec(wSum / wTot) : null;
     }
 
     if (raw === null || raw === undefined || raw === '') return null;
@@ -76,10 +80,14 @@ export function computeDistributionStats(
       const c1 = Number(st.avg_vocab ?? st.avg_check_1 ?? 0);
       const c2 = Number(st.avg_grammar ?? st.avg_check_2 ?? 0);
       const hw = Number(st.avg_homework ?? 0);
-      if (c1 > 0 || c2 > 0 || hw > 0) {
-        return trunc1Dec(c1 * 0.55 + c2 * 0.35 + hw * 0.1);
-      }
-      return null;
+      const mt = Number(st.avg_mock_test ?? st.mock_test ?? 0);
+      let wSum = 0;
+      let wTot = 0;
+      if (c1 > 0) { wSum += c1 * 0.30; wTot += 0.30; }
+      if (c2 > 0) { wSum += c2 * 0.30; wTot += 0.30; }
+      if (hw > 0) { wSum += hw * 0.05; wTot += 0.05; }
+      if (mt > 0) { wSum += mt * 0.35; wTot += 0.35; }
+      return wTot > 0 ? trunc1Dec(wSum / wTot) : null;
     }
 
     if (raw === null || raw === undefined || raw === '') return null;

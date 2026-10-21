@@ -104,6 +104,73 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
     except Exception:
         pass
 
+    # Migration: Update friend_group_members PK from (class_id, student_id) to (group_id, student_id)
+    try:
+        from database.connection import is_postgres
+        if is_postgres():
+            cursor.execute("""
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.table_constraints 
+                        WHERE table_name = 'friend_group_members' AND constraint_type = 'PRIMARY KEY'
+                    ) THEN
+                        ALTER TABLE public.friend_group_members DROP CONSTRAINT IF EXISTS friend_group_members_pkey;
+                        ALTER TABLE public.friend_group_members ADD PRIMARY KEY (group_id, student_id);
+                    END IF;
+                END $$;
+            """)
+        else:
+            cursor.execute("PRAGMA table_info(friend_group_members)")
+            cols = cursor.fetchall()
+            pk_cols = [c[1] for c in cols if c[5] > 0]
+            if pk_cols == ["class_id", "student_id"] or ("class_id" in pk_cols and "group_id" not in pk_cols):
+                cursor.execute("""
+                    CREATE TABLE friend_group_members_migration (
+                        group_id INTEGER REFERENCES friend_groups(id) ON DELETE CASCADE,
+                        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+                        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+                        PRIMARY KEY (group_id, student_id)
+                    )
+                """)
+                cursor.execute("""
+                    INSERT OR IGNORE INTO friend_group_members_migration (group_id, student_id, class_id)
+                    SELECT group_id, student_id, class_id FROM friend_group_members
+                """)
+                cursor.execute("DROP TABLE friend_group_members")
+                cursor.execute("ALTER TABLE friend_group_members_migration RENAME TO friend_group_members")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_friend_group_members_cls_stu ON friend_group_members(class_id, student_id)")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_friend_group_members_gid ON friend_group_members(group_id)")
+        conn.commit()
+    except Exception as e:
+        print("[Migration friend_group_members note]:", e)
+
+    # Migration: Ensure grade_weights & grade_types in app_settings are set to 30/30/5/35
+    try:
+        import json
+        from datetime import datetime
+        now_dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        gw_json = json.dumps({"check_1": 30.0, "check_2": 30.0, "homework": 5.0, "mock_test": 35.0})
+        gt_json = json.dumps([
+            {"id": "check_1", "label": "Từ Vựng", "weight": 30.0, "color": "#3b82f6"},
+            {"id": "check_2", "label": "Ngữ Pháp", "weight": 30.0, "color": "#a855f7"},
+            {"id": "homework", "label": "BTVN", "weight": 5.0, "color": "#10b981"},
+            {"id": "mock_test", "label": "Luyện Đề", "weight": 35.0, "color": "#f59e0b"}
+        ], ensure_ascii=False)
+        cursor.execute("""
+            INSERT INTO app_settings (setting_key, setting_value, updated_at)
+            VALUES ('grade_weights', ?, ?)
+            ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value, updated_at = EXCLUDED.updated_at
+        """, (gw_json, now_dt))
+        cursor.execute("""
+            INSERT INTO app_settings (setting_key, setting_value, updated_at)
+            VALUES ('grade_types', ?, ?)
+            ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value, updated_at = EXCLUDED.updated_at
+        """, (gt_json, now_dt))
+        conn.commit()
+    except Exception as e:
+        print("[Migration grade_weights note]:", e)
+
 
 def seed_default_admin(cursor: sqlite3.Cursor):
     """Seeds the initial default admin account if table is empty."""

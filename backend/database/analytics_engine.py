@@ -5,9 +5,10 @@ from database.analytics_predictions import smart_predict
 
 def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Dict[str, Any]:
     gw = get_grade_weights()
-    w_c1 = gw.get("check_1", 0.55)
-    w_c2 = gw.get("check_2", 0.35)
-    w_hw = gw.get("homework", 0.10)
+    w_c1 = gw.get("check_1", 0.30)
+    w_c2 = gw.get("check_2", 0.30)
+    w_hw = gw.get("homework", 0.05)
+    w_mt = gw.get("mock_test", 0.35)
 
     if not session_records:
         return {
@@ -19,17 +20,21 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             "std_dev_c1": 0.0,
             "std_dev_c2": 0.0,
             "std_dev_hw": 0.0,
+            "std_dev_mt": 0.0,
             "std_dev_check_1": 0.0,
             "std_dev_check_2": 0.0,
             "std_dev_homework": 0.0,
+            "std_dev_mock_test": 0.0,
             "consistency_label": "Chưa có dữ liệu",
             "ema_level": 0.0,
             "ema_score": 0.0,
             "ema_c1": 0.0,
             "ema_c2": 0.0,
             "ema_hw": 0.0,
+            "ema_mt": 0.0,
             "ema_vocab": 0.0,
             "ema_grammar": 0.0,
+            "ema_mock_test": 0.0,
             "att_pct": 100.0,
             "attendance_pct": 100.0,
             "performance_index": 0.0,
@@ -39,15 +44,19 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             "pred_c1": 0.0,
             "pred_c2": 0.0,
             "pred_hw": 0.0,
+            "pred_mt": 0.0,
             "pred_vocab": 0.0,
             "pred_grammar": 0.0,
+            "pred_mock_test": 0.0,
             "avg_vocab": 0.0,
             "avg_grammar": 0.0,
+            "avg_mock_test": 0.0,
             "model_used": "None",
             "prediction_model": "None",
             "fitted_c1": [],
             "fitted_c2": [],
             "fitted_hw": [],
+            "fitted_mt": [],
             "recommendations": ["Chưa có dữ liệu buổi học để phân tích."]
         }
 
@@ -70,6 +79,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             c1_vals = [float(x.get("check_1")) for x in d_rows if x.get("check_1") is not None and float(x.get("check_1")) > 0]
             c2_vals = [float(x.get("check_2")) for x in d_rows if x.get("check_2") is not None and float(x.get("check_2")) > 0]
             hw_vals = [float(x.get("homework")) for x in d_rows if x.get("homework") is not None and float(x.get("homework")) > 0]
+            mt_vals = [float(x.get("mock_test")) for x in d_rows if x.get("mock_test") is not None and float(x.get("mock_test")) > 0]
 
             first = d_rows[0]
             aggregated_records.append({
@@ -78,13 +88,14 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
                 "check_1": sum(c1_vals) / len(c1_vals) if c1_vals else None,
                 "check_2": sum(c2_vals) / len(c2_vals) if c2_vals else None,
                 "homework": sum(hw_vals) / len(hw_vals) if hw_vals else None,
+                "mock_test": sum(mt_vals) / len(mt_vals) if mt_vals else None,
                 "check_1_skill": first.get("check_1_skill", "vocab"),
                 "check_2_skill": first.get("check_2_skill", "grammar"),
                 "topic": first.get("topic", ""),
             })
         session_records = aggregated_records
 
-    vocab_list, grammar_list, hw_list = [], [], []
+    vocab_list, grammar_list, hw_list, mt_list = [], [], [], []
     overall_session_scores = []
     present_count = 0
 
@@ -97,6 +108,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         c1 = float(r.get("check_1") or 0)
         c2 = float(r.get("check_2") or 0)
         hw = float(r.get("homework") or 0)
+        mt = float(r.get("mock_test") or 0)
         c1_skill = str(r.get("check_1_skill") or "vocab").lower().strip()
         c2_skill = str(r.get("check_2_skill") or "grammar").lower().strip()
 
@@ -122,6 +134,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         if hw > 0:
             hw_list.append(hw)
 
+        if mt > 0:
+            mt_list.append(mt)
+
         w_sum = 0.0
         w_tot = 0.0
         if hw > 0:
@@ -135,6 +150,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             avg_sess_grammar = sum(session_grammar) / len(session_grammar)
             w_sum += avg_sess_grammar * w_c2
             w_tot += w_c2
+        if mt > 0 and w_mt > 0:
+            w_sum += mt * w_mt
+            w_tot += w_mt
 
         if w_tot > 0:
             overall_session_scores.append(w_sum / w_tot)
@@ -169,6 +187,13 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     else:
         avg_c2 = 0.0
 
+    if mt_list and w_mt > 0:
+        avg_mt = sum(mt_list) / len(mt_list)
+        weighted_sum += avg_mt * w_mt
+        weight_total += w_mt
+    else:
+        avg_mt = 0.0
+
     if weight_total > 0:
         academic_10 = weighted_sum / weight_total
     else:
@@ -181,6 +206,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     slope_c1, pred_c1 = smart_predict(c1_list) if c1_list else (0.0, 0.0)
     slope_c2, pred_c2 = smart_predict(c2_list) if c2_list else (0.0, 0.0)
     slope_hw, pred_hw = smart_predict(hw_list) if hw_list else (0.0, 0.0)
+    slope_mt, pred_mt = smart_predict(mt_list) if mt_list else (0.0, 0.0)
 
     _N = len(valid_overall)
     if _N < 3:
@@ -244,6 +270,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     fitted_c1 = get_fitted_values(c1_list) if c1_list else []
     fitted_c2 = get_fitted_values(c2_list) if c2_list else []
     fitted_hw = get_fitted_values(hw_list) if hw_list else []
+    fitted_mt = get_fitted_values(mt_list) if mt_list else []
 
     if slope_overall > 0.3:
         trend_label = "Tăng trưởng mạnh"
@@ -271,6 +298,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     std_dev_c1 = _calc_sd(c1_list, fitted_c1)
     std_dev_c2 = _calc_sd(c2_list, fitted_c2)
     std_dev_hw = _calc_sd(hw_list, fitted_hw)
+    std_dev_mt = _calc_sd(mt_list, fitted_mt)
 
     sd_w_sum = 0.0
     sd_w_total = 0.0
@@ -283,6 +311,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if c2_list:
         sd_w_sum += std_dev_c2 * w_c2
         sd_w_total += w_c2
+    if mt_list and w_mt > 0:
+        sd_w_sum += std_dev_mt * w_mt
+        sd_w_total += w_mt
 
     std_dev = (sd_w_sum / sd_w_total) if sd_w_total > 0 else 0.0
     consistency_score = max(0.0, min(100.0, 100.0 - (std_dev * 15.0)))
@@ -310,6 +341,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     ema_c1 = _calc_ema(c1_list)
     ema_c2 = _calc_ema(c2_list)
     ema_hw = _calc_ema(hw_list)
+    ema_mt = _calc_ema(mt_list)
 
     ema_w_sum = 0.0
     ema_w_tot = 0.0
@@ -322,6 +354,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if c2_list:
         ema_w_sum += ema_c2 * w_c2
         ema_w_tot += w_c2
+    if mt_list and w_mt > 0:
+        ema_w_sum += ema_mt * w_mt
+        ema_w_tot += w_mt
 
     ema = (ema_w_sum / ema_w_tot) if ema_w_tot > 0 else (valid_overall[0] if valid_overall else 0.0)
     ema_score = max(0.0, min(100.0, ema * 10.0))
@@ -363,7 +398,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
 
     if not recs:
         recs.append("Đánh giá: Duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.")
-    recs.append(f"Dự đoán buổi tới: Từ Vựng ({pred_c1:.1f}), Ngữ Pháp ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
+    recs.append(f"Dự đoán buổi tới: Từ Vựng ({pred_c1:.1f}), Ngữ Pháp ({pred_c2:.1f}), Homework ({pred_hw:.1f}), Luyện Đề ({pred_mt:.1f}).")
 
     return {
         "academic_score": trunc_1_dec(academic_score),
@@ -374,31 +409,39 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         "std_dev_c1": round(std_dev_c1, 2),
         "std_dev_c2": round(std_dev_c2, 2),
         "std_dev_hw": round(std_dev_hw, 2),
+        "std_dev_mt": round(std_dev_mt, 2),
         "std_dev_check_1": round(std_dev_c1, 2),
         "std_dev_check_2": round(std_dev_c2, 2),
         "std_dev_homework": round(std_dev_hw, 2),
+        "std_dev_mock_test": round(std_dev_mt, 2),
         "consistency_label": consistency_label,
         "ema_level": trunc_1_dec(ema),
         "ema_score": trunc_1_dec(ema_score),
         "ema_c1": trunc_1_dec(ema_c1),
         "ema_c2": trunc_1_dec(ema_c2),
         "ema_hw": trunc_1_dec(ema_hw),
+        "ema_mt": trunc_1_dec(ema_mt),
         "ema_vocab": trunc_1_dec(ema_c1),
         "ema_grammar": trunc_1_dec(ema_c2),
+        "ema_mock_test": trunc_1_dec(ema_mt),
         "predicted_next": trunc_1_dec(pred_overall),
         "pred_overall": trunc_1_dec(pred_overall),
         "pred_c1": trunc_1_dec(pred_c1),
         "pred_c2": trunc_1_dec(pred_c2),
         "pred_hw": trunc_1_dec(pred_hw),
+        "pred_mt": trunc_1_dec(pred_mt),
         "pred_vocab": trunc_1_dec(pred_c1),
         "pred_grammar": trunc_1_dec(pred_c2),
+        "pred_mock_test": trunc_1_dec(pred_mt),
         "avg_vocab": trunc_1_dec(avg_c1),
         "avg_grammar": trunc_1_dec(avg_c2),
+        "avg_mock_test": trunc_1_dec(avg_mt),
         "prediction_model": prediction_model,
         "model_used": prediction_model,
         "fitted_c1": fitted_c1,
         "fitted_c2": fitted_c2,
         "fitted_hw": fitted_hw,
+        "fitted_mt": fitted_mt,
         "att_pct": trunc_1_dec(att_pct),
         "attendance_pct": trunc_1_dec(att_pct),
         "performance_index": trunc_1_dec(performance_index),

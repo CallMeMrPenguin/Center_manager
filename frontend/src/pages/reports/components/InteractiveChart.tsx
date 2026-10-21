@@ -272,11 +272,12 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
         setHoveredPoint({
           index: closestIdx, sessionName: d.sessionName, fullDate: d.fullDate,
-          check1: d.check1, check2: d.check2, homework: d.homework,
+          check1: d.check1, check2: d.check2, homework: d.homework, mockTest: d.mockTest || 0,
           x, y: highestY,
           fittedC1: fittedLookup.c1[closestIdx] ?? null,
           fittedC2: fittedLookup.c2[closestIdx] ?? null,
           fittedHw: fittedLookup.hw[closestIdx] ?? null,
+          fittedMt: (fittedLookup as any)?.mt?.[closestIdx] ?? null,
           predModel: 'EMA',
         });
       }

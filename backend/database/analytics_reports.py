@@ -6,10 +6,10 @@ from database.analytics_engine import calculate_performance_analytics
 
 def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
     gw = get_grade_weights()
-    w_c1 = float(gw.get("check_1", 0.55))
-    w_c2 = float(gw.get("check_2", 0.35))
-    w_hw = float(gw.get("homework", 0.10))
-    w_mt = float(gw.get("mock_test", 0.0))
+    w_c1 = float(gw.get("check_1", 0.30))
+    w_c2 = float(gw.get("check_2", 0.30))
+    w_hw = float(gw.get("homework", 0.05))
+    w_mt = float(gw.get("mock_test", 0.35))
 
     conn = get_connection()
     try:
@@ -135,12 +135,14 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         vocab_scores = []
         grammar_scores = []
         hw_scores = []
+        mock_scores = []
         for r in s_rows:
             if r.get("status") in ("Vắng mặt", "Nghỉ học"):
                 continue
             c1 = float(r.get("check_1") or 0)
             c2 = float(r.get("check_2") or 0)
             hw = float(r.get("homework") or 0)
+            mt = float(r.get("mock_test") or 0)
             c1_s = str(r.get("check_1_skill") or "vocab").lower().strip()
             c2_s = str(r.get("check_2_skill") or "grammar").lower().strip()
 
@@ -156,14 +158,19 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                     grammar_scores.append(c2)
             if hw > 0:
                 hw_scores.append(hw)
+            if mt > 0:
+                mock_scores.append(mt)
 
         avg_vocab = trunc_1_dec(sum(vocab_scores) / len(vocab_scores)) if vocab_scores else 0.0
         avg_grammar = trunc_1_dec(sum(grammar_scores) / len(grammar_scores)) if grammar_scores else 0.0
         avg_hw = trunc_1_dec(sum(hw_scores) / len(hw_scores)) if hw_scores else 0.0
+        avg_mt = trunc_1_dec(sum(mock_scores) / len(mock_scores)) if mock_scores else 0.0
 
         sr["avg_vocab"] = avg_vocab
         sr["avg_grammar"] = avg_grammar
         sr["avg_homework"] = avg_hw
+        sr["avg_mock_test"] = avg_mt
+        sr["mock_test"] = avg_mt
         sr["avg_check_1"] = avg_vocab
         sr["avg_check_2"] = avg_grammar
 
@@ -178,6 +185,10 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         if avg_hw > 0:
             w_sum += avg_hw * w_hw
             w_tot += w_hw
+        if avg_mt > 0 and w_mt > 0:
+            w_sum += avg_mt * w_mt
+            w_tot += w_mt
+
         overall_avg = trunc_1_dec(w_sum / w_tot) if w_tot > 0 else 0.0
         sr["overall_avg"] = overall_avg
         sr["academic_score"] = overall_avg
@@ -188,6 +199,7 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["ema_c1"] = s_analytics.get("ema_c1", 0.0)
             sr["ema_c2"] = s_analytics.get("ema_c2", 0.0)
             sr["ema_hw"] = s_analytics.get("ema_hw", 0.0)
+            sr["ema_mt"] = s_analytics.get("ema_mt", 0.0)
             sr["trend_slope"] = s_analytics.get("trend_slope", 0.0)
             sr["trend_label"] = s_analytics.get("trend_label", "Ổn định")
             sr["performance_index"] = s_analytics.get("performance_index", 0.0)
@@ -197,12 +209,17 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["pred_c1"] = s_analytics.get("pred_c1", 0.0)
             sr["pred_c2"] = s_analytics.get("pred_c2", 0.0)
             sr["pred_hw"] = s_analytics.get("pred_hw", 0.0)
+            sr["pred_mt"] = s_analytics.get("pred_mt", 0.0)
             sr["std_dev"] = s_analytics.get("std_dev", 0.0)
             sr["std_dev_c1"] = s_analytics.get("std_dev_c1", 0.0)
             sr["std_dev_c2"] = s_analytics.get("std_dev_c2", 0.0)
             sr["std_dev_hw"] = s_analytics.get("std_dev_hw", 0.0)
+            sr["std_dev_mock_test"] = s_analytics.get("std_dev_mock_test", 0.0)
             sr["std_dev_check_1"] = s_analytics.get("std_dev_check_1", 0.0)
             sr["std_dev_check_2"] = s_analytics.get("std_dev_check_2", 0.0)
+            sr["std_dev_homework"] = s_analytics.get("std_dev_homework", 0.0)
+            sr["prediction_model"] = s_analytics.get("prediction_model", "None")
+            sr["model_used"] = s_analytics.get("model_used", "None")
             sr["std_dev_homework"] = s_analytics.get("std_dev_homework", 0.0)
             sr["prediction_model"] = s_analytics.get("prediction_model", "None")
             sr["model_used"] = s_analytics.get("model_used", "None")

@@ -15,6 +15,14 @@ def get_target_db_url():
 
 DATABASE_URL = get_target_db_url()
 
+def is_postgres() -> bool:
+    return bool(
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("POSTGRES_URL")
+        or os.environ.get("DB_ENGINE") == "postgres"
+        or os.environ.get("APP_MODE") in ("web", "vps", "server")
+    )
+
 # Local SQLite Database Path (data/ folder with backward-compatible root fallback)
 def _resolve_db_path() -> str:
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

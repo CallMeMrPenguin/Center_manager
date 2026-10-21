@@ -243,9 +243,9 @@ export const computeClassAnalyticsSd = (records: any[]): number => {
 
   let w_sum = 0.0;
   let w_tot = 0.0;
-  if (hw_list.length > 0) { w_sum += sd_hw * 0.10; w_tot += 0.10; }
-  if (c1_list.length > 0) { w_sum += sd_c1 * 0.55; w_tot += 0.55; }
-  if (c2_list.length > 0) { w_sum += sd_c2 * 0.35; w_tot += 0.35; }
+  if (hw_list.length > 0) { w_sum += sd_hw * 0.05; w_tot += 0.05; }
+  if (c1_list.length > 0) { w_sum += sd_c1 * 0.30; w_tot += 0.30; }
+  if (c2_list.length > 0) { w_sum += sd_c2 * 0.30; w_tot += 0.30; }
 
   return w_tot > 0 ? trunc1Dec(w_sum / w_tot) : 0.0;
 };
@@ -255,14 +255,14 @@ export const computeStudentOverallScore = (r: any): number => {
   const v = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
   const g = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
   const h = Number(r.avg_homework ?? r.avg_homework_1 ?? 0);
-  const h2 = Number(r.avg_homework_2 ?? 0);
+  const mt = Number(r.avg_mock_test ?? r.mock_test ?? 0);
 
   let wSum = 0;
   let wTot = 0;
-  if (v > 0) { wSum += v * 0.50; wTot += 0.50; }
+  if (v > 0) { wSum += v * 0.30; wTot += 0.30; }
   if (g > 0) { wSum += g * 0.30; wTot += 0.30; }
-  if (h > 0) { wSum += h * 0.10; wTot += 0.10; }
-  if (h2 > 0) { wSum += h2 * 0.10; wTot += 0.10; }
+  if (h > 0) { wSum += h * 0.05; wTot += 0.05; }
+  if (mt > 0) { wSum += mt * 0.35; wTot += 0.35; }
 
   if (wTot === 0) {
     if (r.academic_score !== undefined && Number(r.academic_score) > 0) {

@@ -246,7 +246,7 @@ def create_all_tables(cursor: sqlite3.Cursor):
         group_id INTEGER REFERENCES friend_groups(id) ON DELETE CASCADE,
         student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
         class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
-        PRIMARY KEY (class_id, student_id)
+        PRIMARY KEY (group_id, student_id)
     )
     """)
 

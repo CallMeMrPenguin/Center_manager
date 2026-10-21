@@ -137,10 +137,10 @@ export const useOverviewStats = ({
 
     let overall = 0;
     let totW = 0;
-    if (c1 > 0) { overall += c1 * 0.55; totW += 0.55; }
-    if (c2 > 0) { overall += c2 * 0.35; totW += 0.35; }
-    if (hw > 0) { overall += hw * 0.10; totW += 0.10; }
-    if (mockTest > 0) { overall += mockTest * 0.15; totW += 0.15; }
+    if (c1 > 0) { overall += c1 * 0.30; totW += 0.30; }
+    if (c2 > 0) { overall += c2 * 0.30; totW += 0.30; }
+    if (hw > 0) { overall += hw * 0.05; totW += 0.05; }
+    if (mockTest > 0) { overall += mockTest * 0.35; totW += 0.35; }
     if (totW > 0) overall = trunc1Dec(overall / totW);
 
     const attPct = records.length > 0 ? Math.round((presentCount / records.length) * 100) : 100;
@@ -208,13 +208,14 @@ export const useOverviewStats = ({
     const recordsToChart = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
     if (!recordsToChart || recordsToChart.length === 0) return [];
 
-    const dateMap: Record<string, { check1: number[]; check2: number[]; hw: number[] }> = {};
+    const dateMap: Record<string, { check1: number[]; check2: number[]; hw: number[]; mockTest: number[] }> = {};
     recordsToChart.forEach(r => {
       const d = r.date || 'Session';
-      if (!dateMap[d]) dateMap[d] = { check1: [], check2: [], hw: [] };
+      if (!dateMap[d]) dateMap[d] = { check1: [], check2: [], hw: [], mockTest: [] };
       const val1 = Number(r.check_1);
       const val2 = Number(r.check_2);
       const valHw = Number(r.homework);
+      const valMock = Number((r as any).mock_test);
       const c1Skill = String(r.check_1_skill || 'vocab').toLowerCase().trim();
       const c2Skill = String(r.check_2_skill || 'grammar').toLowerCase().trim();
 
@@ -227,12 +228,13 @@ export const useOverviewStats = ({
         else dateMap[d].check2.push(val2);
       }
       if (valHw > 0) dateMap[d].hw.push(valHw);
+      if (valMock > 0) dateMap[d].mockTest.push(valMock);
     });
 
     const dates = Object.keys(dateMap)
       .filter(d => {
         const item = dateMap[d];
-        return item.check1.length > 0 || item.check2.length > 0 || item.hw.length > 0;
+        return item.check1.length > 0 || item.check2.length > 0 || item.hw.length > 0 || item.mockTest.length > 0;
       })
       .sort();
 
@@ -256,21 +258,24 @@ export const useOverviewStats = ({
     });
     if (wTot <= 0) wTot = 1;
 
-    const w1 = weightsMap['check_1'] ?? 0.55;
-    const w2 = weightsMap['check_2'] ?? 0.35;
-    const whw = weightsMap['homework'] ?? 0.10;
+    const w1 = weightsMap['check_1'] ?? 0.30;
+    const w2 = weightsMap['check_2'] ?? 0.30;
+    const whw = weightsMap['homework'] ?? 0.05;
+    const wmt = weightsMap['mock_test'] ?? 0.35;
 
     const result = selectedDates.map((d) => {
       const item = dateMap[d];
       const avg1 = item.check1.length > 0 ? item.check1.reduce((a, b) => a + b, 0) / item.check1.length : 0;
       const avg2 = item.check2.length > 0 ? item.check2.reduce((a, b) => a + b, 0) / item.check2.length : 0;
       const avghw = item.hw.length > 0 ? item.hw.reduce((a, b) => a + b, 0) / item.hw.length : 0;
+      const avgmt = item.mockTest.length > 0 ? item.mockTest.reduce((a, b) => a + b, 0) / item.mockTest.length : 0;
 
       let wSum = 0;
       let wActive = 0;
       if (item.check1.length > 0) { wSum += avg1 * w1; wActive += w1; }
       if (item.check2.length > 0) { wSum += avg2 * w2; wActive += w2; }
       if (item.hw.length > 0) { wSum += avghw * whw; wActive += whw; }
+      if (item.mockTest.length > 0) { wSum += avgmt * wmt; wActive += wmt; }
       const avgOverall = wActive > 0 ? wSum / wActive : 0;
 
       return {
@@ -279,6 +284,7 @@ export const useOverviewStats = ({
         check1: item.check1.length > 0 ? trunc1Dec(avg1) : 0,
         check2: item.check2.length > 0 ? trunc1Dec(avg2) : 0,
         homework: item.hw.length > 0 ? trunc1Dec(avghw) : 0,
+        mockTest: item.mockTest.length > 0 ? trunc1Dec(avgmt) : 0,
         overall: trunc1Dec(avgOverall)
       };
     });
@@ -332,7 +338,7 @@ export const useOverviewStats = ({
       else if (selectedGradeTypeFilter === 'homework') sc = Number(r.avg_homework || 0);
       else if (selectedGradeTypeFilter === 'mock_test') sc = Number(r.avg_mock_test || r.mock_test || r.avg_grammar || r.avg_check_2 || 0);
       else {
-        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_vocab ?? r.avg_check_1 ?? 0) * 0.55 + Number(r.avg_grammar ?? r.avg_check_2 ?? 0) * 0.35 + Number(r.avg_homework || 0) * 0.1);
+        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_vocab ?? r.avg_check_1 ?? 0) * 0.30 + Number(r.avg_grammar ?? r.avg_check_2 ?? 0) * 0.30 + Number(r.avg_homework || 0) * 0.05 + Number(r.avg_mock_test ?? r.mock_test ?? 0) * 0.35);
       }
       return sc >= selectedScoreBin.minScore && (selectedScoreBin.maxScore === 10 ? sc <= 10 : sc < selectedScoreBin.maxScore);
     });

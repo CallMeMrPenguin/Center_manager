@@ -23,8 +23,8 @@ ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS avg
 
 -- Table: app_settings (2 rows)
 INSERT INTO public.app_settings ("setting_key", "setting_value", "updated_at") VALUES
-('grade_types', '[{"id": "check_1", "label": "Từ Vựng", "weight": 55.0, "color": "#3b82f6"}, {"id": "check_2", "label": "Ngữ Pháp", "weight": 35.0, "color": "#a855f7"}, {"id": "homework", "label": "BTVN", "weight": 10.0, "color": "#10b981"}]', '2026-08-26 16:23:22'),
-('grade_weights', '{"check_1": 50.0, "check_2": 30.0, "homework": 20.0, "mock_test": 0.0}', '2026-08-26 16:23:13')
+('grade_types', '[{"id": "check_1", "label": "Từ Vựng", "weight": 30.0, "color": "#3b82f6"}, {"id": "check_2", "label": "Ngữ Pháp", "weight": 30.0, "color": "#a855f7"}, {"id": "homework", "label": "BTVN", "weight": 5.0, "color": "#10b981"}, {"id": "mock_test", "label": "Luyện Đề", "weight": 35.0, "color": "#f59e0b"}]', '2026-08-26 16:23:22'),
+('grade_weights', '{"check_1": 30.0, "check_2": 30.0, "homework": 5.0, "mock_test": 35.0}', '2026-08-26 16:23:13')
 ON CONFLICT DO NOTHING;
 
 -- Table: app_users (44 rows)

@@ -23,6 +23,10 @@ export const RANKINGS_COLUMN_ALIASES: Record<string, string> = {
   avg_homework_2: 'avg_homework_2',
   hw2: 'avg_homework_2',
   homework_2: 'avg_homework_2',
+  avg_mock_test: 'avg_mock_test',
+  mock_test: 'avg_mock_test',
+  mock: 'avg_mock_test',
+  mt: 'avg_mock_test',
   trend_sparkline: 'trend_sparkline',
   trend: 'trend_sparkline',
   rankTier: 'rankTier',
@@ -90,6 +94,13 @@ export async function exportRankingsExcel({
           return v > 0 ? format1Dec(v) : '-';
         },
       },
+      avg_mock_test: {
+        header: 'Luyện Đề',
+        getValue: (r) => {
+          const v = Number(r.avg_mock_test ?? 0);
+          return v > 0 ? format1Dec(v) : '-';
+        },
+      },
       trend_sparkline: {
         header: 'Xu Hướng',
         getValue: (r) =>
@@ -125,7 +136,7 @@ export async function exportRankingsExcel({
     }
 
     if (activeColDefs.length === 0) {
-      const defaultOrder = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'trend_sparkline', 'rankTier', 'overallAvg'];
+      const defaultOrder = ['stt', 'full_name', 'class_name', 'present_count', 'avg_vocab', 'avg_grammar', 'avg_homework', 'avg_mock_test', 'trend_sparkline', 'rankTier', 'overallAvg'];
       activeColDefs = defaultOrder.map((id) => ALL_COLS[id]).filter(Boolean);
     }
 

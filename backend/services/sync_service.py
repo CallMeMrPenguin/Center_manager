@@ -34,7 +34,7 @@ FAST_SYNC_TABLES = [
     {"table": "class_sessions", "pk": ["id"]},
     {"table": "class_attendance_grades", "pk": ["class_id", "student_id", "date"]},
     {"table": "assignment_submissions", "pk": ["assignment_id", "student_id"]},
-    {"table": "friend_group_members", "pk": ["class_id", "student_id"]},
+    {"table": "friend_group_members", "pk": ["group_id", "student_id"]},
     {"table": "conflict_group_members", "pk": ["class_id", "student_id"]},
     {"table": "conflict_relationships", "pk": ["class_id", "student_id1", "student_id2"]},
     {"table": "trusted_swap_relationships", "pk": ["class_id", "student_id1", "student_id2"]},

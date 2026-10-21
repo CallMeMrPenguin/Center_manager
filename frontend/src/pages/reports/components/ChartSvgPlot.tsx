@@ -255,11 +255,13 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                       check1: d.check1,
                       check2: d.check2,
                       homework: d.homework,
+                      mockTest: d.mockTest || 0,
                       x,
                       y: relY,
                       fittedC1: fittedLookup.c1[i] ?? null,
                       fittedC2: fittedLookup.c2[i] ?? null,
                       fittedHw: fittedLookup.hw[i] ?? null,
+                      fittedMt: (fittedLookup as any)?.mt?.[i] ?? null,
                       predModel: 'EMA',
                     });
                   };

@@ -124,7 +124,7 @@ def api_add_friend_group_member(class_id: int, group_id: int, payload: FriendGro
 
 @router.delete("/api/classes/{class_id}/friend-groups/{group_id}/members/{student_id}")
 def api_remove_friend_group_member(class_id: int, group_id: int, student_id: int):
-    remove_member_from_group(class_id, student_id)
+    remove_member_from_group(class_id, student_id, group_id=group_id)
     return {"status": "success"}
 
 @router.get("/api/classes/{class_id}/conflict-groups")

@@ -85,7 +85,7 @@ def save_db_setting(key: str, value: Any) -> bool:
 def get_db_grade_weights() -> Dict[str, float]:
     """
     Returns unified fractional grade weights {grade_key: fraction_weight}.
-    Example: {'check_1': 0.55, 'check_2': 0.35, 'homework': 0.10, 'mock_test': 0.0}
+    Example: {'check_1': 0.30, 'check_2': 0.30, 'homework': 0.05, 'mock_test': 0.35}
     """
     gt_list = get_db_setting("grade_types")
     if gt_list and isinstance(gt_list, list):
@@ -99,10 +99,10 @@ def get_db_grade_weights() -> Dict[str, float]:
             return res
 
     gw = get_db_setting("grade_weights") or {}
-    w_c1 = float(gw.get("check_1", 55.0)) / 100.0
-    w_c2 = float(gw.get("check_2", 35.0)) / 100.0
-    w_hw = float(gw.get("homework", 10.0)) / 100.0
-    w_mt = float(gw.get("mock_test", 0.0)) / 100.0
+    w_c1 = float(gw.get("check_1", 30.0)) / 100.0
+    w_c2 = float(gw.get("check_2", 30.0)) / 100.0
+    w_hw = float(gw.get("homework", 5.0)) / 100.0
+    w_mt = float(gw.get("mock_test", 35.0)) / 100.0
     return {"check_1": w_c1, "check_2": w_c2, "homework": w_hw, "mock_test": w_mt}
 
 def clear_settings_cache():
