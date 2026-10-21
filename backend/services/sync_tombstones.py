@@ -69,6 +69,27 @@ def apply_tombstone(cur: Any, tbl: str, rec_id: Any) -> bool:
                     cur.execute("DELETE FROM role_permissions WHERE role = ? AND tab_id = ?", (parts[0], parts[1]))
                     return True
 
+        elif tbl == "friend_group_members":
+            if ":" in rec_str:
+                parts = rec_str.split(":")
+                if len(parts) >= 2:
+                    cur.execute("DELETE FROM friend_group_members WHERE group_id = ? AND student_id = ?", (parts[0], parts[1]))
+                    return True
+
+        elif tbl == "conflict_group_members":
+            if ":" in rec_str:
+                parts = rec_str.split(":")
+                if len(parts) >= 2:
+                    cur.execute("DELETE FROM conflict_group_members WHERE class_id = ? AND student_id = ?", (parts[0], parts[1]))
+                    return True
+
+        elif tbl == "trusted_swap_students":
+            if ":" in rec_str:
+                parts = rec_str.split(":")
+                if len(parts) >= 2:
+                    cur.execute("DELETE FROM trusted_swap_students WHERE class_id = ? AND student_id = ?", (parts[0], parts[1]))
+                    return True
+
         else:
             try:
                 cur.execute(f"DELETE FROM {tbl} WHERE id = ?", (rec_str,))
@@ -120,6 +141,21 @@ def is_row_tombstoned(table: str, row: Dict[str, Any], ts_set: Set[Tuple[str, st
                 return True
 
     elif table == "class_students":
+        cid, sid = row.get("class_id"), row.get("student_id")
+        if cid is not None and sid is not None and (table, f"{cid}:{sid}") in ts_set:
+            return True
+
+    elif table == "friend_group_members":
+        gid, sid = row.get("group_id"), row.get("student_id")
+        if gid is not None and sid is not None and (table, f"{gid}:{sid}") in ts_set:
+            return True
+
+    elif table == "conflict_group_members":
+        cid, sid = row.get("class_id"), row.get("student_id")
+        if cid is not None and sid is not None and (table, f"{cid}:{sid}") in ts_set:
+            return True
+
+    elif table == "trusted_swap_students":
         cid, sid = row.get("class_id"), row.get("student_id")
         if cid is not None and sid is not None and (table, f"{cid}:{sid}") in ts_set:
             return True

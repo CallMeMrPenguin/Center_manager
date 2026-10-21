@@ -453,8 +453,6 @@ def create_all_indexes(cursor: sqlite3.Cursor):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_type ON question_bank(question_type);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_id ON question_bank(id DESC);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_freq ON question_bank(frequency);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_documents_folder_trash ON documents(folder_id, is_trash);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_trash ON document_folders(parent_id, is_trash);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade ON vocabulary_list(grade);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")

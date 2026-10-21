@@ -54,6 +54,8 @@ def delete_friend_group(group_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM friend_groups WHERE id = ?", (group_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("friend_groups", group_id)
     finally:
         conn.close()
 
@@ -74,10 +76,13 @@ def remove_member_from_group(class_id: int, student_id: int, group_id: Optional[
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        from database.utils import record_tombstone
         if group_id:
             cursor.execute("DELETE FROM friend_group_members WHERE group_id = ? AND student_id = ?", (group_id, student_id))
+            record_tombstone("friend_group_members", f"{group_id}:{student_id}")
         else:
             cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+            record_tombstone("friend_group_members", f"{class_id}:{student_id}")
         conn.commit()
     finally:
         conn.close()
@@ -136,6 +141,8 @@ def remove_conflict_pair(conflict_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM conflict_relationships WHERE id = ?", (conflict_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("conflict_relationships", conflict_id)
     finally:
         conn.close()
 
@@ -178,6 +185,8 @@ def remove_trusted_swap_pair(swap_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM trusted_swap_relationships WHERE id = ?", (swap_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("trusted_swap_relationships", swap_id)
     finally:
         conn.close()
 
@@ -229,6 +238,8 @@ def delete_conflict_group(group_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM conflict_groups WHERE id = ?", (group_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("conflict_groups", group_id)
     finally:
         conn.close()
 
@@ -251,6 +262,8 @@ def remove_member_from_conflict_group(class_id: int, student_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM conflict_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("conflict_group_members", f"{class_id}:{student_id}")
     finally:
         conn.close()
 
@@ -291,5 +304,7 @@ def remove_trusted_swap_student(class_id: int, student_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM trusted_swap_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("trusted_swap_students", f"{class_id}:{student_id}")
     finally:
         conn.close()

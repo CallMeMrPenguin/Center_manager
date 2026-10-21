@@ -112,10 +112,18 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
                 DO $$
                 BEGIN
                     IF EXISTS (
-                        SELECT 1 FROM information_schema.table_constraints 
-                        WHERE table_name = 'friend_group_members' AND constraint_type = 'PRIMARY KEY'
+                        SELECT 1
+                        FROM information_schema.table_constraints tc
+                        JOIN information_schema.key_column_usage kcu
+                          ON tc.constraint_name = kcu.constraint_name
+                          AND tc.table_schema = kcu.table_schema
+                        WHERE tc.table_name = 'friend_group_members'
+                          AND tc.constraint_type = 'PRIMARY KEY'
+                          AND kcu.column_name = 'class_id'
                     ) THEN
-                        ALTER TABLE public.friend_group_members DROP CONSTRAINT IF EXISTS friend_group_members_pkey;
+                        ALTER TABLE public.friend_group_members DROP CONSTRAINT IF EXISTS friend_group_members_pkey CASCADE;
+                        DELETE FROM public.friend_group_members a USING public.friend_group_members b
+                        WHERE a.ctid < b.ctid AND a.group_id = b.group_id AND a.student_id = b.student_id;
                         ALTER TABLE public.friend_group_members ADD PRIMARY KEY (group_id, student_id);
                     END IF;
                 END $$;
