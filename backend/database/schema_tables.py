@@ -455,6 +455,11 @@ def create_all_indexes(cursor: sqlite3.Cursor):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_freq ON question_bank(frequency);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade ON vocabulary_list(grade);")
+    try:
+        cursor.execute("DELETE FROM class_sessions WHERE id NOT IN (SELECT MAX(id) FROM class_sessions GROUP BY class_id, date);")
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_class_sessions_unique_class_date ON class_sessions(class_id, date);")
+    except Exception:
+        pass
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_date ON class_sessions(date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")

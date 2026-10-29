@@ -7,9 +7,6 @@ from database.connection import get_connection
 from database.utils import record_tombstone
 from services.cache_service import cache_get, cache_set, cache_invalidate
 
-# ----------------------------------------------------
-# CENTER MANAGER — CLASSES CRUD & SEATING / SCHEDULE
-# ----------------------------------------------------
 def get_classes(search: str = "") -> List[Dict[str, Any]]:
     cache_key = f"classes:{search}"
     cached = cache_get(cache_key)
@@ -251,7 +248,9 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
             params.append(f"{month_year}%")
         query += " ORDER BY s.date ASC, s.start_time ASC"
         cursor.execute(query, params)
-        explicit_sessions = [dict(r) for r in cursor.fetchall()]
+        raw_rows = [dict(r) for r in cursor.fetchall()]
+        sess_dedup = {(r["class_id"], r["date"]): r for r in raw_rows}
+        explicit_sessions = list(sess_dedup.values())
         
         # 2. Get weekly slots
         w_query = """
@@ -356,6 +355,7 @@ def add_class_session(class_id: int, date: str, start_time: str, duration: int, 
         cursor.execute("""
             INSERT INTO class_sessions (class_id, date, start_time, duration, status, teacher_id, notes, color)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (class_id, date) DO UPDATE SET start_time = excluded.start_time, duration = excluded.duration, status = excluded.status, notes = excluded.notes, color = excluded.color
         """, (class_id, date, start_time, duration, status, teacher_id, notes, color))
         conn.commit()
         return cursor.lastrowid

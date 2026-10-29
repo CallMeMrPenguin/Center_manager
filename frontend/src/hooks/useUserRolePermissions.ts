@@ -30,10 +30,17 @@ export function useUserRolePermissions(currentUser: AuthUser | null) {
     // Check configured permissions from DB
     const matched = rolePermissions.filter((p) => (p.role || '').toLowerCase() === userRoleKey);
     if (matched.length > 0) {
-      return matched.filter((p) => p.can_access === 1).map((p) => p.tab_id);
+      const allowed = matched.filter((p) => p.can_access === 1).map((p) => p.tab_id);
+      if ((userRoleKey === 'quản lý' || currentUser.role === 'manager') && !allowed.includes('schedule')) {
+        allowed.push('schedule');
+      }
+      return allowed;
     }
 
     // Role-based fallbacks while loading or unconfigured
+    if (currentUser.role === 'manager' || userRoleKey === 'quản lý') {
+      return TAB_DEFINITIONS.map((t) => t.id).filter((id) => !['settings', 'ui-showcase'].includes(id));
+    }
     if (currentUser.role === 'accountant') return ['dashboard', 'payments', 'invoices', 'reports'];
     if (currentUser.role === 'assistant') return ['dashboard', 'students', 'classes', 'schedule', 'assignments', 'results', 'file-manager', 'reports'];
 

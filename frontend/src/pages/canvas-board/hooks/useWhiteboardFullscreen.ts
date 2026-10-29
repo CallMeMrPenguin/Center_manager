@@ -29,24 +29,33 @@ export function useWhiteboardFullscreen({
 
     if (willBeFullscreen) {
       container.classList.add('whiteboard-fullscreen-mode');
+      document.body.classList.add('whiteboard-fullscreen-active');
       if (!document.fullscreenElement && container.requestFullscreen) {
         container.requestFullscreen().catch(() => {});
       }
     } else {
       container.classList.remove('whiteboard-fullscreen-mode');
+      document.body.classList.remove('whiteboard-fullscreen-active');
       if (document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
     }
 
-    setTimeout(() => {
-      try {
-        excalidrawAPI?.refresh();
-      } catch {
-        // Ignore unmounted
-      }
-    }, 80);
+    [0, 50, 150, 300].forEach((ms) => {
+      setTimeout(() => {
+        try {
+          excalidrawAPI?.refresh();
+        } catch {}
+      }, ms);
+    });
   };
+
+  // Listen to custom global toggle event from toolbar click interceptor
+  useEffect(() => {
+    const handler = () => toggleFullscreen();
+    window.addEventListener('toggle-whiteboard-fullscreen', handler);
+    return () => window.removeEventListener('toggle-whiteboard-fullscreen', handler);
+  }, []);
 
   // Sync with native fullscreen changes (e.g. user presses Esc key)
   useEffect(() => {
@@ -59,13 +68,14 @@ export function useWhiteboardFullscreen({
         isFullscreenRef.current = false;
         setIsFullscreen(false);
         container.classList.remove('whiteboard-fullscreen-mode');
-        setTimeout(() => {
-          try {
-            excalidrawAPI?.refresh();
-          } catch {
-            // Ignore unmounted
-          }
-        }, 80);
+        document.body.classList.remove('whiteboard-fullscreen-active');
+        [0, 50, 150].forEach((ms) => {
+          setTimeout(() => {
+            try {
+              excalidrawAPI?.refresh();
+            } catch {}
+          }, ms);
+        });
       }
     };
 
@@ -81,6 +91,8 @@ export function useWhiteboardFullscreen({
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       window.removeEventListener('keydown', handleKeyDown);
+      container?.classList.remove('whiteboard-fullscreen-mode');
+      document.body.classList.remove('whiteboard-fullscreen-active');
     };
   }, [containerRef, excalidrawAPI]);
 
@@ -102,6 +114,9 @@ export function useWhiteboardFullscreen({
         fsBtn = document.createElement('button');
         fsBtn.type = 'button';
         fsBtn.className = 'custom-fullscreen-tool-btn';
+        fsBtn.addEventListener('pointerdown', (ev) => {
+          ev.stopPropagation();
+        });
         fsBtn.addEventListener('click', (ev) => {
           ev.preventDefault();
           ev.stopPropagation();

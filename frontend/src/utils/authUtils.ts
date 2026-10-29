@@ -2,7 +2,7 @@ export interface AuthUser {
   id: string;
   name: string;
   username?: string;
-  role: 'student' | 'admin' | 'teacher' | 'assistant' | 'accountant';
+  role: 'student' | 'admin' | 'manager' | 'teacher' | 'assistant' | 'accountant' | 'staff';
   rawRole?: string;
   status?: string;
   avatar?: string;
@@ -10,6 +10,27 @@ export interface AuthUser {
   studentId?: number;
   lastLogin?: string;
   token?: string;
+}
+
+export function isTokenExpired(token?: string | null): boolean {
+  if (!token) return true;
+  try {
+    const parts = token.trim().split('.');
+    if (parts.length < 2) return true;
+    let b64 = parts[0].replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const jsonStr = decodeURIComponent(
+      atob(b64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const payload = JSON.parse(jsonStr);
+    if (!payload.exp) return false;
+    return Math.floor(Date.now() / 1000) >= payload.exp;
+  } catch {
+    return false;
+  }
 }
 
 export function getAuthToken(): string | null {

@@ -99,6 +99,15 @@ export function useWhiteboardUIAdjustments({
         return;
       }
 
+      // Check if user clicked custom fullscreen button
+      const fsBtn = target.closest('.custom-fullscreen-tool-btn') as HTMLElement | null;
+      if (fsBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.dispatchEvent(new CustomEvent('toggle-whiteboard-fullscreen'));
+        return;
+      }
+
       // Check if user clicked a tool button inside toolbar
       const toolBtn = target.closest('[data-testid^="toolbar-"], .custom-highlighter-tool-btn') as HTMLElement | null;
       if (!toolBtn) return;

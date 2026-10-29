@@ -93,9 +93,15 @@ export default function SchedulePage() {
       ]);
       setClassesList(cls);
 
-      const sessionMap = new Map<number, any>();
+      const sessionMap = new Map<string, any>();
       sessionArrays.flat().forEach((s: any) => {
-        if (s?.id) sessionMap.set(s.id, s);
+        if (s?.id && s?.class_id && s?.date) {
+          const key = `${s.class_id}_${s.date}`;
+          const existing = sessionMap.get(key);
+          if (!existing || (existing.id < 0 && s.id > 0) || (s.id > existing.id)) {
+            sessionMap.set(key, s);
+          }
+        }
       });
       const rawSessions = Array.from(sessionMap.values());
       const inScope = filterInScopeSessions(rawSessions, scheduleScope, selectedMonth, selectedWeekStarts, customRange);

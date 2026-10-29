@@ -90,18 +90,18 @@ export function formatDateTime(val: string | Date | null | undefined): string {
 }
 
 /**
- * Format timestamp for any exported file/image: ss-mm-hh -dd=mm-yy
- * Example: 45-30-14 -08=10-26
+ * Format timestamp for any exported file/image: dd-MM-yyyy_HH-mm-ss
+ * Example: 29-10-2026_18-06-30 (Standard Vietnamese / International date & time, hours before minutes and seconds)
  */
 export function formatExportTimestamp(d: Date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0');
-  const ss = pad(d.getSeconds());
-  const mm = pad(d.getMinutes());
   const hh = pad(d.getHours());
+  const mm = pad(d.getMinutes());
+  const ss = pad(d.getSeconds());
   const dd = pad(d.getDate());
   const MM = pad(d.getMonth() + 1);
-  const yy = String(d.getFullYear()).slice(-2);
-  return `${ss}-${mm}-${hh} -${dd}=${MM}-${yy}`;
+  const yyyy = d.getFullYear();
+  return `${dd}-${MM}-${yyyy}_${hh}-${mm}-${ss}`;
 }
 
 

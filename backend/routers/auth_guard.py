@@ -7,7 +7,7 @@ from fastapi import Request, HTTPException, status
 from typing import Dict, Any, Optional
 from services.auth_security import verify_access_token
 
-STAFF_ROLES = {"Quản trị viên", "Giáo viên", "Trợ giảng", "Kế toán", "admin", "teacher", "staff"}
+STAFF_ROLES = {"Quản trị viên", "Quản lý", "Quản Lý", "Giáo viên", "Trợ giảng", "Kế toán", "admin", "manager", "teacher", "staff"}
 
 def extract_bearer_token(request: Request) -> Optional[str]:
     """Extracts bearer token from Authorization header or cookie/query."""

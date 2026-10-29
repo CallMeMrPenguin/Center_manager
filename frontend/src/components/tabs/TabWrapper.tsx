@@ -30,7 +30,7 @@ export const TabWrapper = memo(
   }: TabWrapperProps) {
     return (
       <div
-        className={`h-full w-full ${isActive && tab.id !== 'whiteboard' ? 'animate-tab-enter' : ''} ${!isActive ? 'hidden' : ''}`}
+        className={`h-full w-full ${isActive && tab.id !== 'canvas-board' && tab.id !== 'whiteboard' ? 'animate-tab-enter' : ''} ${!isActive ? 'hidden' : ''}`}
         style={!isActive ? { display: 'none' } : undefined}
       >
         <Suspense

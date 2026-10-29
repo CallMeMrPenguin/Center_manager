@@ -182,6 +182,25 @@ def _parse_score(val: Any, is_present: bool = True) -> Optional[float]:
     except (ValueError, TypeError):
         return None
 
+def infer_standard_teaching_slot(target_dt: Optional[datetime] = None) -> tuple[str, int]:
+    """
+    Infers the standard teaching shift according to center frames:
+    1. Ca 1 (Sáng):       8-10am      -> 08:00 - 10:00 (120 mins)
+    2. Ca 2 (Chiều sớm):  2-4pm       -> 14:00 - 16:00 (120 mins)
+    3. Ca 3 (Chiều muộn): 5-7pm       -> 17:00 - 19:00 (120 mins)
+    4. Ca 4 (Tối):        7h15-9h15pm -> 19:15 - 21:15 (120 mins)
+    """
+    now = target_dt or datetime.now()
+    cur_m = now.hour * 60 + now.minute
+    if cur_m < 720:       # Before 12:00 -> 8-10am
+        return ("08:00", 120)
+    elif cur_m < 990:     # 12:00 - 16:30 -> 2-4pm
+        return ("14:00", 120)
+    elif cur_m < 1125:    # 16:30 - 18:45 -> 5-7pm
+        return ("17:00", 120)
+    else:                 # 18:45 onwards -> 7h15-9h15pm
+        return ("19:15", 120)
+
 def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
     if not records:
         return
@@ -193,9 +212,8 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         cursor.execute("SELECT id, start_time, duration FROM class_sessions WHERE class_id = ? AND date = ?", (class_id, date_str))
         existing_sess = cursor.fetchone()
         
-        # Look up class's configured weekly slot for this weekday
-        s_time = '18:00'
-        s_dur = 90
+        # Look up class's configured weekly slot or infer from center standard shift
+        s_time, s_dur = infer_standard_teaching_slot()
         try:
             w_map = {0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"}
             dt_val = datetime.strptime(date_str, "%Y-%m-%d")
@@ -221,6 +239,10 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
                 cursor.execute("""
                     INSERT INTO class_sessions (class_id, date, start_time, duration, status)
                     VALUES (?, ?, ?, ?, ?)
+                    ON CONFLICT(class_id, date) DO UPDATE SET
+                        status = excluded.status,
+                        start_time = CASE WHEN class_sessions.start_time IN ('18:00', '') AND class_sessions.duration = 90 THEN excluded.start_time ELSE class_sessions.start_time END,
+                        duration = CASE WHEN class_sessions.start_time IN ('18:00', '') AND class_sessions.duration = 90 THEN excluded.duration ELSE class_sessions.duration END
                 """, (class_id, date_str, s_time, s_dur, sess_status))
             except Exception:
                 pass
@@ -230,8 +252,8 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
                 cursor.execute("""
                     UPDATE class_sessions
                     SET status = ?,
-                        start_time = CASE WHEN start_time = '18:00' AND duration = 90 THEN ? ELSE start_time END,
-                        duration = CASE WHEN start_time = '18:00' AND duration = 90 THEN ? ELSE duration END
+                        start_time = CASE WHEN start_time IN ('18:00', '') AND duration = 90 THEN ? ELSE start_time END,
+                        duration = CASE WHEN start_time IN ('18:00', '') AND duration = 90 THEN ? ELSE duration END
                     WHERE id = ?
                 """, (sess_status, s_time, s_dur, sess_id))
             except Exception:

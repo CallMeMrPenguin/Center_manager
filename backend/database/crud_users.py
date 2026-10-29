@@ -173,6 +173,8 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
         raw_lower = raw_role.lower()
         if "quản trị" in raw_lower or "admin" in raw_lower:
             norm_role = "admin"
+        elif "quản lý" in raw_lower or "manager" in raw_lower:
+            norm_role = "manager"
         elif "học sinh" in raw_lower or "student" in raw_lower:
             norm_role = "student"
         elif "trợ giảng" in raw_lower or "assistant" in raw_lower:
@@ -424,6 +426,7 @@ def change_user_password(username: str, old_password: str, new_password: str, co
 
 SYSTEM_ROLES = [
     ("Quản trị viên", "Quản trị toàn quyền", 1),
+    ("Quản lý", "Quản lý cơ sở & lịch học", 1),
     ("Giáo viên", "Giảng dạy & chấm điểm", 1),
     ("Trợ giảng", "Điểm danh & hỗ trợ lớp", 1),
     ("Học sinh", "Xem kết quả & làm bài", 1),

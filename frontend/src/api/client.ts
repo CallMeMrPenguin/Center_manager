@@ -69,6 +69,17 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
 
   if (!response.ok) {
     const errText = await response.text();
+    if (response.status === 401) {
+      if (typeof window !== 'undefined' && !(window as any).__sessionExpiredNotified) {
+        (window as any).__sessionExpiredNotified = true;
+        setTimeout(() => {
+          (window as any).__sessionExpiredNotified = false;
+        }, 3000);
+        window.dispatchEvent(new CustomEvent('auth-session-expired', { detail: { message: errText } }));
+      }
+      throw new Error(errText || 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+
     if (response.status === 403) {
       const isCloudflareBlocked =
         errText.includes('<!DOCTYPE') ||

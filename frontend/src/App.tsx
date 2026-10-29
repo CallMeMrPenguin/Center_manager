@@ -10,7 +10,7 @@ import { MobileBottomDock } from './components/MobileBottomDock';
 import { showToast, AnimatedToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
-import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
+import { AuthUser, getCurrentUser, clearAuthUser, getAuthToken, isTokenExpired } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 import { useWarmupDataCache } from './hooks/useWarmupDataCache';
 import { useTabIdleWarmup } from './hooks/useTabIdleWarmup';
@@ -113,7 +113,6 @@ function AppContent() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close profile popup when clicking outside
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -202,6 +201,27 @@ function AppContent() {
     showToast('Đã đăng xuất tài khoản', 'success');
   };
 
+  // Auto-logout when session expires
+  useEffect(() => {
+    const handleExpired = () => {
+      clearAuthUser();
+      setCurrentUser(null);
+      setActiveTab('dashboard');
+      setVisitedTabIds(new Set(['dashboard']));
+      window.history.pushState({ tabId: 'dashboard' }, '', '/dashboard');
+      showToast('Phiên làm việc đã hết hạn. Hệ thống đã tự động đăng xuất.', 'warning');
+    };
+    window.addEventListener('auth-session-expired', handleExpired);
+    const timer = setInterval(() => {
+      const token = getAuthToken();
+      if (token && isTokenExpired(token)) handleExpired();
+    }, 15000);
+    return () => {
+      window.removeEventListener('auth-session-expired', handleExpired);
+      clearInterval(timer);
+    };
+  }, []);
+
   const handleLogin = (user: AuthUser) => {
     setCurrentUser(user);
     const targetTab = user.role === 'student' ? 'assignments' : 'dashboard';
@@ -212,7 +232,6 @@ function AppContent() {
 
   const { isAdmin, isStudent, allowedTabIds } = useUserRolePermissions(currentUser);
 
-  // Progressive tab chunk prefetching & idle background warmup
   const { prefetchTab } = useTabIdleWarmup({
     currentUser,
     allowedTabIds,
@@ -220,7 +239,6 @@ function AppContent() {
     setVisitedTabIds,
   });
 
-  // Periodic user heartbeat ping for active online status
   useEffect(() => {
     const uname = currentUser?.username;
     if (!uname) return;
@@ -230,7 +248,6 @@ function AppContent() {
     return () => clearInterval(timer);
   }, [currentUser?.username]);
 
-  // Redirect if currently active tab is not permitted for this role
   useEffect(() => {
     if (!currentUser || isAdmin || allowedTabIds.length === 0) return;
     if (!allowedTabIds.includes(activeTab)) {
@@ -241,7 +258,6 @@ function AppContent() {
     }
   }, [currentUser, isAdmin, allowedTabIds, activeTab, isStudent]);
 
-  // If user is not logged in, show LoginPage
   if (!currentUser) {
     return <LoginPage onLogin={handleLogin} />;
   }
@@ -256,35 +272,21 @@ function AppContent() {
       {/* Real-time FPS Debug Counter Overlay */}
       <FpsOverlay />
 
-      {/* GLOBAL VIEWPORT NAVIGATION ARROW INDICATOR (SÁT CẠNH MÀN HÌNH CHUẨN XÁC) */}
       <AnimatePresence>
-        {navIndicator === 'back' && (
+        {navIndicator && (
           <motion.div
-            initial={{ opacity: 0, x: -16, scale: 0.8 }}
+            initial={{ opacity: 0, x: navIndicator === 'back' ? -16 : 16, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -16, scale: 0.8 }}
+            exit={{ opacity: 0, x: navIndicator === 'back' ? -16 : 16, scale: 0.8 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="fixed left-3 md:left-68 top-1/2 -translate-y-1/2 z-[9999] flex items-center justify-center w-11 h-11 rounded-full bg-white/95 dark:bg-[#121626]/95 text-blue-600 dark:text-blue-400 shadow-2xl border border-slate-200/90 dark:border-white/10 ring-2 ring-blue-500/25 pointer-events-none"
-            title="Quay lại tab trước"
+            className={`fixed ${navIndicator === 'back' ? 'left-3 md:left-68' : 'right-3 md:right-5'} top-1/2 -translate-y-1/2 z-[9999] flex items-center justify-center w-11 h-11 rounded-full bg-white/95 dark:bg-[#121626]/95 text-blue-600 dark:text-blue-400 shadow-2xl border border-slate-200/90 dark:border-white/10 ring-2 ring-blue-500/25 pointer-events-none`}
+            title={navIndicator === 'back' ? 'Quay lại tab trước' : 'Tiến tới tab sau'}
           >
-            <ChevronLeft size={24} strokeWidth={2.8} />
-          </motion.div>
-        )}
-        {navIndicator === 'forward' && (
-          <motion.div
-            initial={{ opacity: 0, x: 16, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 16, scale: 0.8 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="fixed right-3 md:right-5 top-1/2 -translate-y-1/2 z-[9999] flex items-center justify-center w-11 h-11 rounded-full bg-white/95 dark:bg-[#121626]/95 text-blue-600 dark:text-blue-400 shadow-2xl border border-slate-200/90 dark:border-white/10 ring-2 ring-blue-500/25 pointer-events-none"
-            title="Tiến tới tab sau"
-          >
-            <ChevronRight size={24} strokeWidth={2.8} />
+            {navIndicator === 'back' ? <ChevronLeft size={24} strokeWidth={2.8} /> : <ChevronRight size={24} strokeWidth={2.8} />}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* MOBILE TOP APP BAR (LOGO & PROFILE MENU) */}
       <MobileTopBar
         activeTab={activeTab}
         currentUser={currentUser}
@@ -292,7 +294,6 @@ function AppContent() {
       />
 
       <div className="relative flex flex-row flex-1 overflow-hidden z-10 w-full min-w-0">
-        {/* DESKTOP SIDEBAR NAVIGATION (ALWAYS ON DESKTOP, HIDDEN ON REAL MOBILE) */}
         <div className={`${isMobile ? 'hidden md:flex' : 'flex'} h-full shrink-0`}>
           <Sidebar
             isSidebarExpanded={isSidebarExpanded}
@@ -338,7 +339,6 @@ function AppContent() {
         </div>
       </div>
 
-      {/* MOBILE BOTTOM DOCK (TRANSPARENT, CIRCULAR ICONS, FISHEYE CAROUSEL) */}
       <MobileBottomDock
         activeTab={activeTab}
         setActiveTab={handleSelectTab}
@@ -346,7 +346,6 @@ function AppContent() {
         onPrefetchTab={prefetchTab}
       />
 
-      {/* STATUS BAR (DESKTOP ONLY) */}
       <footer className={`${isMobile ? 'hidden md:flex' : 'flex'} h-7 sm:h-8 bg-white dark:bg-[#06070a] items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]`}>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
